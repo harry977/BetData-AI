@@ -94,8 +94,10 @@ export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
 
   return (
     <div className="relative min-h-dvh bg-navy pb-[4.75rem] lg:pb-10">
-      <header className="sticky top-0 z-30 border-b border-[#1e2538] bg-[#0b0e17]/95 px-4 py-3 backdrop-blur-xl">
-        <BetDataLogo version />
+      <header className="sticky top-0 z-30 border-b border-[#1e2538] bg-[#0b0e17]/95 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-md items-center px-3 py-2 lg:max-w-lg lg:px-4 lg:py-2.5">
+          <BetDataLogo version />
+        </div>
       </header>
 
       <section className="relative overflow-hidden px-4 pb-8 pt-10 text-center">

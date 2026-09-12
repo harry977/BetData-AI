@@ -30,7 +30,7 @@ export default function HomePage() {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-navy">
         <div className="flex flex-col items-center gap-3">
-          <BetDataLogo version />
+          <BetDataLogo lockup version />
           <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
             Calentando el partido…
           </p>
