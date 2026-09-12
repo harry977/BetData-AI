@@ -37,7 +37,7 @@ export function statusLabel(match: MatchInsight) {
     return `FT ${match.result.finalScore.home}-${match.result.finalScore.away}`;
   }
   if (match.status === "LIVE" && match.elapsed) return `${match.elapsed}'`;
-  if (match.status === "HT") return "Descanso";
+  if (match.status === "HT") return "HT";
   if (match.status === "FT" && match.score.home !== null && match.score.away !== null) {
     return `FT ${match.score.home}-${match.score.away}`;
   }
