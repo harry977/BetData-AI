@@ -21,7 +21,17 @@ export const STORAGE_KEYS = {
 export const OFFICIAL_SERVER_URL =
   process.env.NEXT_PUBLIC_OFFICIAL_SERVER_URL ??
   process.env.NEXT_PUBLIC_PARTNER_AFFILIATE_URL ??
-  "https://www.bet365.com/#/HO/";
+  "https://www.88gallo.com";
+
+export const BONUS_URL =
+  process.env.NEXT_PUBLIC_BONUS_URL ?? "https://www.88gallo.com";
+
+export const WELCOME_BONUS = {
+  amount: "500€",
+  headline: "Bono de bienvenida de hasta 500€",
+  detail:
+    "Actívalo con tu primer depósito y úsalo en los mercados de la Liga BBVA.",
+} as const;
 
 export const RAPIDAPI_FOOTBALL = {
   host: "api-football-v1.p.rapidapi.com",
