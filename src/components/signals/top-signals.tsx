@@ -1,5 +1,6 @@
 "use client";
 
+import { SignalCopy } from "@/components/signals/signal-copy";
 import type { MatchInsight } from "@/lib/types";
 import { formatConfidence } from "@/lib/utils";
 
@@ -36,8 +37,8 @@ export function TopSignals({ matches, selectedId, onSelect }: TopSignalsProps) {
                   <span className="block truncate text-[13px] font-semibold uppercase text-zinc-50">
                     {match.home.code} — {match.away.code}
                   </span>
-                  <span className="text-[12px] font-semibold text-emerald-400">
-                    {match.bestTip}
+                  <span className="mt-0.5 block">
+                    <SignalCopy match={match} size="sm" />
                   </span>
                 </span>
                 <span className="font-mono text-sm text-emerald-300">

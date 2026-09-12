@@ -1,7 +1,9 @@
 "use client";
 
 import { TeamCrest } from "@/components/brand/team-crest";
+import { BetBonusCta } from "@/components/signals/bet-bonus-cta";
 import { ConfidenceMeter } from "@/components/signals/confidence-meter";
+import { SignalCopy } from "@/components/signals/signal-copy";
 import { signalRarity } from "@/lib/signals";
 import type { MatchInsight } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -34,13 +36,13 @@ export function SignalCard({
           <TeamCrest team={match.away} size={28} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[13px] font-black uppercase tracking-wide text-white">
+          <p className="truncate text-[12px] font-black uppercase tracking-wide text-slate-400">
             {match.home.code} · {match.away.code}
-          </p>
-          <p className="truncate text-[11px] font-semibold text-slate-400">
-            {match.bestTip}
             {clock ? ` · ${clock}` : ""}
           </p>
+          <div className="mt-0.5">
+            <SignalCopy match={match} size="sm" />
+          </div>
         </div>
         <span className="text-[11px] font-black tabular-nums text-cyan-300">
           {match.confidence.toFixed(1)}
@@ -87,17 +89,18 @@ export function SignalCard({
           {match.away.name}
         </p>
       </div>
-      <p className="mt-4 text-lg font-black uppercase tracking-wide text-emerald-300">
-        {match.bestTip}
-      </p>
+      <div className="mt-4">
+        <SignalCopy match={match} size="lg" />
+      </div>
       <div className="mt-5">
         <ConfidenceMeter confidence={match.confidence} />
       </div>
+      <BetBonusCta className="mt-5" />
       {onWhy ? (
         <button
           type="button"
           onClick={onWhy}
-          className="mt-5 flex w-full items-center justify-end text-[11px] font-black uppercase tracking-[0.18em] text-cyan-300"
+          className="mt-3 flex w-full items-center justify-end text-[11px] font-black uppercase tracking-[0.18em] text-cyan-300"
         >
           ¿Por qué? →
         </button>

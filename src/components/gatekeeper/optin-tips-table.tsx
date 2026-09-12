@@ -1,6 +1,7 @@
 "use client";
 
 import { TeamCrest } from "@/components/brand/team-crest";
+import { explainTip } from "@/lib/tip-copy";
 import type { MatchInsight } from "@/lib/types";
 import { formatKickoffLocal } from "@/lib/dates";
 import { cn, isBanker } from "@/lib/utils";
@@ -29,7 +30,7 @@ export function OptinTipsTable({
       </h2>
       <p className="mt-1 text-sm text-zinc-500">{dateLabel}</p>
       <div className="mt-4 overflow-hidden rounded-2xl border border-[#232a42] bg-[#121629]/90">
-        <div className="grid grid-cols-[3.2rem_1fr_5.4rem] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
+        <div className="grid grid-cols-[3rem_1fr_minmax(7.5rem,38%)] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
           <span>Hora</span>
           <span>Partidos</span>
           <span className="text-right">Mejor tip</span>
@@ -40,7 +41,7 @@ export function OptinTipsTable({
               <button
                 type="button"
                 onClick={onEnter}
-                className="grid w-full grid-cols-[3.2rem_1fr_5.4rem] items-center px-3 py-2.5 text-left"
+                className="grid w-full grid-cols-[3rem_1fr_minmax(7.5rem,38%)] items-center px-3 py-2.5 text-left"
               >
                 <TimeCell match={match} />
                 <TeamsCell match={match} />
@@ -124,21 +125,23 @@ function TipCell({
   resolved: boolean;
 }) {
   const won = match.result?.won;
+  const copy = explainTip(match.bestTip, match.home.name, match.away.name);
   return (
     <div className="text-right">
-      <span
+      <p
         className={cn(
-          "inline-flex rounded-md px-1.5 py-0.5 text-[11px] font-semibold",
+          "text-[11px] font-semibold leading-snug",
           resolved && won
-            ? "bg-emerald-500/20 text-emerald-300"
+            ? "text-emerald-300"
             : resolved && won === false
-              ? "bg-red-500/15 text-red-300"
-              : "bg-[#2a3148] text-zinc-100",
+              ? "text-red-300"
+              : "text-zinc-100",
         )}
       >
         {resolved && won ? "✓ " : null}
-        {match.bestTip}
-      </span>
+        {copy.plain}
+      </p>
+      <p className="mt-0.5 text-[10px] text-emerald-300/90">{copy.market}</p>
       <p className="mt-1 text-[11px]">
         <span className="text-emerald-400/90">{match.odds.valueMarket.toFixed(2)}</span>
         <span

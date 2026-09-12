@@ -1,15 +1,13 @@
 "use client";
 
-import { ExternalLink } from "lucide-react";
 import { PressureChart } from "@/components/dashboard/pressure-chart";
 import { XgChart } from "@/components/dashboard/xg-chart";
+import { BetBonusCta } from "@/components/signals/bet-bonus-cta";
+import { SignalCopy } from "@/components/signals/signal-copy";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ConfidenceBar } from "@/components/confidence-bar";
 import { useEventStatistics } from "@/hooks/use-event-statistics";
-import { OFFICIAL_SERVER_URL } from "@/lib/constants";
-import { hapticTap, openExternal } from "@/lib/telegram";
 import type { MatchInsight } from "@/lib/types";
 import { formatOdds } from "@/lib/utils";
 
@@ -31,21 +29,19 @@ export function MatchDetail({ match }: MatchDetailProps) {
         <CardContent className="space-y-3 p-4">
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-[10px] uppercase tracking-[0.16em] text-zinc-500">
-              Modelo BetData Engine
+              Señal de la IA
             </p>
-            {view.isBanker ? <Badge variant="banker">Banker</Badge> : null}
+            {view.isBanker ? <Badge variant="banker">Fuerte</Badge> : null}
             {view.result ? (
               <Badge variant={view.result.won ? "won" : "lost"}>
                 {view.result.won ? "Acertado" : "Fallado"}
               </Badge>
             ) : null}
           </div>
-          <h3 className="text-base font-semibold text-zinc-50">
-            Mejor Tip: <span className="text-emerald-400">{view.bestTip}</span>{" "}
-            <span className="font-mono text-sm text-emerald-300/80">
-              {formatOdds(view.odds.valueMarket)}
-            </span>
-          </h3>
+          <SignalCopy match={view} size="md" />
+          <p className="font-mono text-sm text-emerald-300/80">
+            {formatOdds(view.odds.valueMarket)}
+          </p>
           <p className="text-[13px] leading-relaxed text-zinc-400">
             {view.formNote}
             {xgNote}
@@ -65,17 +61,7 @@ export function MatchDetail({ match }: MatchDetailProps) {
         <PressureChart match={view} />
         <XgChart match={view} />
       </div>
-      <Button
-        size="lg"
-        className="w-full"
-        onClick={() => {
-          hapticTap();
-          openExternal(OFFICIAL_SERVER_URL);
-        }}
-      >
-        Ver cuota en el Servidor Oficial
-        <ExternalLink className="h-4 w-4" />
-      </Button>
+      <BetBonusCta />
     </section>
   );
 }

@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Zap } from "lucide-react";
 import { bandLabel } from "@/lib/copy";
 import { confidenceBand } from "@/lib/signals";
+import { SignalCopy } from "@/components/signals/signal-copy";
 import type { MatchInsight } from "@/lib/types";
 
 type AiAlertProps = {
@@ -34,9 +35,11 @@ export function AiAlert({ match, onOpen }: AiAlertProps) {
             <span className="mx-1.5 text-slate-500">vs</span>
             {match.away.name}
           </p>
-          <p className="mt-1 text-sm font-bold text-emerald-300">
-            {match.bestTip}
-            <span className="ml-2 font-black tabular-nums text-white">
+          <div className="mt-2">
+            <SignalCopy match={match} size="sm" />
+          </div>
+          <p className="mt-1 text-sm font-bold">
+            <span className="font-black tabular-nums text-white">
               {match.confidence.toFixed(1)}
             </span>
             <span className="ml-1 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-400">

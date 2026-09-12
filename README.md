@@ -24,8 +24,8 @@ La app queda en [http://127.0.0.1:43141](http://127.0.0.1:43141).
 
 1. **Landing** — “No le pagues más a los tipsters. La IA lo hace por ti.” CTA: *Entrar y ver pronósticos*.
 2. **Registro** — Telegram si estás en la Mini App; si no, usuario o correo.
-3. **Hoy** — misión, mejor señal, resto del día, rachas y Canal VIP.
-4. **En directo** — solo partidos en juego, 9:16. Si no hay live, estado vacío.
+3. **Hoy** — misión, mejor señal en lenguaje claro y CTA para apostar/activar el bono de 500€, resto del día y rachas.
+4. **En directo** — solo partidos en juego, 9:16. Cada partido muestra la señal de la IA y el mismo CTA del bono. Si no hay live, estado vacío.
 5. **Mi cuenta** — progreso, boleto, bono de hasta 500€ (después de entrar) y ajustes.
 
 El bono **no** aparece en la landing. Dentro de la app no se habla de tipsters.

@@ -5,13 +5,13 @@ import { Gift, LogOut } from "lucide-react";
 import { BetBuilderView } from "@/components/dashboard/bet-builder-view";
 import { StreakBoard } from "@/components/signals/streak-board";
 import { MissionCard } from "@/components/signals/mission-card";
-import { VipCta } from "@/components/layout/vip-cta";
 import { Button } from "@/components/ui/button";
 import { BONUS_URL, WELCOME_BONUS } from "@/lib/constants";
 import { madridYmd } from "@/lib/dates";
 import { resolvedSignals } from "@/lib/signals";
 import { readDailyMission, readUserStreak, readViewedSignals } from "@/lib/storage";
 import { hapticTap, openExternal } from "@/lib/telegram";
+import { explainTip } from "@/lib/tip-copy";
 import type { MatchInsight } from "@/lib/types";
 
 type AccountViewProps = {
@@ -90,8 +90,6 @@ export function AccountView({
         </Button>
       </section>
 
-      <VipCta />
-
       <section>
         <h2 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
           Boleto combinado
@@ -155,7 +153,9 @@ function HistoryList({
                   <span className="block truncate text-[13px] font-semibold uppercase text-zinc-100">
                     {match.home.code} — {match.away.code}
                   </span>
-                  <span className="text-[12px] text-emerald-400">{match.bestTip}</span>
+                  <span className="text-[12px] leading-snug text-emerald-400">
+                    {explainTip(match.bestTip, match.home.name, match.away.name).plain}
+                  </span>
                 </span>
                 {match.result ? (
                   <span

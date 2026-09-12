@@ -1,7 +1,9 @@
 "use client";
 
+import { BetBonusCta } from "@/components/signals/bet-bonus-cta";
 import { ConfidenceMeter } from "@/components/signals/confidence-meter";
 import { whyMeters } from "@/lib/signals";
+import { explainTip } from "@/lib/tip-copy";
 import type { MatchInsight } from "@/lib/types";
 import { Brain } from "lucide-react";
 
@@ -27,6 +29,7 @@ export function WhyPanel({
   onClose: () => void;
 }) {
   const meters = whyMeters(match);
+  const copy = explainTip(match.bestTip, match.home.name, match.away.name);
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end bg-black/70" onClick={onClose}>
@@ -41,7 +44,8 @@ export function WhyPanel({
         <p className="mt-3 text-lg font-black uppercase leading-tight text-white">
           {match.home.name} · {match.away.name}
         </p>
-        <p className="mt-1 text-sm font-bold text-emerald-300">{match.bestTip}</p>
+        <p className="mt-3 text-lg font-black leading-snug text-white">{copy.plain}</p>
+        <p className="mt-1 text-sm font-semibold text-emerald-300">{copy.market}</p>
         <div className="mt-5 space-y-3">
           {meters.map((meter) => (
             <MeterRow key={meter.key} label={meter.label} value={meter.value} />
@@ -50,10 +54,11 @@ export function WhyPanel({
         <div className="mt-6">
           <ConfidenceMeter confidence={match.confidence} compact />
         </div>
+        <BetBonusCta className="mt-5" />
         <button
           type="button"
           onClick={onClose}
-          className="mt-6 h-12 w-full rounded-2xl bg-white text-sm font-black uppercase tracking-[0.16em] text-[#0b0e17]"
+          className="mt-3 h-12 w-full rounded-2xl bg-white text-sm font-black uppercase tracking-[0.16em] text-[#0b0e17]"
         >
           Entendido
         </button>

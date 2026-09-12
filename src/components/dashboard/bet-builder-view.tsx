@@ -6,6 +6,7 @@ import { MatchCard } from "@/components/dashboard/match-card";
 import { Button } from "@/components/ui/button";
 import { OFFICIAL_SERVER_URL } from "@/lib/constants";
 import { hapticTap, openExternal } from "@/lib/telegram";
+import { explainTip } from "@/lib/tip-copy";
 import type { MatchInsight } from "@/lib/types";
 import { formatOdds, matchesForDay } from "@/lib/utils";
 
@@ -57,7 +58,8 @@ export function BetBuilderView({ matches }: BetBuilderViewProps) {
         <div className="mt-2 space-y-1">
           {selected.map((match) => (
             <p key={match.id} className="text-[12px] text-zinc-200">
-              {match.home.code} vs {match.away.code} · {match.bestTip}
+              {match.home.code} vs {match.away.code} ·{" "}
+              {explainTip(match.bestTip, match.home.name, match.away.name).plain}
             </p>
           ))}
         </div>

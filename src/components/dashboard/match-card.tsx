@@ -1,6 +1,7 @@
 "use client";
 
 import { TeamCrest } from "@/components/brand/team-crest";
+import { SignalCopy } from "@/components/signals/signal-copy";
 import { Badge } from "@/components/ui/badge";
 import type { DayBucket, MatchInsight } from "@/lib/types";
 import { cn, formatConfidence, formatOdds, isBanker, statusLabel } from "@/lib/utils";
@@ -35,10 +36,10 @@ export function MatchCard({ match, day, active = false, onSelect }: MatchCardPro
       <div className="min-w-0 flex-1 space-y-1">
         <TeamLine team={match.home} />
         <TeamLine team={match.away} />
-        <p className="truncate text-[10px] text-zinc-500">{match.league.name}</p>
+        <SignalCopy match={match} size="sm" />
       </div>
 
-      <div className="w-[108px] shrink-0 text-right">
+      <div className="w-[4.5rem] shrink-0 text-right">
         {day === "yesterday" && match.result ? (
           <>
             <Badge variant={match.result.won ? "won" : "lost"}>
@@ -47,20 +48,16 @@ export function MatchCard({ match, day, active = false, onSelect }: MatchCardPro
             <p className="mt-1 font-mono text-[11px] text-zinc-300">
               {match.result.finalScore.home}-{match.result.finalScore.away}
             </p>
-            <p className="text-[10px] text-zinc-500">{match.bestTip}</p>
           </>
         ) : (
           <>
-            <p className="text-[15px] font-semibold leading-tight text-emerald-400">
-              {match.bestTip}
-            </p>
             <p className="text-[10px] text-zinc-500">{formatOdds(match.odds.valueMarket)}</p>
             <p className="mt-1 font-mono text-sm text-zinc-50">
               {formatConfidence(match.confidence)}
             </p>
             {banker ? (
               <Badge variant="banker" className="mt-1">
-                Señal fuerte
+                Fuerte
               </Badge>
             ) : null}
           </>

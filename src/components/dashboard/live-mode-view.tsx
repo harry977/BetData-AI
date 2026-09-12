@@ -3,7 +3,9 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TeamCrest } from "@/components/brand/team-crest";
+import { BetBonusCta } from "@/components/signals/bet-bonus-cta";
 import { ConfidenceMeter } from "@/components/signals/confidence-meter";
+import { SignalCopy } from "@/components/signals/signal-copy";
 import { WhyPanel } from "@/components/signals/why-panel";
 import { livePlaylist } from "@/lib/signals";
 import { recordViewedSignal } from "@/lib/storage";
@@ -132,12 +134,13 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
           <p className="text-[11px] font-black uppercase tracking-[0.22em] text-cyan-300">
             Señal de la IA
           </p>
-          <p className="mt-2 break-words text-4xl font-black uppercase leading-none text-white">
-            {selected.bestTip}
-          </p>
+          <div className="mt-3">
+            <SignalCopy match={selected} size="lg" />
+          </div>
           <div className="mt-5">
             <ConfidenceMeter confidence={selected.confidence} />
           </div>
+          <BetBonusCta className="mt-5" />
         </div>
 
         <button
@@ -176,27 +179,32 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
         ) : null}
 
         {playlist.length > 1 ? (
-          <div className="mt-6 flex gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {playlist.map((match) => {
-              const active = match.id === selected.id;
-              return (
-                <button
+          <div className="mt-6 space-y-3 pb-2">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+              Más partidos en directo
+            </p>
+            {playlist
+              .filter((match) => match.id !== selected.id)
+              .map((match) => (
+                <div
                   key={match.id}
-                  type="button"
-                  onClick={() => pick(match.id)}
-                  className={cn(
-                    "min-w-[5.5rem] shrink-0 rounded-xl border px-3 py-2 text-left",
-                    active
-                      ? "border-emerald-400/50 bg-emerald-500/10"
-                      : "border-white/10 bg-white/5",
-                  )}
+                  className="rounded-2xl border border-white/10 bg-white/5 p-3"
                 >
-                  <p className="truncate text-[11px] font-black uppercase text-white">
-                    {match.home.code}–{match.away.code}
-                  </p>
-                </button>
-              );
-            })}
+                  <button
+                    type="button"
+                    onClick={() => pick(match.id)}
+                    className="w-full text-left"
+                  >
+                    <p className="truncate text-[13px] font-black uppercase text-white">
+                      {match.home.name} — {match.away.name}
+                    </p>
+                    <div className="mt-2">
+                      <SignalCopy match={match} size="sm" />
+                    </div>
+                  </button>
+                  <BetBonusCta className="mt-3" />
+                </div>
+              ))}
           </div>
         ) : null}
       </div>

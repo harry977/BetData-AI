@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { explainTip } from "@/lib/tip-copy";
 import type { MatchInsight } from "@/lib/types";
 
 type HitsTickerProps = {
@@ -37,7 +38,7 @@ export function HitsTicker({ hits }: HitsTickerProps) {
                 {match.home.code} vs {match.away.code}
               </span>
               <span className="whitespace-nowrap text-[11px] font-semibold text-emerald-400">
-                {match.bestTip}
+                {explainTip(match.bestTip, match.home.name, match.away.name).plain}
               </span>
               <span className="text-[#1e2538]">•</span>
             </div>

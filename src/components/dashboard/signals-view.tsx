@@ -1,24 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ExternalLink } from "lucide-react";
 import { TeamCrest } from "@/components/brand/team-crest";
 import { AiScan } from "@/components/signals/ai-scan";
 import { MissionCard } from "@/components/signals/mission-card";
 import { SignalCard } from "@/components/signals/signal-card";
+import { SignalCopy } from "@/components/signals/signal-copy";
 import { StreakBoard } from "@/components/signals/streak-board";
 import { WhyPanel } from "@/components/signals/why-panel";
-import { VipCta } from "@/components/layout/vip-cta";
-import { Button } from "@/components/ui/button";
-import { OFFICIAL_SERVER_URL } from "@/lib/constants";
 import { madridYmd } from "@/lib/dates";
 import { recordMissionSignal, recordViewedSignal } from "@/lib/storage";
-import {
-  activeSignals,
-  featuredSignal,
-  scanCounts,
-} from "@/lib/signals";
-import { hapticTap, openExternal } from "@/lib/telegram";
+import { activeSignals, featuredSignal, scanCounts } from "@/lib/signals";
+import { hapticTap } from "@/lib/telegram";
 import { isBanker, matchesForDay } from "@/lib/utils";
 import type { MatchInsight } from "@/lib/types";
 
@@ -163,26 +156,12 @@ export function SignalsView({
                 <p className="truncate text-[12px] font-black uppercase text-white">
                   {match.home.code} · {match.away.code}
                 </p>
-                <p className="text-[11px] text-emerald-300">{match.bestTip}</p>
+                <SignalCopy match={match} size="sm" />
               </div>
             </div>
           ))}
         </section>
       ) : null}
-
-      <VipCta />
-      <Button
-        size="lg"
-        variant="outline"
-        className="w-full"
-        onClick={() => {
-          hapticTap();
-          openExternal(OFFICIAL_SERVER_URL);
-        }}
-      >
-        Ver cuota en el Servidor Oficial
-        <ExternalLink className="h-4 w-4" />
-      </Button>
 
       {whyMatch ? (
         <WhyPanel match={whyMatch} onClose={() => setWhyMatch(null)} />
