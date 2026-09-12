@@ -185,7 +185,7 @@ export const MOCK_FIXTURES: MatchInsight[] = [
     markets: {
       oneXTwo: { pick: "1", odds: 2.15 },
       overUnder: { pick: "O2.5", odds: 1.82 },
-      btts: { pick: "Sí", odds: 1.7 },
+      btts: { pick: "GG", odds: 1.7 },
     },
     formNote:
       "Análisis de forma reciente y goles esperados (xG): el Madrid llega con 1.82 xG acumulado y más ocasiones claras. El modelo BetData Engine marca Over 0.5 en la primera parte.",
@@ -208,7 +208,7 @@ export const MOCK_FIXTURES: MatchInsight[] = [
     markets: {
       oneXTwo: { pick: "1", odds: 1.92 },
       overUnder: { pick: "O2.5", odds: 1.74 },
-      btts: { pick: "Sí", odds: 1.78 },
+      btts: { pick: "GG", odds: 1.78 },
     },
     formNote:
       "Análisis de forma reciente y goles esperados (xG): 1.41 vs 1.18. Ambos llegan goleando y el Mejor Tip es que marquen los dos.",
@@ -231,7 +231,7 @@ export const MOCK_FIXTURES: MatchInsight[] = [
     markets: {
       oneXTwo: { pick: "1", odds: 1.55 },
       overUnder: { pick: "O2.5", odds: 1.62 },
-      btts: { pick: "Sí", odds: 1.66 },
+      btts: { pick: "GG", odds: 1.66 },
     },
     formNote:
       "Análisis de forma reciente y goles esperados (xG): 2.04 vs 0.91 al descanso. Derbi abierto y Banker Over 2.5.",
@@ -254,7 +254,7 @@ export const MOCK_FIXTURES: MatchInsight[] = [
     markets: {
       oneXTwo: { pick: "X", odds: 3.25 },
       overUnder: { pick: "U3.5", odds: 2.08 },
-      btts: { pick: "No", odds: 2.15 },
+      btts: { pick: "NG", odds: 2.15 },
     },
     formNote:
       "Análisis de forma reciente y goles esperados (xG): ritmo bajo (0.38 vs 0.29). El derby apunta a un partido cerrado.",
@@ -275,7 +275,7 @@ export const MOCK_FIXTURES: MatchInsight[] = [
     markets: {
       oneXTwo: { pick: "1", odds: 1.42 },
       overUnder: { pick: "O2.5", odds: 1.7 },
-      btts: { pick: "Sí", odds: 1.88 },
+      btts: { pick: "GG", odds: 1.88 },
     },
     formNote:
       "Análisis de forma reciente y goles esperados (xG): PSG llega como claro favorito. El Mejor Tip es la victoria local.",
@@ -296,7 +296,7 @@ export const MOCK_FIXTURES: MatchInsight[] = [
     markets: {
       oneXTwo: { pick: "1", odds: 1.8 },
       overUnder: { pick: "O2.5", odds: 1.72 },
-      btts: { pick: "Sí", odds: 1.65 },
+      btts: { pick: "GG", odds: 1.65 },
     },
     formNote:
       "Análisis de forma reciente y goles esperados (xG): Anfield suele abrir el marcador pronto. Over 2.5 es el Banker de mañana.",
@@ -316,7 +316,7 @@ export const MOCK_FIXTURES: MatchInsight[] = [
     markets: {
       oneXTwo: { pick: "1", odds: 1.7 },
       overUnder: { pick: "U2.5", odds: 1.85 },
-      btts: { pick: "No", odds: 1.9 },
+      btts: { pick: "NG", odds: 1.9 },
     },
     formNote:
       "Análisis de forma reciente y goles esperados (xG): el Atlético cierra espacios. Under 2.5 encaja con su forma reciente.",
@@ -336,7 +336,7 @@ export const MOCK_FIXTURES: MatchInsight[] = [
     markets: {
       oneXTwo: { pick: "X", odds: 3.3 },
       overUnder: { pick: "O2.5", odds: 2.05 },
-      btts: { pick: "Sí", odds: 1.74 },
+      btts: { pick: "GG", odds: 1.74 },
     },
     formNote:
       "Análisis de forma reciente y goles esperados (xG): ambos atacan bien a campo abierto. El Mejor Tip es BTTS.",
@@ -356,7 +356,7 @@ export const MOCK_FIXTURES: MatchInsight[] = [
     markets: {
       oneXTwo: { pick: "2", odds: 2.7 },
       overUnder: { pick: "O2.5", odds: 1.58 },
-      btts: { pick: "Sí", odds: 1.55 },
+      btts: { pick: "GG", odds: 1.55 },
     },
     formNote:
       "Análisis de forma reciente y goles esperados (xG): clásico holandés de ida y vuelta. Over 2.5 es la lectura más limpia.",
@@ -376,7 +376,7 @@ export const MOCK_FIXTURES: MatchInsight[] = [
     markets: {
       oneXTwo: { pick: "1", odds: 2.55 },
       overUnder: { pick: "O2.5", odds: 2.0 },
-      btts: { pick: "Sí", odds: 1.8 },
+      btts: { pick: "GG", odds: 1.8 },
     },
     formNote:
       "Análisis de forma reciente y goles esperados (xG): derbi lisboeta igualado. Ambos equipos marcan es el escenario más repetido.",
@@ -398,7 +398,7 @@ export const MOCK_FIXTURES: MatchInsight[] = [
     markets: {
       oneXTwo: { pick: "1", odds: 1.45 },
       overUnder: { pick: "O2.5", odds: 1.7 },
-      btts: { pick: "Sí", odds: 1.85 },
+      btts: { pick: "GG", odds: 1.85 },
     },
     formNote: "Pronóstico resuelto. Over 2.5 se cumplió con el 2-1 final.",
     result: { won: true, finalScore: { home: 2, away: 1 } },
@@ -421,7 +421,7 @@ export const MOCK_FIXTURES: MatchInsight[] = [
     markets: {
       oneXTwo: { pick: "1", odds: 2.1 },
       overUnder: { pick: "U2.5", odds: 1.78 },
-      btts: { pick: "Sí", odds: 1.9 },
+      btts: { pick: "GG", odds: 1.9 },
     },
     formNote: "Pronóstico resuelto. La victoria local no se dio: acabó 1-1.",
     result: { won: false, finalScore: { home: 1, away: 1 } },
@@ -444,7 +444,7 @@ export const MOCK_FIXTURES: MatchInsight[] = [
     markets: {
       oneXTwo: { pick: "1", odds: 1.85 },
       overUnder: { pick: "O2.5", odds: 2.05 },
-      btts: { pick: "Sí", odds: 1.82 },
+      btts: { pick: "GG", odds: 1.82 },
     },
     formNote: "Pronóstico resuelto. Ambos marcaron en el 2-1.",
     result: { won: true, finalScore: { home: 2, away: 1 } },
@@ -467,7 +467,7 @@ export const MOCK_FIXTURES: MatchInsight[] = [
     markets: {
       oneXTwo: { pick: "X", odds: 3.1 },
       overUnder: { pick: "U2.5", odds: 1.68 },
-      btts: { pick: "No", odds: 1.95 },
+      btts: { pick: "NG", odds: 1.95 },
     },
     formNote: "Pronóstico resuelto. El 0-0 confirma el Under 2.5.",
     result: { won: true, finalScore: { home: 0, away: 0 } },
@@ -490,7 +490,7 @@ export const MOCK_FIXTURES: MatchInsight[] = [
     markets: {
       oneXTwo: { pick: "1", odds: 2.05 },
       overUnder: { pick: "O2.5", odds: 1.75 },
-      btts: { pick: "Sí", odds: 1.7 },
+      btts: { pick: "GG", odds: 1.7 },
     },
     formNote: "Pronóstico resuelto. El 1-0 se queda por debajo de 2.5 goles.",
     result: { won: false, finalScore: { home: 1, away: 0 } },

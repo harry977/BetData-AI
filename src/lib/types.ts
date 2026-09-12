@@ -16,7 +16,7 @@ export type Team = {
 export type FixtureStatus = "NS" | "LIVE" | "HT" | "FT";
 export type DayBucket = "today" | "tomorrow" | "yesterday";
 export type OneXTwoPick = "1" | "X" | "2";
-export type BttsPick = "Sí" | "No";
+export type BttsPick = "GG" | "NG";
 
 export type PressurePoint = {
   minute: number;

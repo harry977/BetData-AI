@@ -93,7 +93,10 @@ function MatchRow({
 
         <div className="grid grid-cols-3 gap-2 md:contents">
           <MarketCell label="1X2" value={match.markets.oneXTwo.pick} />
-          <MarketCell label="O/U" value={match.markets.overUnder.pick} />
+          <MarketCell
+            label="O/U"
+            value={match.markets.overUnder.pick.replace(/^([OU])(\d)/, "$1 $2")}
+          />
           <MarketCell label="BTTS" value={match.markets.btts.pick} />
         </div>
 
@@ -131,7 +134,7 @@ function MarketCell({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="text-[10px] uppercase tracking-wide text-zinc-500 md:hidden">{label}</p>
-      <p className="font-mono text-sm text-zinc-200">{value}</p>
+      <p className="text-sm font-semibold text-zinc-200">{value}</p>
     </div>
   );
 }
