@@ -15,7 +15,7 @@ export function formatPercent(value: number, digits = 1) {
 }
 
 export function isBanker(confidence: number) {
-  return confidence > 8;
+  return confidence >= 8;
 }
 
 export function formatConfidence(value: number) {
@@ -44,12 +44,15 @@ export function statusLabel(match: MatchInsight) {
   return formatKickoff(match.kickoffIso);
 }
 
-export function bankersOfTheDay(matches: MatchInsight[]) {
+export function starBankers(matches: MatchInsight[]) {
   return matches
-    .filter((match) => match.day === "today")
+    .filter((match) => match.day === "today" && isBanker(match.confidence))
     .slice()
-    .sort((a, b) => b.confidence - a.confidence)
-    .slice(0, 3);
+    .sort((a, b) => b.confidence - a.confidence);
+}
+
+export function bankersOfTheDay(matches: MatchInsight[]) {
+  return starBankers(matches).slice(0, 3);
 }
 
 export function matchesForDay(matches: MatchInsight[], day: DayBucket) {
@@ -58,4 +61,32 @@ export function matchesForDay(matches: MatchInsight[], day: DayBucket) {
 
 export function recentHits(matches: MatchInsight[]) {
   return matches.filter((match) => match.day === "yesterday" && match.result?.won);
+}
+
+export function liveMatches(matches: MatchInsight[]) {
+  return matches
+    .filter((match) => match.status === "LIVE" || match.status === "HT")
+    .slice()
+    .sort((a, b) => (b.elapsed ?? 0) - (a.elapsed ?? 0));
+}
+
+export function groupMatchesByLeague(matches: MatchInsight[]) {
+  const groups: { key: string; country: string; league: string; matches: MatchInsight[] }[] = [];
+  const index = new Map<string, number>();
+  for (const match of matches) {
+    const key = `${match.league.country} · ${match.league.name}`;
+    const existing = index.get(key);
+    if (existing === undefined) {
+      index.set(key, groups.length);
+      groups.push({
+        key,
+        country: match.league.country,
+        league: match.league.name,
+        matches: [match],
+      });
+    } else {
+      groups[existing].matches.push(match);
+    }
+  }
+  return groups;
 }

@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { DayTabs } from "@/components/dashboard/day-tabs";
 import { MatchCard } from "@/components/dashboard/match-card";
 import { MatchDetail } from "@/components/dashboard/match-detail";
-import { cn, matchesForDay } from "@/lib/utils";
+import { cn, groupMatchesByLeague, matchesForDay } from "@/lib/utils";
 import type { DayBucket, MatchInsight } from "@/lib/types";
 
 type Scope = "all" | "live";
@@ -33,6 +33,7 @@ export function PartidosView({
     return byDay;
   }, [byDay, matches, scope]);
   const selected = visible.find((match) => match.id === selectedId) ?? visible[0] ?? null;
+  const grouped = useMemo(() => groupMatchesByLeague(visible), [visible]);
 
   return (
     <div className="space-y-3">
@@ -65,15 +66,22 @@ export function PartidosView({
             : "No hay pronósticos para esta fecha."}
         </p>
       ) : (
-        <div className="space-y-2">
-          {visible.map((match) => (
-            <MatchCard
-              key={match.id}
-              match={match}
-              day={scope === "live" ? match.day : day}
-              active={match.id === selected?.id}
-              onSelect={onSelect}
-            />
+        <div className="space-y-4">
+          {grouped.map((group) => (
+            <section key={group.key} className="space-y-2">
+              <h2 className="px-0.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                {group.country} · {group.league}
+              </h2>
+              {group.matches.map((match) => (
+                <MatchCard
+                  key={match.id}
+                  match={match}
+                  day={scope === "live" ? match.day : day}
+                  active={match.id === selected?.id}
+                  onSelect={onSelect}
+                />
+              ))}
+            </section>
           ))}
         </div>
       )}

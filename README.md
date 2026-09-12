@@ -10,7 +10,7 @@ Telegram Mini App de **pronósticos de fútbol** con inteligencia predictiva. El
 - Tailwind CSS + shadcn/ui
 - Framer Motion + Recharts
 - `@telegram-apps/sdk` + script oficial `telegram-web-app.js`
-- Feed mock con el shape de API-Football (RapidAPI)
+- Feed SportAPI (SofaScore vía RapidAPI) con fallback a mocks
 
 ## Cómo arrancar
 
@@ -26,7 +26,7 @@ La app queda en [http://127.0.0.1:43141](http://127.0.0.1:43141).
 
 1. **Activación** — crear cuenta en el Servidor Oficial Integrado, depósito de activación e ID/correo.
 2. **Simulación visual** (3s, tres estados) → `isUnlocked=true` en `localStorage` y entrada al dashboard.
-3. **Dashboard mobile** — ticker de aciertos, Bankers, Partidos (Hoy/Mañana/Ayer), Bet Builder y barra inferior.
+3. **Dashboard mobile** — ticker en vivo, Bankers (confianza ≥ 8.0), Partidos agrupados por liga, Bet Builder y barra inferior.
 
 Para volver al gatekeeper usa *Cerrar sesión*.
 
@@ -36,24 +36,35 @@ Para volver al gatekeeper usa *Cerrar sesión*.
 2. Configura *Menu Button* / *Mini App* apuntando a la URL pública (Vercel u otro host HTTPS).
 3. Abre la Mini App desde Telegram. Fuera de Telegram el preview de navegador funciona igual; `openLink` cae a `window.open`.
 
-## RapidAPI (API-Football)
+## RapidAPI (SportAPI / SofaScore)
 
 Sin `RAPIDAPI_KEY`, `/api/fixtures` sirve el mock de `src/lib/mocks/fixtures.ts`.
 
-Con clave, el route handler consulta `api-football-v1.p.rapidapi.com/v3/fixtures?live=all` y fusiona cada fixture con la capa analítica de BetData AI.
+Con clave, el servidor consulta **SportAPI** (`sportapi7.p.rapidapi.com`):
+
+- `GET /api/v1/sport/football/{date}/{timezoneOffset}/categories`
+- `GET /api/v1/category/{id}/scheduled-events/{date}`
+- `GET /api/v1/event/{id}/odds/1/all` y estadísticas `GET /api/v1/event/{id}/statistics`
+
+Las categorías del día se cachean 30 minutos (`categories_cache` en `localStorage` y memoria en servidor). Si la API falla o no hay eventos, se usan los mocks.
 
 ```bash
 # .env.local
 RAPIDAPI_KEY=tu_clave
+RAPIDAPI_SPORT_HOST=sportapi7.p.rapidapi.com
 NEXT_PUBLIC_OFFICIAL_SERVER_URL=https://tu-servidor-deportivo-oficial
 ```
+
+No subas la clave al repositorio: `.env.local` está en `.gitignore`.
 
 ## Estructura
 
 ```
 src/
-  app/page.tsx              # Estado Gatekeeper ↔ Dashboard
-  app/api/fixtures/route.ts # Feed mock / RapidAPI
+  app/page.tsx                 # Estado Gatekeeper ↔ Dashboard
+  app/api/fixtures/route.ts    # Feed SportAPI / mock
+  app/api/event/[id]/statistics
+  services/sportApi.ts         # Cliente RapidAPI SportAPI
   components/gatekeeper/
   components/dashboard/
   lib/mocks/fixtures.ts

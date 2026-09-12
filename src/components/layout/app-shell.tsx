@@ -16,7 +16,7 @@ import { useFixtures } from "@/hooks/use-fixtures";
 import { PLATFORM_STATS } from "@/lib/constants";
 import { readUnlockState } from "@/lib/storage";
 import type { DayBucket } from "@/lib/types";
-import { matchesForDay, recentHits } from "@/lib/utils";
+import { matchesForDay, recentHits, liveMatches } from "@/lib/utils";
 
 type AppShellProps = {
   onLock: () => void;
@@ -35,6 +35,8 @@ export function AppShell({ onLock }: AppShellProps) {
   const matches = useMemo(() => data?.response ?? [], [data]);
   const stats = data?.stats ?? PLATFORM_STATS;
   const hits = useMemo(() => recentHits(matches), [matches]);
+  const live = useMemo(() => liveMatches(matches), [matches]);
+  const tickerItems = live.length > 0 ? live.slice(0, 12) : hits;
 
   function handleSelect(id: number) {
     const picked = matches.find((match) => match.id === id);
@@ -57,7 +59,7 @@ export function AppShell({ onLock }: AppShellProps) {
             En vivo
           </span>
         </div>
-        <HitsTicker hits={hits} />
+        <HitsTicker hits={tickerItems} />
         <SyncBanner />
       </header>
 

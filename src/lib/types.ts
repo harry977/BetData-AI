@@ -77,9 +77,18 @@ export type PlatformStats = {
   leaguesMonitored: number;
 };
 
+export type SportCategory = {
+  id: number;
+  name: string;
+  flag?: string;
+  slug?: string;
+  eventsCount?: number;
+};
+
 export type FixturesPayload = {
-  source: "mock" | "rapidapi";
+  source: "mock" | "rapidapi" | "sportapi";
   generatedAt: string;
   stats: PlatformStats;
   response: MatchInsight[];
+  categories?: SportCategory[];
 };

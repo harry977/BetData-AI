@@ -1,10 +1,11 @@
 "use client";
 
 import { DailyTicket } from "@/components/dashboard/daily-ticket";
+import { MatchCard } from "@/components/dashboard/match-card";
 import { MatchDetail } from "@/components/dashboard/match-detail";
 import { StatsBanner } from "@/components/dashboard/stats-banner";
 import type { MatchInsight, PlatformStats } from "@/lib/types";
-import { bankersOfTheDay } from "@/lib/utils";
+import { bankersOfTheDay, starBankers } from "@/lib/utils";
 
 type BankersViewProps = {
   matches: MatchInsight[];
@@ -19,8 +20,11 @@ export function BankersView({
   selectedId,
   onSelect,
 }: BankersViewProps) {
+  const stars = starBankers(matches);
   const ticket = bankersOfTheDay(matches);
-  const selected = ticket.find((match) => match.id === selectedId) ?? ticket[0] ?? null;
+  const extra = stars.filter((match) => !ticket.some((item) => item.id === match.id));
+  const selected =
+    stars.find((match) => match.id === selectedId) ?? ticket[0] ?? stars[0] ?? null;
 
   return (
     <div className="space-y-4">
@@ -38,12 +42,34 @@ export function BankersView({
         </p>
       </div>
       <div className="grid grid-cols-3 gap-1.5">
-        <MetricBadge label="23 Bankers" />
-        <MetricBadge label="19 Próximos" />
-        <MetricBadge label="100% acierto en bankers resueltos" />
+        <MetricBadge label="23 BANKERS" />
+        <MetricBadge label="19 PRÓXIMOS" />
+        <MetricBadge label="100% ACIERTO EN BANKERS RESUELTOS" />
       </div>
       <StatsBanner stats={stats} />
       <DailyTicket matches={ticket} selectedId={selectedId} onSelect={onSelect} />
+      {stars.length === 0 ? (
+        <p className="rounded-xl border border-[#1e2538] bg-panel p-6 text-center text-sm text-zinc-400">
+          No hay bankers con confianza ≥ 8.0 para hoy. Revisa Partidos para el resto de
+          pronósticos.
+        </p>
+      ) : null}
+      {extra.length > 0 ? (
+        <section className="space-y-2">
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+            Bankers del día
+          </h2>
+          {extra.map((match) => (
+            <MatchCard
+              key={match.id}
+              match={match}
+              day="today"
+              active={match.id === selectedId}
+              onSelect={onSelect}
+            />
+          ))}
+        </section>
+      ) : null}
       {selected ? <MatchDetail match={selected} /> : null}
       <section className="rounded-xl border border-[#1e2538] bg-panel p-3">
         <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">

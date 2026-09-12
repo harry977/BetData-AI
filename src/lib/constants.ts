@@ -27,6 +27,11 @@ export const RAPIDAPI_FOOTBALL = {
   liveFixtures: "https://api-football-v1.p.rapidapi.com/v3/fixtures?live=all",
 } as const;
 
+export const RAPIDAPI_SPORT = {
+  host: "sportapi7.p.rapidapi.com",
+  base: "https://sportapi7.p.rapidapi.com",
+} as const;
+
 export const ACTIVATION_STATUS = [
   "Conectando...",
   "Sincronizando...",
