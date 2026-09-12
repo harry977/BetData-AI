@@ -35,21 +35,19 @@ export function ConfidenceMeter({
 
   return (
     <div className={cn("space-y-1.5", compact && "space-y-1")}>
-      <div className="flex items-end justify-between gap-3">
-        <p className={cn("font-black leading-none tabular-nums text-white", compact ? "text-2xl" : "text-3xl")}>
-          {confidence.toFixed(1)}
-          <span className="ml-0.5 text-sm font-bold text-slate-500">/10</span>
-        </p>
-        <p className={cn("text-[10px] font-black uppercase tracking-[0.18em]", color)}>
-          {label}
-        </p>
-      </div>
+      <p className={cn("font-black leading-none tabular-nums text-white", compact ? "text-2xl" : "text-3xl")}>
+        {confidence.toFixed(1)}
+        <span className="ml-0.5 text-sm font-bold text-slate-500">/10</span>
+      </p>
       <div className="h-2 overflow-hidden rounded-full bg-white/10">
         <div
           className={cn("h-full rounded-full transition-all duration-700", fill)}
           style={{ width: `${pct}%` }}
         />
       </div>
+      <p className={cn("text-[10px] font-black uppercase tracking-[0.18em]", color)}>
+        {label}
+      </p>
       {rarity === "ELITE" ? (
         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-violet-300">
           Elite signal
