@@ -4,12 +4,12 @@ import { AlertTriangle, RefreshCcw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { BetDataLogo } from "@/components/brand/betdata-logo";
 import { AccountView } from "@/components/dashboard/account-view";
-import { ActivarView } from "@/components/dashboard/activar-view";
 import { BankersView } from "@/components/dashboard/bankers-view";
 import { BetBuilderView } from "@/components/dashboard/bet-builder-view";
 import { PartidosView } from "@/components/dashboard/partidos-view";
 import { BottomNav, type AppTab } from "@/components/layout/bottom-nav";
 import { HitsTicker } from "@/components/layout/hits-ticker";
+import { SyncBanner } from "@/components/layout/sync-banner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFixtures } from "@/hooks/use-fixtures";
@@ -58,6 +58,7 @@ export function AppShell({ onLock }: AppShellProps) {
           </span>
         </div>
         <HitsTicker hits={hits} />
+        <SyncBanner />
       </header>
 
       <main className="mx-auto max-w-md px-3 pb-nav pt-4">
@@ -101,7 +102,6 @@ export function AppShell({ onLock }: AppShellProps) {
             {tab === "account" ? (
               <AccountView accountId={accountId} onLock={onLock} />
             ) : null}
-            {tab === "activar" ? <ActivarView /> : null}
           </>
         ) : null}
       </main>

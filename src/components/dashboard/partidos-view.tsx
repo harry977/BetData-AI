@@ -1,10 +1,13 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { DayTabs } from "@/components/dashboard/day-tabs";
 import { MatchCard } from "@/components/dashboard/match-card";
 import { MatchDetail } from "@/components/dashboard/match-detail";
+import { cn, matchesForDay } from "@/lib/utils";
 import type { DayBucket, MatchInsight } from "@/lib/types";
-import { matchesForDay } from "@/lib/utils";
+
+type Scope = "all" | "live";
 
 type PartidosViewProps = {
   matches: MatchInsight[];
@@ -21,21 +24,45 @@ export function PartidosView({
   onDayChange,
   onSelect,
 }: PartidosViewProps) {
-  const visible = matchesForDay(matches, day);
+  const [scope, setScope] = useState<Scope>("all");
+  const byDay = matchesForDay(matches, day);
+  const visible = useMemo(() => {
+    if (scope === "live") {
+      return matches.filter((match) => match.status === "LIVE" || match.status === "HT");
+    }
+    return byDay;
+  }, [byDay, matches, scope]);
   const selected = visible.find((match) => match.id === selectedId) ?? visible[0] ?? null;
 
   return (
     <div className="space-y-3">
       <div>
-        <h1 className="text-xl font-semibold text-zinc-50">Partidos</h1>
-        <p className="mt-1 text-[13px] text-zinc-400">
-          Hoy, mañana y el registro de ayer con Acertado / Fallado.
+        <h1 className="text-[15px] font-semibold uppercase tracking-wide text-zinc-50">
+          Hoy · Pronósticos de fútbol de hoy
+        </h1>
+        <p className="mt-1 text-[13px] leading-relaxed text-zinc-400">
+          Obtén los pronósticos de fútbol de hoy de BetData AI. Cubrimos todos los
+          partidos y todas las ligas.
         </p>
       </div>
-      <DayTabs value={day} onChange={onDayChange} />
+      <div role="tablist" className="grid grid-cols-2 gap-1 rounded-xl bg-[#080b12] p-1">
+        <ScopeTab
+          active={scope === "all"}
+          label="Todos los Partidos"
+          onClick={() => setScope("all")}
+        />
+        <ScopeTab
+          active={scope === "live"}
+          label="En directo"
+          onClick={() => setScope("live")}
+        />
+      </div>
+      {scope === "all" ? <DayTabs value={day} onChange={onDayChange} /> : null}
       {visible.length === 0 ? (
         <p className="rounded-xl border border-[#1e2538] bg-panel p-6 text-center text-sm text-zinc-400">
-          No hay pronósticos para esta fecha.
+          {scope === "live"
+            ? "No hay partidos en directo ahora mismo."
+            : "No hay pronósticos para esta fecha."}
         </p>
       ) : (
         <div className="space-y-2">
@@ -43,7 +70,7 @@ export function PartidosView({
             <MatchCard
               key={match.id}
               match={match}
-              day={day}
+              day={scope === "live" ? match.day : day}
               active={match.id === selected?.id}
               onSelect={onSelect}
             />
@@ -51,6 +78,44 @@ export function PartidosView({
         </div>
       )}
       {selected ? <MatchDetail match={selected} /> : null}
+      <section className="rounded-xl border border-[#1e2538] bg-panel p-3">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+          Sobre los Pronósticos de Fútbol
+        </h2>
+        <p className="mt-2 text-[12px] leading-relaxed text-zinc-400">
+          En esta página, BetData AI ofrece predicciones de fútbol completas para todos
+          los partidos de hoy en todas las ligas. Para cada evento, nuestros algoritmos
+          de IA eligen un “Mejor Pronóstico” junto con un valor de confianza preciso y
+          mercados que incluyen Resultado Final, Más/Menos y Ambos Equipos Marcan. Las
+          predicciones avanzadas requieren sincronización de servidor, pero mantenemos
+          plena transparencia.
+        </p>
+      </section>
     </div>
+  );
+}
+
+function ScopeTab({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={active}
+      onClick={onClick}
+      className={cn(
+        "rounded-lg px-2 py-2 text-[11px] font-semibold",
+        active ? "bg-emerald-500/15 text-emerald-300" : "text-zinc-500",
+      )}
+    >
+      {label}
+    </button>
   );
 }
