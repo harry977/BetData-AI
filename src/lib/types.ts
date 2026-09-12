@@ -14,6 +14,9 @@ export type Team = {
 };
 
 export type FixtureStatus = "NS" | "LIVE" | "HT" | "FT";
+export type DayBucket = "today" | "tomorrow" | "yesterday";
+export type OneXTwoPick = "1" | "X" | "2";
+export type BttsPick = "Sí" | "No";
 
 export type PressurePoint = {
   minute: number;
@@ -36,16 +39,20 @@ export type LiveMetrics = {
   xGHistory: XGPoint[];
 };
 
-export type AiAlert = {
-  headline: string;
-  market: string;
-  probability: number;
-  valueOdds: number;
-  rationale: string;
+export type Markets = {
+  oneXTwo: { pick: OneXTwoPick; odds: number };
+  overUnder: { pick: string; odds: number };
+  btts: { pick: BttsPick; odds: number };
+};
+
+export type MatchResult = {
+  won: boolean;
+  finalScore: { home: number; away: number };
 };
 
 export type MatchInsight = {
   id: number;
+  day: DayBucket;
   league: League;
   home: Team;
   away: Team;
@@ -56,14 +63,23 @@ export type MatchInsight = {
   odds: { home: number; draw: number; away: number; valueMarket: number };
   hitRate: number;
   confidence: number;
-  isValueBetOfTheDay: boolean;
+  isBanker: boolean;
   bestTip: string;
+  markets: Markets;
+  formNote: string;
   metrics: LiveMetrics;
-  alert: AiAlert;
+  result: MatchResult | null;
+};
+
+export type PlatformStats = {
+  matchesAnalyzedToday: number;
+  bankerHitRate: number;
+  leaguesMonitored: number;
 };
 
 export type FixturesPayload = {
   source: "mock" | "rapidapi";
   generatedAt: string;
+  stats: PlatformStats;
   response: MatchInsight[];
 };

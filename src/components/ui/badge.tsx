@@ -12,6 +12,9 @@ const badgeVariants = cva(
         muted: "border-zinc-700 bg-zinc-800 text-zinc-300",
         signal: "border-cyan-500/40 bg-cyan-500/15 text-cyan-300",
         disconnected: "border-amber-500/40 bg-amber-500/10 text-amber-300",
+        banker: "border-emerald-400/50 bg-emerald-500 text-slate-950",
+        won: "border-emerald-500/40 bg-emerald-500/15 text-emerald-300",
+        lost: "border-red-500/30 bg-red-950/50 text-red-300",
       },
     },
     defaultVariants: {

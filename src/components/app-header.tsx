@@ -10,12 +10,12 @@ type AppHeaderProps = {
 export function AppHeader({ connected, version = false }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-zinc-800/80 bg-slate-950/85 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3">
+      <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-3">
         <BetDataLogo version={version} />
         {connected ? (
           <Badge variant="default" className="gap-1.5 px-2.5 py-1">
             <span className="h-1.5 w-1.5 animate-pulseGlow rounded-full bg-emerald-400" />
-            Sistema conectado / API LIVE
+            Pronósticos en vivo
           </Badge>
         ) : (
           <Badge variant="disconnected" className="gap-1.5 px-2.5 py-1">

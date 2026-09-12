@@ -1,7 +1,13 @@
 export const BRAND = {
   name: "BetData AI",
   version: "v2.4",
-  tagline: "Engine de Análisis Deportivo e Inteligencia de Datos",
+  tagline: "Inteligencia Predictiva con IA",
+} as const;
+
+export const PLATFORM_STATS = {
+  matchesAnalyzedToday: 600,
+  bankerHitRate: 72.4,
+  leaguesMonitored: 700,
 } as const;
 
 export const STORAGE_KEYS = {

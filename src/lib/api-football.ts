@@ -1,4 +1,4 @@
-import { RAPIDAPI_FOOTBALL } from "@/lib/constants";
+import { PLATFORM_STATS, RAPIDAPI_FOOTBALL } from "@/lib/constants";
 import { MOCK_FIXTURES } from "@/lib/mocks/fixtures";
 import type { FixturesPayload, MatchInsight } from "@/lib/types";
 
@@ -20,7 +20,8 @@ type ApiFootballFixtureRow = {
 };
 
 function overlayAnalytics(row: ApiFootballFixtureRow, index: number): MatchInsight {
-  const template = MOCK_FIXTURES[index % MOCK_FIXTURES.length];
+  const templates = MOCK_FIXTURES.filter((match) => match.day === "today");
+  const template = templates[index % templates.length] ?? MOCK_FIXTURES[0];
   const status = (["NS", "LIVE", "HT", "FT"].includes(row.fixture.status.short)
     ? row.fixture.status.short
     : row.fixture.status.elapsed
@@ -30,6 +31,7 @@ function overlayAnalytics(row: ApiFootballFixtureRow, index: number): MatchInsig
   return {
     ...template,
     id: row.fixture.id,
+    day: "today",
     league: {
       id: row.league.id,
       name: row.league.name,
@@ -55,15 +57,24 @@ function overlayAnalytics(row: ApiFootballFixtureRow, index: number): MatchInsig
   };
 }
 
+function payload(source: FixturesPayload["source"], response: MatchInsight[]): FixturesPayload {
+  return {
+    source,
+    generatedAt: new Date().toISOString(),
+    stats: {
+      matchesAnalyzedToday: PLATFORM_STATS.matchesAnalyzedToday,
+      bankerHitRate: PLATFORM_STATS.bankerHitRate,
+      leaguesMonitored: PLATFORM_STATS.leaguesMonitored,
+    },
+    response,
+  };
+}
+
 export async function getFixturesFeed(): Promise<FixturesPayload> {
   const key = process.env.RAPIDAPI_KEY;
 
   if (!key) {
-    return {
-      source: "mock",
-      generatedAt: new Date().toISOString(),
-      response: MOCK_FIXTURES,
-    };
+    return payload("mock", MOCK_FIXTURES);
   }
 
   const res = await fetch(RAPIDAPI_FOOTBALL.liveFixtures, {
@@ -75,27 +86,16 @@ export async function getFixturesFeed(): Promise<FixturesPayload> {
   });
 
   if (!res.ok) {
-    return {
-      source: "mock",
-      generatedAt: new Date().toISOString(),
-      response: MOCK_FIXTURES,
-    };
+    return payload("mock", MOCK_FIXTURES);
   }
 
   const json = (await res.json()) as { response?: ApiFootballFixtureRow[] };
   const rows = json.response ?? [];
+  const archive = MOCK_FIXTURES.filter((match) => match.day !== "today");
 
   if (rows.length === 0) {
-    return {
-      source: "rapidapi",
-      generatedAt: new Date().toISOString(),
-      response: MOCK_FIXTURES,
-    };
+    return payload("rapidapi", MOCK_FIXTURES);
   }
 
-  return {
-    source: "rapidapi",
-    generatedAt: new Date().toISOString(),
-    response: rows.slice(0, 8).map(overlayAnalytics),
-  };
+  return payload("rapidapi", [...rows.slice(0, 8).map(overlayAnalytics), ...archive]);
 }

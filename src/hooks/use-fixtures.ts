@@ -14,15 +14,13 @@ export function useFixtures() {
     try {
       const res = await fetch("/api/fixtures", { cache: "no-store" });
       if (!res.ok) {
-        throw new Error("No se pudo sincronizar el feed de API-Football.");
+        throw new Error("No se pudieron cargar los pronósticos.");
       }
       const json = (await res.json()) as FixturesPayload;
       setData(json);
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "No se pudo sincronizar el feed de API-Football.",
+        err instanceof Error ? err.message : "No se pudieron cargar los pronósticos.",
       );
     } finally {
       setLoading(false);

@@ -1,10 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn, formatConfidence } from "@/lib/utils";
 
 type ConfidenceBarProps = {
   value: number;
+  max?: number;
   label?: string;
   tone?: "neon" | "signal" | "amber";
   className?: string;
@@ -18,22 +19,24 @@ const tones = {
 
 export function ConfidenceBar({
   value,
-  label = "Confianza del modelo",
+  max = 10,
+  label = "Confianza (1 a 10)",
   tone = "neon",
   className,
 }: ConfidenceBarProps) {
-  const clamped = Math.max(0, Math.min(100, value));
+  const clamped = Math.max(0, Math.min(max, value));
+  const percent = (clamped / max) * 100;
 
   return (
     <div className={cn("space-y-1.5", className)}>
       <div className="flex items-center justify-between text-[11px] uppercase tracking-wide text-zinc-400">
         <span>{label}</span>
-        <span className="font-mono text-zinc-100">{clamped.toFixed(1)}%</span>
+        <span className="font-mono text-zinc-100">{formatConfidence(clamped)}</span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
         <motion.div
           initial={{ width: 0 }}
-          animate={{ width: `${clamped}%` }}
+          animate={{ width: `${percent}%` }}
           transition={{ duration: 1.15, ease: [0.22, 1, 0.36, 1] }}
           className={cn("h-full rounded-full bg-gradient-to-r", tones[tone])}
         />

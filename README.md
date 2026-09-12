@@ -1,8 +1,8 @@
 # BetData AI
 
-Telegram Mini App de **análisis predictivo deportivo**. El usuario activa el motor en el Servidor Deportivo Oficial y desbloquea el dashboard de inteligencia (presión ofensiva, xG, alertas de valor).
+Telegram Mini App de **pronósticos de fútbol** con inteligencia predictiva. El usuario activa la herramienta en el Servidor Deportivo Oficial y desbloquea el dashboard estilo NerdyTips: Bankers del día, confianza 1 a 10 y registro de aciertos.
 
-**BetData AI** — Engine de Análisis Deportivo e Inteligencia de Datos.
+**BetData AI** — Inteligencia Predictiva con IA.
 
 ## Stack
 
@@ -26,9 +26,9 @@ La app queda en [http://127.0.0.1:43141](http://127.0.0.1:43141).
 
 1. **Activación** — crear cuenta en el Servidor Oficial Integrado, depósito de activación e ID/correo.
 2. **Simulación visual** (3s, tres estados) → `isUnlocked=true` en `localStorage` y entrada al dashboard.
-3. **Dashboard** — selector de jornada, métricas live, gráficos y alerta BetData AI.
+3. **Dashboard** — stats de acierto, boleto del día, pestañas Hoy / Mañana / Ayer y tabla de pronósticos.
 
-Para volver al gatekeeper usa *Cerrar sesión del motor*.
+Para volver al gatekeeper usa *Cerrar sesión*.
 
 ## Telegram Mini App
 

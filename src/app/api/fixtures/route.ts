@@ -9,7 +9,7 @@ export async function GET() {
     return NextResponse.json(payload);
   } catch {
     return NextResponse.json(
-      { error: "No se pudo sincronizar el feed de API-Football." },
+      { error: "No se pudieron cargar los pronósticos." },
       { status: 502 },
     );
   }

@@ -1,19 +1,19 @@
 "use client";
 
-import { Activity, AlertTriangle, RefreshCcw, Zap } from "lucide-react";
+import { AlertTriangle, RefreshCcw } from "lucide-react";
 import { useMemo, useState } from "react";
 import { AppHeader } from "@/components/app-header";
-import { AiAlertCard } from "@/components/dashboard/ai-alert";
-import { MatchSelector } from "@/components/dashboard/match-selector";
-import { MetricsPanel } from "@/components/dashboard/metrics-panel";
-import { PressureChart } from "@/components/dashboard/pressure-chart";
-import { ValueBetBanner } from "@/components/dashboard/value-bet-banner";
-import { XgChart } from "@/components/dashboard/xg-chart";
+import { DailyTicket } from "@/components/dashboard/daily-ticket";
+import { DayTabs } from "@/components/dashboard/day-tabs";
+import { MatchDetail } from "@/components/dashboard/match-detail";
+import { PredictionsTable } from "@/components/dashboard/predictions-table";
+import { StatsBanner } from "@/components/dashboard/stats-banner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFixtures } from "@/hooks/use-fixtures";
-import { OFFICIAL_SERVER_URL } from "@/lib/constants";
-import { hapticTap, openExternal } from "@/lib/telegram";
+import { PLATFORM_STATS } from "@/lib/constants";
+import type { DayBucket } from "@/lib/types";
+import { bankersOfTheDay, matchesForDay } from "@/lib/utils";
 
 type DashboardViewProps = {
   onLock?: () => void;
@@ -21,18 +21,29 @@ type DashboardViewProps = {
 
 export function DashboardView({ onLock }: DashboardViewProps) {
   const { data, error, loading, reload } = useFixtures();
+  const [day, setDay] = useState<DayBucket>("today");
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const matches = useMemo(() => data?.response ?? [], [data]);
+  const stats = data?.stats ?? PLATFORM_STATS;
+  const ticket = useMemo(() => bankersOfTheDay(matches), [matches]);
+  const visible = useMemo(() => matchesForDay(matches, day), [matches, day]);
   const selected = useMemo(() => {
-    if (matches.length === 0) return null;
-    return matches.find((match) => match.id === selectedId) ?? matches[0];
-  }, [matches, selectedId]);
+    const pool = visible.length ? visible : matches;
+    if (pool.length === 0) return null;
+    return pool.find((match) => match.id === selectedId) ?? pool[0];
+  }, [matches, visible, selectedId]);
+
+  function handleSelect(id: number) {
+    const picked = matches.find((match) => match.id === id);
+    if (picked) setDay(picked.day);
+    setSelectedId(id);
+  }
 
   return (
     <div className="min-h-dvh pb-8">
       <AppHeader connected />
-      <main className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-4 sm:py-6">
+      <main className="mx-auto flex max-w-4xl flex-col gap-5 px-4 py-4 sm:py-6">
         {loading ? <DashboardSkeleton /> : null}
 
         {error ? (
@@ -43,51 +54,48 @@ export function DashboardView({ onLock }: DashboardViewProps) {
                 <p>{error}</p>
                 <Button variant="outline" size="sm" onClick={() => void reload()}>
                   <RefreshCcw className="h-3.5 w-3.5" />
-                  Reintentar sincronización
+                  Reintentar
                 </Button>
               </div>
             </div>
           </div>
         ) : null}
 
-        {!loading && !error && matches.length === 0 ? (
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900/70 p-8 text-center">
-            <Activity className="mx-auto mb-3 h-6 w-6 text-zinc-500" />
-            <p className="text-sm text-zinc-300">
-              No hay partidos en el feed de esta jornada.
-            </p>
-            <Button className="mt-4" variant="outline" onClick={() => void reload()}>
-              Actualizar jornada
-            </Button>
-          </div>
-        ) : null}
-
-        {selected ? (
+        {!loading && !error ? (
           <>
-            <ValueBetBanner matches={matches} onSelect={setSelectedId} />
-            <MatchSelector
-              matches={matches}
-              selectedId={selected.id}
-              onSelect={setSelectedId}
-              source={data?.source}
-            />
-            <MetricsPanel match={selected} />
-            <div className="grid gap-4 sm:grid-cols-2">
-              <PressureChart match={selected} />
-              <XgChart match={selected} />
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                Inteligencia Predictiva con IA
+              </p>
+              <h1 className="text-xl font-semibold text-zinc-50 sm:text-2xl">
+                Pronósticos Gratis de Hoy
+              </h1>
+              <p className="mt-1 text-sm text-zinc-400">
+                Confianza de 1 a 10, Bankers por encima de 8 y registro público de aciertos.
+              </p>
             </div>
-            <AiAlertCard match={selected} />
-            <Button
-              size="lg"
-              className="w-full text-[13px] tracking-wide sm:text-sm"
-              onClick={() => {
-                hapticTap();
-                openExternal(OFFICIAL_SERVER_URL);
+
+            <StatsBanner stats={stats} />
+            <DailyTicket
+              matches={ticket}
+              selectedId={selected?.id ?? null}
+              onSelect={handleSelect}
+            />
+            <DayTabs
+              value={day}
+              onChange={(next) => {
+                setDay(next);
+                const first = matchesForDay(matches, next)[0];
+                if (first) setSelectedId(first.id);
               }}
-            >
-              <Zap className="h-4 w-4 fill-current" />
-              EJECUTAR ENTRADA CON BONO ACTIVADO
-            </Button>
+            />
+            <PredictionsTable
+              matches={visible}
+              day={day}
+              selectedId={selected?.id ?? null}
+              onSelect={handleSelect}
+            />
+            {selected ? <MatchDetail match={selected} /> : null}
           </>
         ) : null}
 
@@ -97,7 +105,7 @@ export function DashboardView({ onLock }: DashboardViewProps) {
             onClick={onLock}
             className="mx-auto text-[11px] text-zinc-600 underline-offset-4 hover:text-zinc-400 hover:underline"
           >
-            Cerrar sesión del motor
+            Cerrar sesión
           </button>
         ) : null}
       </main>
@@ -108,13 +116,13 @@ export function DashboardView({ onLock }: DashboardViewProps) {
 function DashboardSkeleton() {
   return (
     <div className="space-y-4">
-      <Skeleton className="h-24 w-full rounded-xl" />
-      <div className="flex gap-2 overflow-hidden">
-        <Skeleton className="h-24 w-40 shrink-0 rounded-xl" />
-        <Skeleton className="h-24 w-40 shrink-0 rounded-xl" />
-        <Skeleton className="h-24 w-40 shrink-0 rounded-xl" />
+      <Skeleton className="h-16 w-full rounded-xl" />
+      <div className="grid gap-2 sm:grid-cols-3">
+        <Skeleton className="h-20 rounded-xl" />
+        <Skeleton className="h-20 rounded-xl" />
+        <Skeleton className="h-20 rounded-xl" />
       </div>
-      <Skeleton className="h-40 w-full rounded-xl" />
+      <Skeleton className="h-36 w-full rounded-xl" />
       <Skeleton className="h-48 w-full rounded-xl" />
     </div>
   );

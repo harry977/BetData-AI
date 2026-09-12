@@ -21,7 +21,7 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: `${BRAND.name} — ${BRAND.tagline}`,
   description:
-    "Mini App de Telegram para análisis predictivo deportivo: cuotas de valor, xG y presión ofensiva en tiempo real.",
+    "Pronósticos de fútbol con inteligencia predictiva: Bankers del día, confianza 1 a 10 y registro de aciertos.",
   applicationName: BRAND.name,
 };
 
