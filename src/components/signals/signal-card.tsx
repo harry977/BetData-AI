@@ -29,22 +29,22 @@ export function SignalCard({
       <button
         type="button"
         onClick={onSelect}
-        className="flex w-full items-center gap-3 rounded-2xl border border-white/8 bg-[#121726] px-3 py-3 text-left"
+        className="flex w-full items-center gap-3 rounded-2xl border border-white/8 bg-[#121726] px-3 py-3 text-left lg:min-h-[5.75rem] lg:gap-4 lg:px-4 lg:py-5"
       >
         <div className="flex -space-x-2">
-          <TeamCrest team={match.home} size={28} />
-          <TeamCrest team={match.away} size={28} />
+          <TeamCrest team={match.home} size={28} className="lg:h-11 lg:w-11" />
+          <TeamCrest team={match.away} size={28} className="lg:h-11 lg:w-11" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[12px] font-black uppercase tracking-wide text-slate-400">
+          <p className="truncate text-[12px] font-black uppercase tracking-wide text-slate-400 lg:text-base lg:text-gray-300">
             {match.home.code} · {match.away.code}
             {clock ? ` · ${clock}` : ""}
           </p>
-          <div className="mt-0.5">
+          <div className="mt-0.5 lg:mt-1">
             <SignalCopy match={match} size="sm" />
           </div>
         </div>
-        <span className="text-[11px] font-black tabular-nums text-cyan-300">
+        <span className="text-[11px] font-black tabular-nums text-cyan-300 lg:text-xl lg:text-[#00E676]">
           {match.confidence.toFixed(1)}
         </span>
       </button>
@@ -54,7 +54,7 @@ export function SignalCard({
   return (
     <article
       className={cn(
-        "rounded-[28px] border bg-[#121726] p-5",
+        "rounded-[28px] border bg-[#121726] p-5 lg:p-8",
         rarity === "ELITE"
           ? "border-violet-400/35"
           : rarity === "STRONG"
@@ -62,45 +62,65 @@ export function SignalCard({
             : "border-white/8",
       )}
     >
-      <div className="mb-4 flex items-center justify-between">
-        <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300">
-          <Zap className="h-3.5 w-3.5" />
+      <div className="mb-4 flex items-center justify-between lg:mb-8">
+        <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300 lg:text-sm">
+          <Zap className="h-3.5 w-3.5 lg:h-4 lg:w-4" />
           Mejor señal de hoy
         </p>
         {clock ? (
-          <span className="rounded-full bg-rose-500/15 px-2 py-0.5 text-[10px] font-black tabular-nums text-rose-300">
+          <span className="rounded-full bg-rose-500/15 px-2 py-0.5 text-[10px] font-black tabular-nums text-rose-300 lg:px-3 lg:py-1 lg:text-sm">
             {clock}
           </span>
         ) : (
-          <span className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">
+          <span className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 lg:text-sm lg:text-gray-300">
             {match.status === "NS" ? "Antes del partido" : match.status}
           </span>
         )}
       </div>
-      <div className="flex items-center gap-3">
-        <TeamCrest team={match.home} size={44} />
-        <p className="min-w-0 truncate text-[22px] font-black uppercase leading-none tracking-tight text-white">
-          {match.home.name}
-        </p>
+
+      <div className="space-y-3 lg:hidden">
+        <div className="flex items-center gap-3">
+          <TeamCrest team={match.home} size={44} />
+          <p className="min-w-0 truncate text-[22px] font-black uppercase leading-none tracking-tight text-white">
+            {match.home.name}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <TeamCrest team={match.away} size={44} />
+          <p className="min-w-0 truncate text-[22px] font-black uppercase leading-none tracking-tight text-white">
+            {match.away.name}
+          </p>
+        </div>
       </div>
-      <div className="mt-3 flex items-center gap-3">
-        <TeamCrest team={match.away} size={44} />
-        <p className="min-w-0 truncate text-[22px] font-black uppercase leading-none tracking-tight text-white">
-          {match.away.name}
-        </p>
+
+      <div className="hidden items-center justify-center gap-6 lg:flex">
+        <div className="flex min-w-0 flex-1 flex-col items-center gap-3 text-center">
+          <TeamCrest team={match.home} size={84} className="h-[84px] w-[84px]" />
+          <p className="text-2xl font-black uppercase leading-tight tracking-tight text-white">
+            {match.home.name}
+          </p>
+        </div>
+        <p className="shrink-0 text-xl font-black text-gray-300">VS</p>
+        <div className="flex min-w-0 flex-1 flex-col items-center gap-3 text-center">
+          <TeamCrest team={match.away} size={84} className="h-[84px] w-[84px]" />
+          <p className="text-2xl font-black uppercase leading-tight tracking-tight text-white">
+            {match.away.name}
+          </p>
+        </div>
       </div>
-      <div className="mt-4">
-        <SignalCopy match={match} size="lg" />
+
+      <div className="mt-4 lg:mt-8">
+        <SignalCopy match={match} size="lg" hero />
       </div>
-      <div className="mt-5">
+      <div className="mt-5 lg:mt-8 lg:text-center">
         <ConfidenceMeter confidence={match.confidence} />
       </div>
-      <BetBonusCta className="mt-5" />
+      <BetBonusCta className="mt-5 lg:mt-8" />
       {onWhy ? (
         <button
           type="button"
           onClick={onWhy}
-          className="mt-3 flex w-full items-center justify-end text-[11px] font-black uppercase tracking-[0.18em] text-cyan-300"
+          className="mt-3 flex w-full items-center justify-end text-[11px] font-black uppercase tracking-[0.18em] text-cyan-300 lg:mt-4 lg:justify-center lg:text-sm"
         >
           ¿Por qué? →
         </button>

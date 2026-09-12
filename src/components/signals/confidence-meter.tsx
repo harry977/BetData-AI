@@ -15,23 +15,40 @@ export function ConfidenceMeter({
   const rarity = signalRarity(confidence);
   const pct = Math.min(100, Math.max(0, (confidence / 10) * 100));
   const fill =
-    band === "HIGH" ? "bg-emerald-400" : band === "MEDIUM" ? "bg-amber-400" : "bg-slate-400";
+    band === "HIGH" ? "bg-emerald-400 lg:bg-[#00E676]" : band === "MEDIUM" ? "bg-amber-400" : "bg-slate-400";
   const color =
     band === "HIGH" ? "text-emerald-300" : band === "MEDIUM" ? "text-amber-300" : "text-slate-400";
 
   return (
     <div className={cn("space-y-1.5", compact && "space-y-1")}>
-      <p className={cn("font-black leading-none tabular-nums text-white", compact ? "text-2xl" : "text-3xl")}>
+      <p
+        className={cn(
+          "font-black leading-none tabular-nums",
+          compact ? "text-2xl text-white" : "text-3xl text-white lg:text-6xl lg:text-[#00E676] lg:drop-shadow-[0_0_22px_rgba(0,230,118,0.72)]",
+        )}
+      >
         {confidence.toFixed(1)}
-        <span className="ml-0.5 text-sm font-bold text-slate-500">/10</span>
+        <span
+          className={cn(
+            "ml-0.5 font-bold",
+            compact ? "text-sm text-slate-500" : "text-sm text-slate-500 lg:text-2xl lg:text-gray-300",
+          )}
+        >
+          /10
+        </span>
       </p>
-      <div className="h-2 overflow-hidden rounded-full bg-white/10">
+      <div
+        className={cn(
+          "overflow-hidden rounded-full bg-white/10 lg:mx-auto",
+          compact ? "h-2" : "h-2 lg:h-3.5 lg:max-w-sm",
+        )}
+      >
         <div
           className={cn("h-full rounded-full transition-all duration-700", fill)}
           style={{ width: `${pct}%` }}
         />
       </div>
-      <p className={cn("text-[11px] font-black uppercase tracking-[0.16em]", color)}>
+      <p className={cn("text-[11px] font-black uppercase tracking-[0.16em] lg:text-sm", color)}>
         {bandLabel(band)}
       </p>
       {rarity !== "STANDARD" ? (

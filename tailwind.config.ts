@@ -45,7 +45,7 @@ const config: Config = {
         ring: "hsl(var(--ring))",
         navy: "#0b0e17",
         panel: "#121726",
-        neon: "#10b981",
+        neon: "#00E676",
         signal: "#06b6d4",
       },
       borderRadius: {

@@ -102,7 +102,7 @@ export function SignalsView({
           <button
             type="button"
             onClick={() => onOpenLive(liveNow[0].id)}
-            className="flex w-full items-center justify-between rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-left"
+            className="flex w-full items-center justify-between rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-left lg:min-h-[5.25rem] lg:px-5 lg:py-5"
           >
             <span>
               <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-rose-300">
@@ -166,7 +166,7 @@ export function SignalsView({
               key={match.id}
               type="button"
               onClick={() => openWhy(match)}
-              className="flex w-full items-center gap-3 rounded-2xl border border-white/8 bg-[#121726] px-3 py-3 text-left"
+              className="flex w-full items-center gap-3 rounded-2xl border border-white/8 bg-[#121726] px-3 py-3 text-left lg:min-h-[5.75rem] lg:gap-4 lg:px-4 lg:py-5"
             >
               <div className="flex -space-x-2">
                 <TeamCrest team={match.home} size={24} />

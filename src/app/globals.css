@@ -53,6 +53,16 @@
     padding-bottom: calc(4.75rem + env(safe-area-inset-bottom));
   }
 
+  @media (min-width: 1024px) {
+    .pb-nav {
+      padding-bottom: 2.5rem;
+    }
+
+    .stream-stage :is(.text-zinc-500, .text-slate-500) {
+      color: #d1d5db;
+    }
+  }
+
   .live-stage {
     height: 100dvh;
   }

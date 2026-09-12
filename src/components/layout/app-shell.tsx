@@ -6,12 +6,12 @@ import { BetDataLogo } from "@/components/brand/betdata-logo";
 import { AccountView } from "@/components/dashboard/account-view";
 import { LiveModeView } from "@/components/dashboard/live-mode-view";
 import { SignalsView } from "@/components/dashboard/signals-view";
-import { BottomNav, type AppTab } from "@/components/layout/bottom-nav";
+import { BottomNav, HeaderNav, type AppTab } from "@/components/layout/bottom-nav";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFixtures } from "@/hooks/use-fixtures";
 import { recordViewedSignal, readUnlockState } from "@/lib/storage";
-import { liveMatches } from "@/lib/utils";
+import { cn, liveMatches } from "@/lib/utils";
 
 type AppShellProps = {
   onLock: () => void;
@@ -46,23 +46,34 @@ export function AppShell({ onLock }: AppShellProps) {
   }
 
   return (
-    <div className={liveMode ? "flex h-dvh flex-col overflow-hidden bg-navy" : "min-h-dvh bg-navy"}>
-      {liveMode ? null : (
-        <header className="sticky top-0 z-30 border-b border-[#1e2538] bg-[#0b0e17]/95 backdrop-blur-xl">
-          <div className="mx-auto flex max-w-md items-center justify-between px-4 py-2.5">
-            <BetDataLogo />
-            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-300">
-              {liveCount > 0 ? `${liveCount} en juego` : "IA activa"}
-            </span>
-          </div>
-        </header>
+    <div
+      className={cn(
+        "stream-stage bg-navy",
+        liveMode
+          ? "flex h-dvh flex-col overflow-hidden lg:h-auto lg:min-h-dvh lg:overflow-visible"
+          : "min-h-dvh",
       )}
+    >
+      <header
+        className={cn(
+          "sticky top-0 z-30 border-b border-[#1e2538] bg-[#0b0e17]/95 backdrop-blur-xl",
+          liveMode && "hidden lg:block",
+        )}
+      >
+        <div className="mx-auto flex max-w-md items-center justify-between gap-3 px-4 py-2.5 lg:max-w-lg">
+          <BetDataLogo />
+          <HeaderNav value={tab} onChange={setTab} />
+          <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-300 lg:text-[11px]">
+            {liveCount > 0 ? `${liveCount} en juego` : "IA activa"}
+          </span>
+        </div>
+      </header>
 
       <main
         className={
           liveMode
-            ? "mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col pb-nav"
-            : "mx-auto max-w-md px-3 pb-nav pt-4"
+            ? "mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col pb-nav lg:max-w-lg lg:pb-8"
+            : "mx-auto max-w-md px-3 pb-nav pt-4 lg:max-w-lg lg:px-4 lg:pb-10 lg:pt-6"
         }
       >
         {loading ? <DashboardSkeleton /> : null}

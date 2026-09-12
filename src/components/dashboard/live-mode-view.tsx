@@ -94,7 +94,7 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.16),transparent_42%)] px-4 pb-3 pt-5">
+    <div className="flex h-full min-h-0 flex-col bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.16),transparent_42%)] px-4 pb-3 pt-5 lg:min-h-[calc(100dvh-4.5rem)] lg:px-6 lg:pt-8">
       <header className="text-center">
         <p className="text-[11px] font-black uppercase tracking-[0.28em] text-emerald-300">
           BetData IA
@@ -187,7 +187,7 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
               .map((match) => (
                 <div
                   key={match.id}
-                  className="rounded-2xl border border-white/10 bg-white/5 p-3"
+                  className="rounded-2xl border border-white/10 bg-white/5 p-3 lg:min-h-[5.75rem] lg:p-5"
                 >
                   <button
                     type="button"
@@ -225,8 +225,8 @@ function ScoreRow({
   return (
     <div className="flex items-center justify-between gap-3">
       <div className="flex min-w-0 items-center gap-3">
-        <TeamCrest team={team} size={40} />
-        <p className="min-w-0 truncate text-[22px] font-black uppercase leading-none tracking-tight text-white">
+        <TeamCrest team={team} size={40} className="lg:h-16 lg:w-16" />
+        <p className="min-w-0 truncate text-[22px] font-black uppercase leading-none tracking-tight text-white lg:text-3xl">
           {team.name}
         </p>
       </div>

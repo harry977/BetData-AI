@@ -93,7 +93,7 @@ export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
   const statusText = ACTIVATION_STATUS[statusIndex];
 
   return (
-    <div className="relative min-h-dvh bg-navy pb-[4.75rem]">
+    <div className="relative min-h-dvh bg-navy pb-[4.75rem] lg:pb-10">
       <header className="sticky top-0 z-30 border-b border-[#1e2538] bg-[#0b0e17]/95 px-4 py-3 backdrop-blur-xl">
         <BetDataLogo version />
       </header>
@@ -206,7 +206,7 @@ export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
         </p>
       </section>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[#1e2538] bg-[#0b0e17]/95 backdrop-blur-xl">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[#1e2538] bg-[#0b0e17]/95 backdrop-blur-xl lg:hidden">
         <div className="mx-auto grid max-w-md grid-cols-3 px-1 pb-[env(safe-area-inset-bottom)] pt-1">
           <NavItem icon={Trophy} label="Adelanto" onClick={() => scrollTo("pronosticos-gratis")} />
           <NavItem icon={LogIn} label="Entrar" accent onClick={() => scrollTo("entrar")} />

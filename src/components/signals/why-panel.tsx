@@ -32,9 +32,12 @@ export function WhyPanel({
   const copy = explainTip(match.bestTip, match.home.name, match.away.name);
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end bg-black/70" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-[60] flex items-end bg-black/70 lg:items-center lg:justify-center lg:p-6"
+      onClick={onClose}
+    >
       <div
-        className="w-full rounded-t-[28px] border-t border-white/10 bg-[#121726] p-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
+        className="w-full rounded-t-[28px] border-t border-white/10 bg-[#121726] p-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] lg:max-w-lg lg:rounded-[28px] lg:border lg:border-white/10 lg:p-8 lg:pb-8"
         onClick={(e) => e.stopPropagation()}
       >
         <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-cyan-300">
