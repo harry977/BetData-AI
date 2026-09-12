@@ -69,9 +69,13 @@ export function isYouthLeague(match: MatchInsight) {
   );
 }
 
+export function isInPlayStatus(status: string) {
+  return status === "LIVE" || status === "HT" || status === "IN_PLAY";
+}
+
 export function liveMatches(matches: MatchInsight[]) {
   return matches
-    .filter((match) => match.status === "LIVE" || match.status === "HT")
+    .filter((match) => isInPlayStatus(match.status))
     .slice()
     .sort((a, b) => {
       const youthDelta = Number(isYouthLeague(a)) - Number(isYouthLeague(b));

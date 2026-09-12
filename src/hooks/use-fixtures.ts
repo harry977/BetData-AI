@@ -4,6 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { readCategoriesCache, saveCategoriesCache } from "@/lib/category-cache";
 import { utcDateOffset } from "@/lib/dates";
 import type { FixturesPayload } from "@/lib/types";
+import { isInPlayStatus } from "@/lib/utils";
+
+const LIVE_POLL_MS = 15_000;
 
 export function useFixtures() {
   const [data, setData] = useState<FixturesPayload | null>(null);
@@ -25,7 +28,10 @@ export function useFixtures() {
         cached && cached.length
           ? `?categoryIds=${cached.map((category) => category.id).join(",")}`
           : "";
-      const res = await fetch(`/api/fixtures${query}`, { cache: "no-store" });
+      const res = await fetch(`/api/fixtures${query}`, {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-store" },
+      });
       if (!res.ok) {
         throw new Error("No se pudieron cargar los pronósticos.");
       }
@@ -50,14 +56,13 @@ export function useFixtures() {
     void reload();
   }, [reload]);
 
-  useEffect(() => {
-    const live = (data?.response ?? []).some(
-      (match) => match.status === "LIVE" || match.status === "HT",
-    );
-    const ms = live ? 20_000 : 45_000;
-    const id = window.setInterval(() => void reload({ silent: true }), ms);
-    return () => window.clearInterval(id);
-  }, [data, reload]);
+  const hasLive = (data?.response ?? []).some((match) => isInPlayStatus(match.status));
 
-  return { data, error, loading, reload };
+  useEffect(() => {
+    if (!hasLive) return;
+    const id = window.setInterval(() => void reload({ silent: true }), LIVE_POLL_MS);
+    return () => window.clearInterval(id);
+  }, [hasLive, reload]);
+
+  return { data, error, loading, reload, hasLive };
 }

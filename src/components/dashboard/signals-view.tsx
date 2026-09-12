@@ -7,6 +7,7 @@ import { MissionCard } from "@/components/signals/mission-card";
 import { SignalCard } from "@/components/signals/signal-card";
 import { SignalCopy } from "@/components/signals/signal-copy";
 import { StreakBoard } from "@/components/signals/streak-board";
+import { LivePulse } from "@/components/signals/live-pulse";
 import { WhyPanel } from "@/components/signals/why-panel";
 import { madridYmd } from "@/lib/dates";
 import { recordMissionSignal, recordViewedSignal } from "@/lib/storage";
@@ -87,7 +88,8 @@ export function SignalsView({
       ) : null}
 
       <header>
-        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-400">
+        <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-emerald-400">
+          <LivePulse />
           Datos en vivo
         </p>
         <h1 className="mt-1 text-[1.55rem] font-black uppercase leading-none tracking-tight text-white">

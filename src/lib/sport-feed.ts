@@ -9,6 +9,7 @@ import {
   toMatchInsight,
 } from "@/lib/sport-mapper";
 import type { FixturesPayload, MatchInsight, SportCategory } from "@/lib/types";
+import { isInPlayStatus } from "@/lib/utils";
 import {
   fetchBulkOdds,
   fetchCategories,
@@ -158,7 +159,10 @@ export async function getFixturesFeed(cachedCategoryIds?: number[]): Promise<Fix
   const yesterday = utcDateOffset(-1);
   const cacheKey = `${today}:${(cachedCategoryIds ?? []).join(",")}`;
   if (feedCache && feedCache.key === cacheKey && Date.now() - feedCache.savedAt < feedCache.ttl) {
-    return feedCache.payload;
+    const cachedLive = feedCache.payload.response.some((match) =>
+      isInPlayStatus(match.status),
+    );
+    if (!cachedLive) return feedCache.payload;
   }
 
   if (!hasSportApiKey()) {
@@ -204,7 +208,10 @@ export async function getFixturesFeed(cachedCategoryIds?: number[]): Promise<Fix
       return toMatchInsight(event, odds, today);
     });
     const next = payload("sportapi", capMatches(withApiOrMock(mapped)), categories);
-    feedCache = { key: cacheKey, savedAt: Date.now(), ttl: FEED_TTL_MS, payload: next };
+    const hasLive = next.response.some((match) => isInPlayStatus(match.status));
+    feedCache = hasLive
+      ? null
+      : { key: cacheKey, savedAt: Date.now(), ttl: FEED_TTL_MS, payload: next };
     return next;
   } catch {
     const fallback = payload("mock", MOCK_FIXTURES, categoryMemory?.categories ?? []);

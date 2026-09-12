@@ -6,6 +6,7 @@ import { TeamCrest } from "@/components/brand/team-crest";
 import { BetBonusCta } from "@/components/signals/bet-bonus-cta";
 import { ConfidenceMeter } from "@/components/signals/confidence-meter";
 import { SignalCopy } from "@/components/signals/signal-copy";
+import { LivePulse } from "@/components/signals/live-pulse";
 import { WhyPanel } from "@/components/signals/why-panel";
 import { livePlaylist } from "@/lib/signals";
 import { recordViewedSignal } from "@/lib/storage";
@@ -106,11 +107,12 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             className={cn(
-              "mt-3 text-sm font-black uppercase tracking-[0.2em]",
+              "mt-3 inline-flex items-center justify-center gap-2 text-sm font-black uppercase tracking-[0.2em]",
               live ? "text-rose-400" : "text-emerald-300",
             )}
           >
-            {live ? `● ${beat}` : "PRÓXIMA JORNADA"}
+            {live ? <LivePulse /> : null}
+            {live ? beat : "PRÓXIMA JORNADA"}
           </motion.p>
         </AnimatePresence>
       </header>
