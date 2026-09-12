@@ -12,12 +12,3 @@ export function formatOdds(value: number) {
 export function formatPercent(value: number, digits = 1) {
   return `${value.toFixed(digits)}%`;
 }
-
-export function isEmailOrUserId(value: string) {
-  const trimmed = value.trim();
-  if (trimmed.length < 3) return false;
-  if (trimmed.includes("@")) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
-  }
-  return /^[a-zA-Z0-9._-]{3,64}$/.test(trimmed);
-}

@@ -12,7 +12,7 @@ import { XgChart } from "@/components/dashboard/xg-chart";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFixtures } from "@/hooks/use-fixtures";
-import { PARTNER_AFFILIATE_URL } from "@/lib/constants";
+import { OFFICIAL_SERVER_URL } from "@/lib/constants";
 import { hapticTap, openExternal } from "@/lib/telegram";
 
 type DashboardViewProps = {
@@ -82,7 +82,7 @@ export function DashboardView({ onLock }: DashboardViewProps) {
               className="w-full text-[13px] tracking-wide sm:text-sm"
               onClick={() => {
                 hapticTap();
-                openExternal(PARTNER_AFFILIATE_URL);
+                openExternal(OFFICIAL_SERVER_URL);
               }}
             >
               <Zap className="h-4 w-4 fill-current" />

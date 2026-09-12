@@ -10,16 +10,14 @@ type ViewState = "boot" | "gatekeeper" | "dashboard";
 
 export default function HomePage() {
   const [view, setView] = useState<ViewState>("boot");
-  const [registered, setRegistered] = useState(false);
 
   useEffect(() => {
     const snapshot = readUnlockState();
-    setRegistered(snapshot.registered);
     setView(snapshot.unlocked ? "dashboard" : "gatekeeper");
   }, []);
 
-  function handleUnlock(partnerId: string) {
-    persistUnlock(partnerId);
+  function handleUnlock(accountId: string) {
+    persistUnlock(accountId);
     setView("dashboard");
   }
 
@@ -42,9 +40,7 @@ export default function HomePage() {
   }
 
   if (view === "gatekeeper") {
-    return (
-      <GatekeeperView onUnlock={handleUnlock} initialRegistered={registered} />
-    );
+    return <GatekeeperView onUnlock={handleUnlock} />;
   }
 
   return <DashboardView onLock={handleLock} />;

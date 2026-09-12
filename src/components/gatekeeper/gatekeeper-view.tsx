@@ -2,62 +2,54 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, ExternalLink, Loader2, Lock, ShieldCheck, Wallet } from "lucide-react";
-import { type ReactNode, useMemo, useState } from "react";
+import { type ReactNode, useState } from "react";
 import { BetDataLogo } from "@/components/brand/betdata-logo";
 import { AppHeader } from "@/components/app-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { BRAND, PARTNER_AFFILIATE_URL, VERIFY_DELAY_MS } from "@/lib/constants";
-import { persistRegistered } from "@/lib/storage";
+import {
+  ACTIVATION_STATUS,
+  ACTIVATION_STEP_MS,
+  BRAND,
+  OFFICIAL_SERVER_URL,
+} from "@/lib/constants";
 import { hapticSuccess, hapticTap, openExternal } from "@/lib/telegram";
-import { isEmailOrUserId } from "@/lib/utils";
 
 type GatekeeperViewProps = {
-  onUnlock: (partnerId: string) => void;
-  initialRegistered?: boolean;
+  onUnlock: (accountId: string) => void;
 };
 
-export function GatekeeperView({
-  onUnlock,
-  initialRegistered = false,
-}: GatekeeperViewProps) {
-  const [registered, setRegistered] = useState(initialRegistered);
-  const [partnerId, setPartnerId] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [verifying, setVerifying] = useState(false);
+export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
+  const [accountCreated, setAccountCreated] = useState(false);
+  const [accountId, setAccountId] = useState("");
+  const [activating, setActivating] = useState(false);
+  const [statusIndex, setStatusIndex] = useState(0);
 
-  const canVerify = useMemo(
-    () => isEmailOrUserId(partnerId) && !verifying,
-    [partnerId, verifying],
-  );
-
-  function handleRegister() {
+  function handleCreateAccount() {
     hapticTap();
-    persistRegistered();
-    setRegistered(true);
-    openExternal(PARTNER_AFFILIATE_URL);
+    setAccountCreated(true);
+    openExternal(OFFICIAL_SERVER_URL);
   }
 
-  async function handleVerify() {
-    if (!isEmailOrUserId(partnerId)) {
-      setError("Introduce un ID de usuario o un correo válido.");
-      return;
-    }
-    if (!registered) {
-      setError("Completa primero el registro en el partner para vincular el FTD.");
-      return;
-    }
+  async function handleActivate() {
+    if (activating) return;
 
-    setError(null);
-    setVerifying(true);
+    setActivating(true);
+    setStatusIndex(0);
     hapticTap();
 
-    await new Promise((resolve) => setTimeout(resolve, VERIFY_DELAY_MS));
+    for (let index = 0; index < ACTIVATION_STATUS.length; index += 1) {
+      setStatusIndex(index);
+      await new Promise((resolve) => setTimeout(resolve, ACTIVATION_STEP_MS));
+    }
+
     hapticSuccess();
-    onUnlock(partnerId.trim());
+    onUnlock(accountId.trim());
   }
+
+  const statusText = ACTIVATION_STATUS[statusIndex];
 
   return (
     <div className="relative min-h-dvh">
@@ -71,11 +63,47 @@ export function GatekeeperView({
             <div className="absolute left-0 right-0 h-16 bg-gradient-to-b from-emerald-500/10 to-transparent animate-scan" />
           </div>
 
+          <AnimatePresence>
+            {activating ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-slate-950/88 px-6 text-center backdrop-blur-md"
+              >
+                <Loader2 className="h-9 w-9 animate-spin text-emerald-400" />
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key={statusText}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    className="max-w-sm text-sm font-medium text-zinc-100 sm:text-base"
+                  >
+                    {statusText}
+                  </motion.p>
+                </AnimatePresence>
+                <div className="flex gap-1.5">
+                  {ACTIVATION_STATUS.map((_, index) => (
+                    <span
+                      key={ACTIVATION_STATUS[index]}
+                      className={
+                        index <= statusIndex
+                          ? "h-1.5 w-6 rounded-full bg-emerald-400"
+                          : "h-1.5 w-6 rounded-full bg-zinc-700"
+                      }
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+
           <CardContent className="relative space-y-6 p-5 sm:p-8">
             <div className="flex items-start justify-between gap-3">
               <BetDataLogo withWordmark={false} size={40} />
               <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-                Gatekeeper / Opt-in
+                Activación del motor
               </p>
             </div>
 
@@ -85,34 +113,34 @@ export function GatekeeperView({
               </h1>
               <p className="text-sm leading-relaxed text-zinc-400">
                 Para vincular la API de cuotas en vivo y métricas avanzadas, completa
-                la activación de tu cuenta de partner.
+                la activación en el Servidor Deportivo Oficial.
               </p>
             </div>
 
             <ol className="space-y-3">
               <StepCard
                 index={1}
-                done={registered}
+                done={accountCreated}
                 icon={<Wallet className="h-4 w-4" />}
-                title="Registrarse en Partner (Bono $20)"
+                title="Servidor Oficial Integrado"
               >
-                <Button className="w-full" size="lg" onClick={handleRegister}>
-                  1. Registrarse en Partner (Bono $20)
-                  <ExternalLink className="h-4 w-4" />
+                <Button className="w-full whitespace-normal py-3" size="lg" onClick={handleCreateAccount}>
+                  1. Crear cuenta en el Servidor Oficial Integrado (Consigue $20 de saldo inicial)
+                  <ExternalLink className="h-4 w-4 shrink-0" />
                 </Button>
               </StepCard>
 
               <StepCard
                 index={2}
-                done={registered}
+                done={accountCreated}
                 icon={<ShieldCheck className="h-4 w-4" />}
-                title="Depósito de activación"
+                title="Estado de Licencia Active"
               >
                 <p className="text-sm text-zinc-300">
-                  2. Realiza tu primer depósito de $20 para activar las cuotas en vivo.
+                  2. Realiza un depósito mínimo de $20 para sincronizar las cuotas de la API en vivo.
                 </p>
                 <p className="text-xs text-zinc-500">
-                  El FTD se valida contra los servidores de {BRAND.name} al verificar tu ID.
+                  Verificación de Depósito de Activación con los servidores de {BRAND.name}.
                 </p>
               </StepCard>
 
@@ -120,59 +148,31 @@ export function GatekeeperView({
                 index={3}
                 done={false}
                 icon={<Lock className="h-4 w-4" />}
-                title="Verificación de cuenta"
+                title="Vincular la herramienta"
               >
                 <div className="space-y-2">
-                  <Label htmlFor="partner-id">
-                    3. Introduce tu ID de usuario o Correo registrado
+                  <Label htmlFor="account-id">
+                    3. Introduce tu ID de Usuario o Correo para vincular la herramienta
                   </Label>
                   <Input
-                    id="partner-id"
+                    id="account-id"
                     autoComplete="email"
-                    placeholder="id_usuario o correo@partner.com"
-                    value={partnerId}
-                    onChange={(event) => {
-                      setPartnerId(event.target.value);
-                      if (error) setError(null);
-                    }}
-                    disabled={verifying}
+                    placeholder="ID de usuario o correo"
+                    value={accountId}
+                    onChange={(event) => setAccountId(event.target.value)}
+                    disabled={activating}
                   />
                 </div>
-                {error ? (
-                  <p className="text-xs text-red-400" role="alert">
-                    {error}
-                  </p>
-                ) : null}
                 <Button
                   className="w-full whitespace-normal py-3"
                   size="lg"
-                  disabled={!canVerify}
-                  onClick={() => void handleVerify()}
+                  disabled={activating}
+                  onClick={() => void handleActivate()}
                 >
-                  {verifying ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Verificando API y FTD con Servidores de BetData AI...
-                    </>
-                  ) : (
-                    "VERIFICAR Y DESBLOQUEAR"
-                  )}
+                  ACTIVAR Y DESBLOQUEAR BETDATA AI
                 </Button>
               </StepCard>
             </ol>
-
-            <AnimatePresence>
-              {verifying ? (
-                <motion.p
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  className="font-mono text-[11px] text-cyan-300"
-                >
-                  Handshake TLS · RapidAPI odds bridge · FTD checksum...
-                </motion.p>
-              ) : null}
-            </AnimatePresence>
 
             <p className="text-[11px] leading-relaxed text-zinc-500">
               Herramienta de análisis predictivo para mayores de 18 años. Las métricas

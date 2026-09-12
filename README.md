@@ -1,6 +1,6 @@
 # BetData AI
 
-Telegram Mini App de **análisis predictivo deportivo**. Actúa como gatekeeper de opt-in: el usuario activa su cuenta de partner y desbloquea el dashboard de inteligencia (presión ofensiva, xG, alertas de valor).
+Telegram Mini App de **análisis predictivo deportivo**. El usuario activa el motor en el Servidor Deportivo Oficial y desbloquea el dashboard de inteligencia (presión ofensiva, xG, alertas de valor).
 
 **BetData AI** — Engine de Análisis Deportivo e Inteligencia de Datos.
 
@@ -24,8 +24,8 @@ La app queda en [http://127.0.0.1:43141](http://127.0.0.1:43141).
 
 ## Flujo
 
-1. **Gatekeeper** — registro en el partner (bono $20), depósito FTD e ID/correo.
-2. **Verificación simulada** (2s) → desbloqueo persistido en `localStorage`.
+1. **Activación** — crear cuenta en el Servidor Oficial Integrado, depósito de activación e ID/correo.
+2. **Simulación visual** (3s, tres estados) → `isUnlocked=true` en `localStorage` y entrada al dashboard.
 3. **Dashboard** — selector de jornada, métricas live, gráficos y alerta BetData AI.
 
 Para volver al gatekeeper usa *Cerrar sesión del motor*.
@@ -45,7 +45,7 @@ Con clave, el route handler consulta `api-football-v1.p.rapidapi.com/v3/fixtures
 ```bash
 # .env.local
 RAPIDAPI_KEY=tu_clave
-NEXT_PUBLIC_PARTNER_AFFILIATE_URL=https://tu-link-de-afiliado
+NEXT_PUBLIC_OFFICIAL_SERVER_URL=https://tu-servidor-deportivo-oficial
 ```
 
 ## Estructura
