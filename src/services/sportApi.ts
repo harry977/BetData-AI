@@ -1,10 +1,33 @@
 import { asArray, asInt, asNumber, asString, isRecord } from "@/lib/json";
 import type { SportCategory } from "@/lib/types";
+import fs from "node:fs";
+import https from "node:https";
+import path from "node:path";
+
+function hydrateLocalEnv() {
+  try {
+    const file = path.join(process.cwd(), ".env.local");
+    if (!fs.existsSync(file)) return;
+    for (const line of fs.readFileSync(file, "utf8").split("\n")) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const index = trimmed.indexOf("=");
+      if (index <= 0) continue;
+      const key = trimmed.slice(0, index);
+      const value = trimmed.slice(index + 1);
+      if (!process.env[key]) process.env[key] = value;
+    }
+  } catch {
+    /* ignore missing env file */
+  }
+}
+
+hydrateLocalEnv();
 
 export const SPORTAPI_HOST =
-  process.env.RAPIDAPI_SPORT_HOST ?? "sportapi7.p.rapidapi.com";
+  process.env["RAPIDAPI_SPORT_HOST"] ?? "sportapi7.p.rapidapi.com";
 export const SPORTAPI_BASE =
-  process.env.RAPIDAPI_SPORT_BASE ?? "https://sportapi7.p.rapidapi.com";
+  process.env["RAPIDAPI_SPORT_BASE"] ?? "https://sportapi7.p.rapidapi.com";
 export const SPORTAPI_ODDS_PROVIDER = 1;
 
 const CATEGORIES_TTL_MS = 30 * 60 * 1000;
@@ -73,21 +96,52 @@ export type EventStatSnapshot = {
   possession: { home: number; away: number };
 };
 
-function sportHeaders() {
-  const key = process.env.RAPIDAPI_KEY;
+function sportHeaders(): Record<string, string> {
+  const key = process.env["RAPIDAPI_KEY"];
   if (!key) {
     throw new Error("Missing RAPIDAPI_KEY");
   }
   return {
     "X-RapidAPI-Key": key,
     "X-RapidAPI-Host": SPORTAPI_HOST,
-    "x-rapidapi-key": key,
-    "x-rapidapi-host": SPORTAPI_HOST,
   };
 }
 
 export function hasSportApiKey() {
-  return Boolean(process.env.RAPIDAPI_KEY);
+  return Boolean(process.env["RAPIDAPI_KEY"]);
+}
+
+function httpsGet(url: string, headers: Record<string, string>): Promise<{ status: number; text: string }> {
+  return new Promise((resolve, reject) => {
+    const req = https.get(url, { headers, timeout: 15000 }, (res) => {
+      const chunks: Buffer[] = [];
+      res.on("data", (chunk) => chunks.push(chunk as Buffer));
+      res.on("end", () =>
+        resolve({
+          status: res.statusCode ?? 0,
+          text: Buffer.concat(chunks).toString("utf8"),
+        }),
+      );
+    });
+    req.on("error", reject);
+    req.on("timeout", () => {
+      req.destroy();
+      reject(new Error(`SportAPI timeout ${url}`));
+    });
+  });
+}
+
+let requestChain = Promise.resolve();
+
+function enqueue<T>(task: () => Promise<T>): Promise<T> {
+  const run = requestChain.then(
+    () => new Promise((resolve) => setTimeout(resolve, 120)),
+  ).then(task);
+  requestChain = run.then(
+    () => undefined,
+    () => undefined,
+  );
+  return run;
 }
 
 export async function sportGet<T = unknown>(path: string, ttlMs = 0): Promise<T> {
@@ -98,23 +152,29 @@ export async function sportGet<T = unknown>(path: string, ttlMs = 0): Promise<T>
   }
 
   const url = `${SPORTAPI_BASE}${path}`;
-  const res = await fetch(url, {
-    headers: sportHeaders(),
-    cache: "no-store",
-    signal: AbortSignal.timeout(12000),
+  const json = await enqueue(async () => {
+    let lastError: Error | null = null;
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const { status, text } = await httpsGet(url, sportHeaders());
+      if (status === 429 && attempt === 0) {
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        continue;
+      }
+      if (status < 200 || status >= 300) {
+        lastError = new Error(`SportAPI ${status} ${path} ${text.slice(0, 160)}`);
+        break;
+      }
+      return JSON.parse(text) as T;
+    }
+    throw lastError ?? new Error(`SportAPI failed ${path}`);
   });
 
-  if (!res.ok) {
-    throw new Error(`SportAPI ${res.status} ${path}`);
-  }
-
-  const json = (await res.json()) as T;
   if (ttlMs > 0) writeCache(cacheKey, json);
   return json;
 }
 
 export function timezoneOffsetSeconds(): number {
-  const fromEnv = Number(process.env.SPORTAPI_TZ_OFFSET);
+  const fromEnv = Number(process.env["SPORTAPI_TZ_OFFSET"]);
   if (Number.isFinite(fromEnv)) return fromEnv;
   return 0;
 }
@@ -229,7 +289,11 @@ function parseCategory(value: unknown): SportCategory | null {
     name: asString(nested.name, "Categoría"),
     flag: asString(nested.flag) || undefined,
     slug: asString(nested.slug) || undefined,
-    eventsCount: asInt(row.eventsCount) ?? tournaments.length,
+    eventsCount:
+      asInt(row.totalEvents) ??
+      asInt(row.eventsCount) ??
+      asInt(nested.totalEvents) ??
+      tournaments.length,
   };
 }
 
@@ -282,13 +346,27 @@ export async function fetchLiveEvents(): Promise<SportEvent[]> {
   return parseEventList(json);
 }
 
+function fractionalToDecimal(value: string): number | null {
+  const match = value.trim().match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/);
+  if (!match) return null;
+  const num = Number(match[1]);
+  const den = Number(match[2]);
+  if (!den) return null;
+  return Number((1 + num / den).toFixed(2));
+}
+
 function decimalOdds(value: unknown): number | null {
   const direct = asNumber(value);
   if (direct && direct > 1) return Number(direct.toFixed(2));
+  if (typeof value === "string" && value.includes("/")) {
+    return fractionalToDecimal(value);
+  }
   if (isRecord(value)) {
     return (
       decimalOdds(value.decimalValue) ??
       decimalOdds(value.decimal) ??
+      decimalOdds(value.fractionalValue) ??
+      decimalOdds(value.fractional) ??
       decimalOdds(value.odd) ??
       decimalOdds(value.odds)
     );
@@ -462,10 +540,8 @@ export async function fetchBulkOdds(date: string): Promise<Map<number, EventOdds
       (isRecord(node.event) ? asInt(node.event.id) : null) ??
       eventId;
     if (Array.isArray(node.markets) || Array.isArray(node.choices)) {
-      const id = nestedId ?? asInt(node.id);
-      if (id !== null && !map.has(id)) {
-        const parsed = parseEventOdds(node);
-        if (parsed.home > 1) map.set(id, parsed);
+      if (typeof nestedId === "number") {
+        map.set(nestedId, parseEventOdds(node));
       }
     }
     for (const [key, value] of Object.entries(node)) {
@@ -538,24 +614,6 @@ export async function fetchEventStatistics(
   const path = `/api/v1/event/${eventId}/statistics`;
   const json = await sportGet(path, 45_000);
   return parseEventStatistics(json);
-}
-
-export async function mapLimit<T, R>(
-  items: T[],
-  limit: number,
-  mapper: (item: T, index: number) => Promise<R>,
-): Promise<R[]> {
-  const results: R[] = new Array(items.length);
-  let cursor = 0;
-  async function worker() {
-    while (cursor < items.length) {
-      const index = cursor++;
-      results[index] = await mapper(items[index], index);
-    }
-  }
-  const workers = Array.from({ length: Math.min(limit, items.length) }, () => worker());
-  await Promise.all(workers);
-  return results;
 }
 
 const PRIORITY_CATEGORY_NAMES = [

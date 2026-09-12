@@ -63,11 +63,21 @@ export function recentHits(matches: MatchInsight[]) {
   return matches.filter((match) => match.day === "yesterday" && match.result?.won);
 }
 
+export function isYouthLeague(match: MatchInsight) {
+  return /u1[6-9]|u21|u23|youth|reserva|reserve|premier league 2/i.test(
+    `${match.league.country} ${match.league.name}`,
+  );
+}
+
 export function liveMatches(matches: MatchInsight[]) {
   return matches
     .filter((match) => match.status === "LIVE" || match.status === "HT")
     .slice()
-    .sort((a, b) => (b.elapsed ?? 0) - (a.elapsed ?? 0));
+    .sort((a, b) => {
+      const youthDelta = Number(isYouthLeague(a)) - Number(isYouthLeague(b));
+      if (youthDelta !== 0) return youthDelta;
+      return (b.elapsed ?? 0) - (a.elapsed ?? 0);
+    });
 }
 
 export function groupMatchesByLeague(matches: MatchInsight[]) {

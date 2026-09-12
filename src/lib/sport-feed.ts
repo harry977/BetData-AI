@@ -1,24 +1,22 @@
-import { utcDateOffset } from "@/lib/dates";
 import { PLATFORM_STATS } from "@/lib/constants";
+import { utcDateOffset } from "@/lib/dates";
 import { MOCK_FIXTURES } from "@/lib/mocks/fixtures";
-import { toMatchInsight, mergeLiveEvent, isPriorityLive } from "@/lib/sport-mapper";
+import { isPriorityLive, mergeLiveEvent, toMatchInsight } from "@/lib/sport-mapper";
 import type { FixturesPayload, MatchInsight, SportCategory } from "@/lib/types";
 import {
   fetchAllScheduledEvents,
   fetchBulkOdds,
   fetchCategories,
-  fetchEventOdds,
   fetchLiveEvents,
   fetchScheduledEvents,
   hasSportApiKey,
-  mapLimit,
   selectPriorityCategories,
   timezoneOffsetSeconds,
   type EventOdds,
   type SportEvent,
 } from "@/services/sportApi";
 
-const FEED_TTL_MS = 60_000;
+const FEED_TTL_MS = 120_000;
 let feedCache: { key: string; savedAt: number; payload: FixturesPayload } | null = null;
 let categoryMemory: { date: string; savedAt: number; categories: SportCategory[] } | null =
   null;
@@ -58,7 +56,7 @@ async function categoriesForDate(date: string, cachedIds?: number[]) {
       return categories;
     }
   } catch {
-    /* fall through */
+    /* keep going with cached ids / bulk events */
   }
 
   if (cachedIds?.length) {
@@ -82,40 +80,24 @@ async function eventsForDate(date: string, categories: SportCategory[]) {
     /* category fan-out */
   }
 
-  const selected = selectPriorityCategories(categories, 8);
-  const batches = await mapLimit(selected, 3, async (category) => {
+  const selected = selectPriorityCategories(categories, 4);
+  const collected: SportEvent[] = [];
+  for (const category of selected) {
     try {
-      return await fetchScheduledEvents(category.id, date);
+      collected.push(...(await fetchScheduledEvents(category.id, date)));
     } catch {
-      return [] as SportEvent[];
+      /* skip category */
     }
-  });
-  return uniqueEvents(batches.flat());
+  }
+  return uniqueEvents(collected);
 }
 
-async function oddsMapFor(events: SportEvent[], date: string) {
-  const map = new Map<number, EventOdds>();
+async function oddsMapFor(date: string) {
   try {
-    const bulk = await fetchBulkOdds(date);
-    bulk.forEach((odds, id) => map.set(id, odds));
+    return await fetchBulkOdds(date);
   } catch {
-    /* per-event fallback below */
+    return new Map<number, EventOdds>();
   }
-
-  const missing = events.filter((event) => !map.has(event.id)).slice(0, 18);
-  if (missing.length === 0) return map;
-
-  const extras = await mapLimit(missing, 3, async (event) => {
-    try {
-      return [event.id, await fetchEventOdds(event.id)] as const;
-    } catch {
-      return null;
-    }
-  });
-  for (const row of extras) {
-    if (row) map.set(row[0], row[1]);
-  }
-  return map;
 }
 
 function defaultOdds(): EventOdds {
@@ -141,6 +123,22 @@ function withMockFallback(apiMatches: MatchInsight[]): MatchInsight[] {
   return merged;
 }
 
+function leagueBoost(match: MatchInsight) {
+  const name = `${match.league.country} ${match.league.name}`.toLowerCase();
+  if (/u1[6-9]|u21|u23|youth|reserva|reserve|premier league 2/.test(name)) return -50;
+  if (
+    /uefa champions|premier league|la liga|serie a|bundesliga|ligue 1|europa league|copa del rey|fa cup/.test(
+      name,
+    )
+  ) {
+    return 55;
+  }
+  if (/england|spain|germany|italy|france|netherlands|portugal|brazil|argentina|mexico/.test(name)) {
+    return 12;
+  }
+  return 0;
+}
+
 function capMatches(matches: MatchInsight[]) {
   const byDay = {
     today: matches.filter((match) => match.day === "today"),
@@ -148,9 +146,10 @@ function capMatches(matches: MatchInsight[]) {
     yesterday: matches.filter((match) => match.day === "yesterday"),
   };
   const rank = (match: MatchInsight) =>
-    (match.status === "LIVE" || match.status === "HT" ? 40 : 0) +
+    leagueBoost(match) +
+    (match.status === "LIVE" || match.status === "HT" ? 20 : 0) +
     match.confidence +
-    (match.isBanker ? 5 : 0);
+    (match.isBanker ? 8 : 0);
   const take = (rows: MatchInsight[], limit: number) =>
     rows.slice().sort((a, b) => rank(b) - rank(a)).slice(0, limit);
   return [...take(byDay.today, 48), ...take(byDay.tomorrow, 16), ...take(byDay.yesterday, 16)];
@@ -169,12 +168,8 @@ export async function getFixturesFeed(cachedCategoryIds?: number[]): Promise<Fix
 
   try {
     const categories = await categoriesForDate(today, cachedCategoryIds);
-    const [todayEvents, tomorrowEvents, yesterdayEvents, liveEvents] = await Promise.all([
-      eventsForDate(today, categories),
-      eventsForDate(utcDateOffset(1), categories).catch(() => [] as SportEvent[]),
-      eventsForDate(utcDateOffset(-1), categories).catch(() => [] as SportEvent[]),
-      fetchLiveEvents().catch(() => [] as SportEvent[]),
-    ]);
+    const todayEvents = await eventsForDate(today, categories);
+    const liveEvents = await fetchLiveEvents().catch(() => [] as SportEvent[]);
 
     const liveById = new Map(liveEvents.map((event) => [event.id, event]));
     const mergedToday = todayEvents.map((event) => {
@@ -187,17 +182,14 @@ export async function getFixturesFeed(cachedCategoryIds?: number[]): Promise<Fix
       }
     }
 
-    const allEvents = uniqueEvents([...mergedToday, ...tomorrowEvents, ...yesterdayEvents]);
-    if (allEvents.length === 0) {
+    if (mergedToday.length === 0) {
       const fallback = payload("mock", MOCK_FIXTURES, categories);
       feedCache = { key: cacheKey, savedAt: Date.now(), payload: fallback };
       return fallback;
     }
 
-    const oddsToday = await oddsMapFor(mergedToday, today).catch(
-      () => new Map<number, EventOdds>(),
-    );
-    const mapped = allEvents.map((event) =>
+    const oddsToday = await oddsMapFor(today);
+    const mapped = mergedToday.map((event) =>
       toMatchInsight(event, oddsToday.get(event.id) ?? defaultOdds(), today),
     );
     const next = payload("sportapi", capMatches(withMockFallback(mapped)), categories);
