@@ -21,6 +21,9 @@ const config = {
       queue: "dummy",
     },
   },
+  cloudflare: {
+    dangerousDisableConfigValidation: true,
+  },
 };
 
 export default config;
