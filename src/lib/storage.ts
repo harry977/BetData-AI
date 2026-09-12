@@ -41,6 +41,31 @@ export function recordViewedSignal(id: number) {
   window.localStorage.setItem(STORAGE_KEYS.viewedSignals, JSON.stringify(next));
 }
 
+type MissionState = { date: string; ids: number[] };
+
+export function readDailyMission(date: string): MissionState {
+  if (typeof window === "undefined") return { date, ids: [] };
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEYS.mission);
+    if (!raw) return { date, ids: [] };
+    const parsed = JSON.parse(raw) as MissionState;
+    if (parsed.date !== date || !Array.isArray(parsed.ids)) return { date, ids: [] };
+    return parsed;
+  } catch {
+    return { date, ids: [] };
+  }
+}
+
+export function recordMissionSignal(date: string, id: number) {
+  if (typeof window === "undefined") return;
+  const current = readDailyMission(date);
+  const ids = current.ids.includes(id) ? current.ids : [...current.ids, id].slice(0, 3);
+  window.localStorage.setItem(
+    STORAGE_KEYS.mission,
+    JSON.stringify({ date, ids }),
+  );
+}
+
 export function persistUnlock(accountId: string) {
   window.localStorage.setItem(STORAGE_KEYS.unlocked, "true");
   window.localStorage.setItem(STORAGE_KEYS.accountId, accountId);

@@ -11,6 +11,7 @@ export const PLATFORM_STATS = {
 } as const;
 
 export const STORAGE_KEYS = {
+  mission: "betdata_ai_daily_mission",
   viewedSignals: "betdata_ai_viewed_signals",
   unlocked: "isUnlocked",
   accountId: "betdata_ai_account_id",

@@ -1,6 +1,6 @@
 # BetData AI
 
-Telegram Mini App de **pronósticos de fútbol** con inteligencia predictiva. El usuario activa la herramienta en el Servidor Deportivo Oficial y desbloquea el dashboard estilo NerdyTips: Bankers del día, confianza 1 a 10 y registro de aciertos.
+Telegram Mini App de **inteligencia de fútbol en vivo**. La IA escanea el día, detecta señales y las explica en un feed tipo juego — no en un dashboard de métricas.
 
 **BetData AI** — Inteligencia Predictiva con IA.
 
@@ -24,11 +24,19 @@ La app queda en [http://127.0.0.1:43141](http://127.0.0.1:43141).
 
 ## Flujo
 
-1. **Activación** — crear cuenta en el Servidor Oficial Integrado, depósito de activación e ID/correo.
-2. **Simulación visual** (3s, tres estados) → `isUnlocked=true` en `localStorage` y entrada al dashboard.
-3. **Dashboard mobile** — ticker en vivo, Bankers (confianza ≥ 8.0), Partidos agrupados por liga, Bet Builder y barra inferior.
+1. **Opt-in** — landing de tips gratuitos y bono de bienvenida hacia el Servidor Oficial.
+2. **Acceder** — simulación visual (3s) → `isUnlocked=true` en `localStorage`.
+3. **AI feed** — SCAN → señal destacada → WHY → streak / resultados.
+4. **LIVE** — interfaz 9:16 para retransmitir, con texto gigante y alertas.
 
 Para volver al gatekeeper usa *Cerrar sesión*.
+
+## Navegación
+
+- **AI** — feed de señales, scan, battle y misión del día
+- **Matches** — partidos por día, con análisis visual
+- **LIVE** — broadcast mode 9:16
+- **Account** — sesión, Bet Builder e historial
 
 ## Telegram Mini App
 
@@ -40,13 +48,7 @@ Para volver al gatekeeper usa *Cerrar sesión*.
 
 Sin `RAPIDAPI_KEY`, `/api/fixtures` sirve el mock de `src/lib/mocks/fixtures.ts`.
 
-Con clave, el servidor consulta **SportAPI** (`sportapi7.p.rapidapi.com`):
-
-- `GET /api/v1/sport/football/{date}/{timezoneOffset}/categories`
-- `GET /api/v1/category/{id}/scheduled-events/{date}`
-- `GET /api/v1/event/{id}/odds/1/all` y estadísticas `GET /api/v1/event/{id}/statistics`
-
-Las categorías del día se cachean 30 minutos (`categories_cache` en `localStorage` y memoria en servidor). Si la API falla o no hay eventos, se usan los mocks.
+Con clave, el servidor consulta **SportAPI** (`sportapi7.p.rapidapi.com`). Las categorías del día se cachean 30 minutos. Si la API falla o no hay eventos, se usan los mocks.
 
 ```bash
 # .env.local
@@ -56,20 +58,6 @@ NEXT_PUBLIC_OFFICIAL_SERVER_URL=https://tu-servidor-deportivo-oficial
 ```
 
 No subas la clave al repositorio: `.env.local` está en `.gitignore`.
-
-## Estructura
-
-```
-src/
-  app/page.tsx                 # Estado Gatekeeper ↔ Dashboard
-  app/api/fixtures/route.ts    # Feed SportAPI / mock
-  app/api/event/[id]/statistics
-  services/sportApi.ts         # Cliente RapidAPI SportAPI
-  components/gatekeeper/
-  components/dashboard/
-  lib/mocks/fixtures.ts
-  lib/telegram.ts
-```
 
 ## Aviso
 

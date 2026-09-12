@@ -4,7 +4,6 @@ import { AlertTriangle, RefreshCcw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { BetDataLogo } from "@/components/brand/betdata-logo";
 import { AccountView } from "@/components/dashboard/account-view";
-import { AiLabView } from "@/components/dashboard/ai-lab-view";
 import { LiveModeView } from "@/components/dashboard/live-mode-view";
 import { PartidosView } from "@/components/dashboard/partidos-view";
 import { SignalsView } from "@/components/dashboard/signals-view";
@@ -24,7 +23,7 @@ type AppShellProps = {
 
 export function AppShell({ onLock }: AppShellProps) {
   const { data, error, loading, reload } = useFixtures();
-  const [tab, setTab] = useState<AppTab>("signals");
+  const [tab, setTab] = useState<AppTab>("ai");
   const [day, setDay] = useState<DayBucket>("today");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [accountId, setAccountId] = useState("");
@@ -37,6 +36,7 @@ export function AppShell({ onLock }: AppShellProps) {
   const live = useMemo(() => liveMatches(matches), [matches]);
   const tickerItems = live.length > 0 ? live.slice(0, 12) : hits;
   const liveMode = tab === "live";
+  const feedMode = tab === "ai";
 
   function handleSelect(id: number) {
     const picked = matches.find((match) => match.id === id);
@@ -53,7 +53,7 @@ export function AppShell({ onLock }: AppShellProps) {
 
   function openFromAccount(id: number) {
     handleSelect(id);
-    setTab("signals");
+    setTab("ai");
   }
 
   return (
@@ -62,12 +62,12 @@ export function AppShell({ onLock }: AppShellProps) {
         <header className="sticky top-0 z-30 border-b border-[#1e2538] bg-[#0b0e17]/95 backdrop-blur-xl">
           <div className="mx-auto flex max-w-md items-center justify-between px-4 py-2.5">
             <BetDataLogo />
-            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-300">
-              Motor activo
+            <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-cyan-300">
+              AI live
             </span>
           </div>
-          <HitsTicker hits={tickerItems} />
-          <SyncBanner />
+          {feedMode ? null : <HitsTicker hits={tickerItems} />}
+          {feedMode ? null : <SyncBanner />}
         </header>
       )}
 
@@ -97,7 +97,7 @@ export function AppShell({ onLock }: AppShellProps) {
 
         {!loading && !error ? (
           <>
-            {tab === "signals" ? (
+            {tab === "ai" ? (
               <SignalsView
                 matches={matches}
                 selectedId={selectedId}
@@ -120,7 +120,6 @@ export function AppShell({ onLock }: AppShellProps) {
                 onSelect={handleSelect}
               />
             ) : null}
-            {tab === "ai" ? <AiLabView matches={matches} /> : null}
             {tab === "account" ? (
               <AccountView
                 accountId={accountId}

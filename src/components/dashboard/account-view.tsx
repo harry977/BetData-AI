@@ -2,12 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { LogOut } from "lucide-react";
+import { BetBuilderView } from "@/components/dashboard/bet-builder-view";
 import { Button } from "@/components/ui/button";
-import { PLATFORM_STATS } from "@/lib/constants";
 import { resolvedSignals } from "@/lib/signals";
 import { readViewedSignals } from "@/lib/storage";
 import type { MatchInsight } from "@/lib/types";
-import { formatPercent } from "@/lib/utils";
 
 type AccountViewProps = {
   accountId: string;
@@ -54,9 +53,11 @@ export function AccountView({
         </p>
       </section>
 
-      <section className="grid grid-cols-2 gap-2">
-        <Stat label="Acierto bankers" value={formatPercent(PLATFORM_STATS.bankerHitRate, 1)} />
-        <Stat label="Ligas" value={`+${PLATFORM_STATS.leaguesMonitored}`} />
+      <section>
+        <h2 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+          Armar boleto
+        </h2>
+        <BetBuilderView matches={matches} />
       </section>
 
       <HistoryList
@@ -77,15 +78,6 @@ export function AccountView({
         <LogOut className="h-4 w-4" />
         Cerrar sesión
       </Button>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-[#1e2538] bg-panel px-3 py-3">
-      <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-500">{label}</p>
-      <p className="mt-1 font-mono text-xl text-emerald-300">{value}</p>
     </div>
   );
 }

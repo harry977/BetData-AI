@@ -2,10 +2,8 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Zap } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { confidenceBand } from "@/lib/signals";
 import type { MatchInsight } from "@/lib/types";
-import { formatConfidence } from "@/lib/utils";
 
 type AiAlertProps = {
   match: MatchInsight | null;
@@ -16,39 +14,35 @@ export function AiAlert({ match, onOpen }: AiAlertProps) {
   return (
     <AnimatePresence mode="wait">
       {match ? (
-        <motion.section
+        <motion.button
           key={match.id}
+          type="button"
+          onClick={() => onOpen(match.id)}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -6 }}
           transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-          className="rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-3.5 py-3"
+          className="w-full rounded-[24px] border border-cyan-400/25 bg-cyan-500/10 px-4 py-3.5 text-left"
         >
-          <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-300">
+          <p className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-cyan-300">
             <Zap className="h-3.5 w-3.5" />
-            AI Alert
+            Señal detectada
           </p>
-          <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-zinc-400">
-            Nueva señal detectada
+          <p className="mt-2 text-base font-black uppercase leading-tight text-white">
+            {match.home.name}
+            <span className="mx-1.5 text-slate-500">vs</span>
+            {match.away.name}
           </p>
-          <p className="mt-2 text-sm font-semibold uppercase tracking-wide text-zinc-50">
-            {match.home.code} — {match.away.code}
+          <p className="mt-1 text-sm font-bold text-emerald-300">
+            {match.bestTip}
+            <span className="ml-2 font-black tabular-nums text-white">
+              {match.confidence.toFixed(1)}
+            </span>
+            <span className="ml-1 text-[10px] font-black uppercase tracking-[0.16em] text-emerald-400">
+              {confidenceBand(match.confidence)}
+            </span>
           </p>
-          <div className="mt-1 flex items-end justify-between gap-3">
-            <div>
-              <p className="text-xl font-semibold text-emerald-400">{match.bestTip}</p>
-              <p className="font-mono text-sm text-zinc-200">
-                {formatConfidence(match.confidence)}
-              </p>
-              <p className="text-[10px] uppercase tracking-wide text-emerald-300/80">
-                {confidenceBand(match.confidence)}
-              </p>
-            </div>
-            <Button size="sm" onClick={() => onOpen(match.id)}>
-              Ver análisis
-            </Button>
-          </div>
-        </motion.section>
+        </motion.button>
       ) : null}
     </AnimatePresence>
   );

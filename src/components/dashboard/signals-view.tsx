@@ -2,23 +2,26 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ExternalLink } from "lucide-react";
-import { MatchDetail } from "@/components/dashboard/match-detail";
 import { AiAlert } from "@/components/signals/ai-alert";
+import { AiBattle } from "@/components/signals/ai-battle";
+import { AiScan } from "@/components/signals/ai-scan";
+import { MissionCard } from "@/components/signals/mission-card";
 import { SignalCard } from "@/components/signals/signal-card";
-import { TopSignals } from "@/components/signals/top-signals";
+import { StreakBoard } from "@/components/signals/streak-board";
 import { WhyPanel } from "@/components/signals/why-panel";
 import { Button } from "@/components/ui/button";
 import { OFFICIAL_SERVER_URL } from "@/lib/constants";
-import { recordViewedSignal } from "@/lib/storage";
+import { madridYmd } from "@/lib/dates";
+import { recordMissionSignal, recordViewedSignal } from "@/lib/storage";
 import {
   activeSignals,
   alertPool,
-  resolvedSignals,
-  supportStats,
+  featuredSignal,
+  scanCounts,
   topAiSignals,
-  upcomingSignals,
 } from "@/lib/signals";
 import { hapticTap, openExternal } from "@/lib/telegram";
+import { isBanker } from "@/lib/utils";
 import type { MatchInsight } from "@/lib/types";
 
 type SignalsViewProps = {
@@ -27,161 +30,132 @@ type SignalsViewProps = {
   onSelect: (id: number) => void;
 };
 
+const SCAN_KEY = "betdata_ai_scan_day";
+
 export function SignalsView({ matches, selectedId, onSelect }: SignalsViewProps) {
-  const top = useMemo(() => topAiSignals(matches, 3), [matches]);
-  const live = useMemo(() => activeSignals(matches).slice(0, 4), [matches]);
-  const upcoming = useMemo(() => upcomingSignals(matches).slice(0, 4), [matches]);
-  const resolved = useMemo(() => resolvedSignals(matches).slice(0, 4), [matches]);
+  const featured = useMemo(
+    () => featuredSignal(matches, selectedId),
+    [matches, selectedId],
+  );
+  const others = useMemo(() => {
+    const pool = [
+      ...activeSignals(matches),
+      ...topAiSignals(matches, 6),
+    ].filter((match, index, list) => list.findIndex((item) => item.id === match.id) === index);
+    return pool.filter((match) => match.id !== featured?.id).slice(0, 5);
+  }, [matches, featured]);
   const alerts = useMemo(() => alertPool(matches), [matches]);
+  const counts = useMemo(() => scanCounts(matches), [matches]);
+  const liveNow = useMemo(() => activeSignals(matches).length > 0, [matches]);
   const [alertIndex, setAlertIndex] = useState(0);
-  const [whyOpen, setWhyOpen] = useState(true);
-  const [chartsOpen, setChartsOpen] = useState(false);
+  const [whyMatch, setWhyMatch] = useState<MatchInsight | null>(null);
+  const [missionKey, setMissionKey] = useState(0);
+  const [scanning, setScanning] = useState(false);
+
+  useEffect(() => {
+    const day = madridYmd();
+    try {
+      if (window.sessionStorage.getItem(SCAN_KEY) === day) return;
+      window.sessionStorage.setItem(SCAN_KEY, day);
+      setScanning(true);
+    } catch {
+      setScanning(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (alerts.length < 2) return;
     const timer = window.setInterval(() => {
       setAlertIndex((current) => (current + 1) % alerts.length);
-    }, 9000);
+    }, 8000);
     return () => window.clearInterval(timer);
   }, [alerts.length]);
-
-  const selected =
-    matches.find((match) => match.id === selectedId) ?? top[0] ?? matches[0] ?? null;
 
   function openSignal(id: number) {
     hapticTap();
     recordViewedSignal(id);
     onSelect(id);
-    setWhyOpen(true);
-    setChartsOpen(true);
+  }
+
+  function openWhy(match: MatchInsight) {
+    hapticTap();
+    recordViewedSignal(match.id);
+    onSelect(match.id);
+    if (isBanker(match.confidence)) {
+      recordMissionSignal(madridYmd(), match.id);
+      setMissionKey((key) => key + 1);
+    }
+    setWhyMatch(match);
   }
 
   return (
     <div className="space-y-5">
+      {scanning ? (
+        <AiScan
+          matches={counts.matches}
+          signals={counts.signals}
+          onDone={() => setScanning(false)}
+        />
+      ) : null}
+
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-400">
-          Football Intelligence
+        <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.22em] text-rose-400">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-70" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500" />
+          </span>
+          Live AI
         </p>
-        <h1 className="mt-1 text-[1.65rem] font-semibold tracking-tight text-zinc-50">
-          Señales IA
+        <h1 className="mt-2 text-[1.7rem] font-black uppercase leading-none tracking-tight text-white">
+          {liveNow ? "La IA está analizando ahora" : "La IA está escaneando el día"}
         </h1>
-        <p className="mt-1 text-[13px] leading-relaxed text-zinc-500">
-          BD APEX AI monitoriza el día y destaca las señales con más confianza.
-        </p>
       </header>
 
       <AiAlert match={alerts[alertIndex] ?? null} onOpen={openSignal} />
 
-      <TopSignals matches={top} selectedId={selected?.id ?? null} onSelect={openSignal} />
-
-      {selected ? (
-        <div className="space-y-3">
-          <SignalCard
-            match={selected}
-            active
-            onSelect={openSignal}
-            onWhy={() => {
-              recordViewedSignal(selected.id);
-              setWhyOpen((open) => !open);
-            }}
-          />
-          {whyOpen ? <WhyPanel match={selected} /> : null}
-          <div className="grid grid-cols-2 gap-2">
-            {supportStats(selected).map((stat) => (
-              <div
-                key={stat.label}
-                className="rounded-xl border border-[#1e2538] bg-[#0d121f] px-3 py-2.5"
-              >
-                <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-500">
-                  {stat.label}
-                </p>
-                <p className="mt-0.5 font-mono text-lg text-cyan-300">{stat.value}</p>
-              </div>
-            ))}
-          </div>
-          <Button
-            size="lg"
-            className="w-full"
-            onClick={() => {
-              hapticTap();
-              openExternal(OFFICIAL_SERVER_URL);
-            }}
-          >
-            Ver cuota en el Servidor Oficial
-            <ExternalLink className="h-4 w-4" />
-          </Button>
-          <button
-            type="button"
-            onClick={() => setChartsOpen((open) => !open)}
-            className="w-full text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500"
-          >
-            {chartsOpen ? "Ocultar gráficas" : "Análisis visual"}
-          </button>
-          {chartsOpen ? <MatchDetail match={selected} /> : null}
-        </div>
+      {featured ? (
+        <SignalCard match={featured} onWhy={() => openWhy(featured)} />
       ) : (
-        <p className="rounded-2xl border border-[#1e2538] bg-panel p-6 text-center text-sm text-zinc-500">
+        <p className="rounded-2xl border border-white/8 bg-[#121726] p-6 text-center text-sm text-slate-400">
           No hay señales disponibles ahora mismo.
         </p>
       )}
 
-      {live.length > 0 ? (
-        <SignalRail
-          title="Señales activas"
-          matches={live}
-          selectedId={selected?.id ?? null}
-          onSelect={openSignal}
-        />
+      {others.length > 0 ? (
+        <section className="space-y-2">
+          <h2 className="text-[11px] font-black uppercase tracking-[0.18em] text-orange-300">
+            Otras señales
+          </h2>
+          {others.map((match) => (
+            <SignalCard
+              key={match.id}
+              match={match}
+              compact
+              onSelect={() => openWhy(match)}
+            />
+          ))}
+        </section>
       ) : null}
 
-      {upcoming.length > 0 ? (
-        <SignalRail
-          title="Próximos"
-          matches={upcoming}
-          selectedId={selected?.id ?? null}
-          onSelect={openSignal}
-        />
-      ) : null}
+      <StreakBoard matches={matches} />
+      <MissionCard refreshKey={missionKey} />
+      <AiBattle matches={matches} onChoose={openWhy} />
 
-      {resolved.length > 0 ? (
-        <SignalRail
-          title="Resultados anteriores"
-          matches={resolved}
-          selectedId={selected?.id ?? null}
-          onSelect={openSignal}
-        />
+      <Button
+        size="lg"
+        className="w-full"
+        onClick={() => {
+          hapticTap();
+          openExternal(OFFICIAL_SERVER_URL);
+        }}
+      >
+        Ver cuota en el Servidor Oficial
+        <ExternalLink className="h-4 w-4" />
+      </Button>
+
+      {whyMatch ? (
+        <WhyPanel match={whyMatch} onClose={() => setWhyMatch(null)} />
       ) : null}
     </div>
-  );
-}
-
-function SignalRail({
-  title,
-  matches,
-  selectedId,
-  onSelect,
-}: {
-  title: string;
-  matches: MatchInsight[];
-  selectedId: number | null;
-  onSelect: (id: number) => void;
-}) {
-  return (
-    <section className="space-y-2">
-      <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
-        {title}
-      </h2>
-      <div className="space-y-2">
-        {matches.map((match) => (
-          <SignalCard
-            key={match.id}
-            match={match}
-            compact
-            active={match.id === selectedId}
-            onSelect={onSelect}
-          />
-        ))}
-      </div>
-    </section>
   );
 }

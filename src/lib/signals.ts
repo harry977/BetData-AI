@@ -9,9 +9,121 @@ export type WhyItem = {
 };
 
 export function confidenceBand(value: number) {
-  if (value >= 8) return "HIGH CONFIDENCE";
-  if (value >= 6.5) return "MEDIUM CONFIDENCE";
-  return "WATCH";
+  if (value >= 8) return "HIGH";
+  if (value >= 6) return "MEDIUM";
+  return "LOW";
+}
+
+export type SignalRarity = "STANDARD" | "STRONG" | "ELITE";
+
+export function signalRarity(value: number): SignalRarity {
+  if (value >= 9) return "ELITE";
+  if (value >= 8) return "STRONG";
+  return "STANDARD";
+}
+
+export function rarityTone(rarity: SignalRarity) {
+  if (rarity === "ELITE") return "text-violet-300 border-violet-400/40";
+  if (rarity === "STRONG") return "text-cyan-300 border-cyan-400/40";
+  return "text-emerald-300 border-emerald-500/30";
+}
+
+export type WhyMeter = { key: string; label: string; value: number };
+
+function clampMeter(value: number) {
+  return Math.max(0, Math.min(10, Number(value.toFixed(1))));
+}
+
+export function whyMeters(match: MatchInsight): WhyMeter[] {
+  const goals = match.metrics.xG.home + match.metrics.xG.away;
+  return [
+    { key: "form", label: "Form", value: clampMeter(match.hitRate / 10) },
+    {
+      key: "momentum",
+      label: "Momentum",
+      value: clampMeter(match.metrics.offensivePressure / 10),
+    },
+    { key: "goals", label: "Goals", value: clampMeter(goals * 3.2) },
+  ];
+}
+
+export type ResultTick = "win" | "loss";
+
+export type ResultBoard = {
+  ticks: ResultTick[];
+  streak: number;
+  hits: number;
+  total: number;
+  pct: number;
+  label: string;
+  lastFailed: boolean;
+};
+
+export function resultBoard(matches: MatchInsight[]): ResultBoard {
+  const todayResolved = matches
+    .filter((match) => match.day === "today" && match.result)
+    .slice()
+    .sort((a, b) => a.kickoffIso.localeCompare(b.kickoffIso));
+  const yesterday = resolvedSignals(matches)
+    .slice()
+    .sort((a, b) => a.kickoffIso.localeCompare(b.kickoffIso));
+  const source = todayResolved.length ? todayResolved : yesterday;
+  const ticks: ResultTick[] = source.map((match) =>
+    match.result?.won ? "win" : "loss",
+  );
+  let streak = 0;
+  for (let index = ticks.length - 1; index >= 0; index -= 1) {
+    if (ticks[index] !== "win") break;
+    streak += 1;
+  }
+  const hits = ticks.filter((tick) => tick === "win").length;
+  const total = ticks.length;
+  return {
+    ticks,
+    streak,
+    hits,
+    total,
+    pct: total ? Math.round((hits / total) * 100) : 0,
+    label: todayResolved.length ? "Today's signals" : "Yesterday's signals",
+    lastFailed: ticks.length > 0 && ticks[ticks.length - 1] === "loss",
+  };
+}
+
+export function scanCounts(matches: MatchInsight[]) {
+  const today = matches.filter((match) => match.day === "today");
+  return {
+    matches: today.length,
+    signals: today.filter((match) => isBanker(match.confidence)).length,
+  };
+}
+
+export function featuredSignal(
+  matches: MatchInsight[],
+  selectedId: number | null,
+) {
+  if (selectedId != null) {
+    const found = matches.find((match) => match.id === selectedId);
+    if (found) return found;
+  }
+  const live = activeSignals(matches);
+  if (live[0]) return live[0];
+  return topAiSignals(matches, 1)[0] ?? null;
+}
+
+export function battlePair(matches: MatchInsight[]) {
+  const top = topAiSignals(matches, 2);
+  if (top.length < 2) return null;
+  return {
+    left: top[0],
+    right: top[1],
+    winner: top[0].confidence >= top[1].confidence ? top[0] : top[1],
+  };
+}
+
+export function choosePool(matches: MatchInsight[], limit = 3) {
+  const live = activeSignals(matches).slice(0, limit);
+  if (live.length >= limit) return live;
+  return topAiSignals(matches, limit);
 }
 
 export function scoreLine(match: MatchInsight) {

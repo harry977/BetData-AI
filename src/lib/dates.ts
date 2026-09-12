@@ -26,3 +26,7 @@ export function formatKickoffLocal(iso: string) {
 export function calendarDayFromYmd(ymd: string) {
   return formatCalendarDay(`${ymd}T12:00:00.000Z`);
 }
+
+export function madridYmd(date = new Date()) {
+  return date.toLocaleDateString("en-CA", { timeZone: DISPLAY_TZ });
+}
