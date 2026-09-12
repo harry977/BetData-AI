@@ -15,6 +15,12 @@ import { PLATFORM_STATS } from "@/lib/constants";
 import type { DayBucket } from "@/lib/types";
 import { bankersOfTheDay, matchesForDay } from "@/lib/utils";
 
+const DAY_TITLES: Record<DayBucket, string> = {
+  today: "Pronósticos Gratis de Hoy",
+  tomorrow: "Pronósticos de Mañana",
+  yesterday: "Pronósticos de Ayer (Resueltos)",
+};
+
 type DashboardViewProps = {
   onLock?: () => void;
 };
@@ -68,10 +74,12 @@ export function DashboardView({ onLock }: DashboardViewProps) {
                 Inteligencia Predictiva con IA
               </p>
               <h1 className="text-xl font-semibold text-zinc-50 sm:text-2xl">
-                Pronósticos Gratis de Hoy
+                {DAY_TITLES[day]}
               </h1>
               <p className="mt-1 text-sm text-zinc-400">
-                Confianza de 1 a 10, Bankers por encima de 8 y registro público de aciertos.
+                {day === "yesterday"
+                  ? "Marcador final y badge de Acertado / Fallado para transparencia total."
+                  : "Confianza de 1 a 10, Bankers por encima de 8 y registro público de aciertos."}
               </p>
             </div>
 
