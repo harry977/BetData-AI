@@ -1,6 +1,4 @@
-import { defineConfig } from "@opennextjs/cloudflare";
-
-export default defineConfig({
+const config = {
   default: {
     override: {
       wrapper: "cloudflare-node",
@@ -10,4 +8,6 @@ export default defineConfig({
       queue: "dummy",
     },
   },
-});
+};
+
+export default config;
