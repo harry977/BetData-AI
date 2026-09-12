@@ -23,6 +23,7 @@ type TelegramLoginProps = {
   busy?: boolean;
   hint?: boolean;
   showBrowserButton?: boolean;
+  ctaLabel?: string;
   className?: string;
 };
 
@@ -37,6 +38,7 @@ export function TelegramLogin({
   busy = false,
   hint = true,
   showBrowserButton = true,
+  ctaLabel = "Entra con Telegram",
   className,
 }: TelegramLoginProps) {
   const [session, setSession] = useState<TelegramIdentity | null>(null);
@@ -177,7 +179,7 @@ export function TelegramLogin({
         onClick={() => void enter()}
       >
         {wait ? <Loader2 className="h-4 w-4 animate-spin" /> : <TelegramGlyph />}
-        {session ? `Entra con Telegram · ${session.label}` : "Entra con Telegram"}
+        {session ? `${ctaLabel} · ${session.label}` : ctaLabel}
       </Button>
 
       {!inTelegram && showBrowserButton ? (

@@ -105,10 +105,10 @@ export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
             {BRAND.name}
           </p>
           <h1 className="mt-3 text-[2rem] font-black leading-[1.12] tracking-tight text-zinc-50">
-            No le pagues más a los tipsters. La IA lo hace por ti.
+            Deja de regalar tu dinero a los tipsters. Pásate a la IA.
           </h1>
-          <p className="mx-auto mt-3 max-w-[22rem] text-[15px] leading-relaxed text-zinc-400">
-            Entra con Telegram, mira cómo lee los partidos y decide con datos. El resto es ruido.
+          <p className="mx-auto mt-3 max-w-[24rem] text-[15px] leading-relaxed text-zinc-400">
+            Obtén predicciones precisas en tiempo real basadas en datos, no en opiniones.
           </p>
 
           <div className="mx-auto mt-6 flex max-w-sm flex-col gap-2.5">
@@ -117,6 +117,7 @@ export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
               busy={activating}
               hint={false}
               showBrowserButton={false}
+              ctaLabel="Probar gratis en Telegram"
             />
             <Button
               size="lg"
