@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DashboardView } from "@/components/dashboard/dashboard-view";
 import { GatekeeperView } from "@/components/gatekeeper/gatekeeper-view";
+import { AppShell } from "@/components/layout/app-shell";
 import { BetDataLogo } from "@/components/brand/betdata-logo";
 import { clearUnlock, persistUnlock, readUnlockState } from "@/lib/storage";
 
@@ -28,11 +28,11 @@ export default function HomePage() {
 
   if (view === "boot") {
     return (
-      <div className="flex min-h-dvh items-center justify-center">
+      <div className="flex min-h-dvh items-center justify-center bg-navy">
         <div className="flex flex-col items-center gap-3">
           <BetDataLogo version />
           <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-zinc-500">
-            Inicializando BetData Engine...
+            Cargando BetData Engine...
           </p>
         </div>
       </div>
@@ -43,5 +43,5 @@ export default function HomePage() {
     return <GatekeeperView onUnlock={handleUnlock} />;
   }
 
-  return <DashboardView onLock={handleLock} />;
+  return <AppShell onLock={handleLock} />;
 }

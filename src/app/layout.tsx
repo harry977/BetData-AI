@@ -30,7 +30,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#020617",
+  themeColor: "#0b0e17",
   viewportFit: "cover",
 };
 
@@ -42,7 +42,7 @@ export default function RootLayout({
   return (
     <html lang="es" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-dvh bg-slate-950 font-sans text-zinc-100 antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} min-h-dvh bg-navy font-sans text-zinc-100 antialiased`}
       >
         <Script
           src="https://telegram.org/js/telegram-web-app.js"

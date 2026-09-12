@@ -32,7 +32,7 @@ export function XgChart({ match }: XgChartProps) {
       <CardHeader className="pb-2">
         <CardTitle className="text-zinc-300">Goles esperados (xG)</CardTitle>
       </CardHeader>
-      <CardContent className="h-52 pr-2">
+      <CardContent className="h-40 pr-2">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
             <CartesianGrid stroke="#27272a" strokeDasharray="3 3" />

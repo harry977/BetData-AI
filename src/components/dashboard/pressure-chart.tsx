@@ -26,7 +26,7 @@ export function PressureChart({ match }: PressureChartProps) {
       <CardHeader className="pb-2">
         <CardTitle className="text-zinc-300">Presión ofensiva</CardTitle>
       </CardHeader>
-      <CardContent className="h-52 pr-2">
+      <CardContent className="h-40 pr-2">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={match.metrics.pressureHistory}>
             <defs>

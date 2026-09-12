@@ -4,26 +4,26 @@
 
 @layer base {
   :root {
-    --background: 222 47% 4%;
-    --foreground: 240 6% 93%;
-    --card: 240 6% 7%;
-    --card-foreground: 240 6% 93%;
-    --popover: 240 6% 7%;
-    --popover-foreground: 240 6% 93%;
+    --background: 226 36% 7%;
+    --foreground: 210 40% 96%;
+    --card: 228 28% 10%;
+    --card-foreground: 210 40% 96%;
+    --popover: 228 28% 10%;
+    --popover-foreground: 210 40% 96%;
     --primary: 160 84% 39%;
-    --primary-foreground: 222 47% 6%;
-    --secondary: 240 5% 12%;
-    --secondary-foreground: 240 6% 93%;
-    --muted: 240 4% 16%;
-    --muted-foreground: 240 5% 65%;
+    --primary-foreground: 226 36% 7%;
+    --secondary: 227 24% 14%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 227 20% 16%;
+    --muted-foreground: 215 16% 65%;
     --accent: 187 94% 43%;
-    --accent-foreground: 222 47% 6%;
+    --accent-foreground: 226 36% 7%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 240 4% 16%;
-    --input: 240 4% 16%;
+    --border: 227 22% 18%;
+    --input: 227 22% 18%;
     --ring: 160 84% 39%;
-    --radius: 0.75rem;
+    --radius: 0.9rem;
   }
 
   * {
@@ -33,18 +33,23 @@
   html,
   body {
     min-height: 100%;
+    background-color: #0b0e17;
   }
 
   body {
-    @apply bg-slate-950 text-foreground;
+    @apply text-foreground;
     background-image:
-      radial-gradient(circle at top, rgba(16, 185, 129, 0.08), transparent 38%),
-      linear-gradient(180deg, #020617 0%, #09090b 100%);
+      radial-gradient(circle at top, rgba(16, 185, 129, 0.12), transparent 34%),
+      linear-gradient(180deg, #0b0e17 0%, #080b12 100%);
   }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .pb-nav {
+    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom));
   }
 }

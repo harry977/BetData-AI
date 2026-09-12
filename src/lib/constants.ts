@@ -28,9 +28,9 @@ export const RAPIDAPI_FOOTBALL = {
 } as const;
 
 export const ACTIVATION_STATUS = [
-  "Conectando con servidores de BetData AI...",
-  "Verificando sincronización de cuotas...",
-  "¡Acceso Concedido! Redirigiendo al Dashboard...",
+  "Conectando...",
+  "Sincronizando...",
+  "¡Acceso Concedido!",
 ] as const;
 
 export const ACTIVATION_STEP_MS = 1000;

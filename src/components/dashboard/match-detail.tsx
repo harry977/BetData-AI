@@ -32,28 +32,25 @@ export function MatchDetail({ match }: MatchDetailProps) {
               </Badge>
             ) : null}
           </div>
-          <h3 className="text-lg font-semibold text-zinc-50">
+          <h3 className="text-base font-semibold text-zinc-50">
             Mejor Tip: <span className="text-emerald-400">{match.bestTip}</span>{" "}
-            <span className="font-mono text-base text-emerald-300/80">
+            <span className="font-mono text-sm text-emerald-300/80">
               {formatOdds(match.odds.valueMarket)}
             </span>
           </h3>
-          <p className="text-sm leading-relaxed text-zinc-400">{match.formNote}</p>
-          <div className="grid gap-2 sm:grid-cols-3">
-            <Stat label="Goles esperados (xG)" value={`${match.metrics.xG.home.toFixed(2)} vs ${match.metrics.xG.away.toFixed(2)}`} />
+          <p className="text-[13px] leading-relaxed text-zinc-400">{match.formNote}</p>
+          <div className="grid grid-cols-3 gap-2">
             <Stat
-              label="Presión ofensiva"
-              value={`${match.metrics.offensivePressure}%`}
+              label="xG"
+              value={`${match.metrics.xG.home.toFixed(2)}/${match.metrics.xG.away.toFixed(2)}`}
             />
-            <Stat
-              label="Acierto histórico"
-              value={`${match.hitRate.toFixed(1)}%`}
-            />
+            <Stat label="Presión" value={`${match.metrics.offensivePressure}%`} />
+            <Stat label="Acierto" value={`${match.hitRate.toFixed(1)}%`} />
           </div>
           <ConfidenceBar value={match.confidence} />
         </CardContent>
       </Card>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3">
         <PressureChart match={match} />
         <XgChart match={match} />
       </div>
@@ -74,9 +71,9 @@ export function MatchDetail({ match }: MatchDetailProps) {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-3">
-      <p className="text-[10px] uppercase tracking-wide text-zinc-500">{label}</p>
-      <p className="font-mono text-sm text-cyan-300">{value}</p>
+    <div className="rounded-lg border border-[#1e2538] bg-[#080b12] p-2">
+      <p className="text-[9px] uppercase tracking-wide text-zinc-500">{label}</p>
+      <p className="font-mono text-[11px] text-cyan-300">{value}</p>
     </div>
   );
 }

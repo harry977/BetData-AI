@@ -26,8 +26,8 @@ export function bootstrapTelegram() {
       if (webApp) {
         webApp.ready();
         webApp.expand();
-        webApp.setHeaderColor?.("#020617");
-        webApp.setBackgroundColor?.("#020617");
+        webApp.setHeaderColor?.("#0b0e17");
+        webApp.setBackgroundColor?.("#0b0e17");
       }
       return;
     }
@@ -41,10 +41,10 @@ export function bootstrapTelegram() {
       miniAppReady();
     }
     if (setMiniAppBackgroundColor.isAvailable()) {
-      setMiniAppBackgroundColor("#020617");
+      setMiniAppBackgroundColor("#0b0e17");
     }
     if (setMiniAppHeaderColor.isAvailable()) {
-      setMiniAppHeaderColor("#020617");
+      setMiniAppHeaderColor("#0b0e17");
     }
     if (mountViewport.isAvailable()) {
       void mountViewport();

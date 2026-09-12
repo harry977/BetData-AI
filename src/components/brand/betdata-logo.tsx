@@ -49,7 +49,7 @@ export function BetDataLogo({
               </span>
             ) : null}
           </p>
-          <p className="max-w-[210px] truncate text-[10px] uppercase tracking-[0.12em] text-zinc-500 sm:max-w-none">
+          <p className="max-w-[140px] truncate text-[10px] uppercase tracking-[0.12em] text-zinc-500">
             {BRAND.tagline}
           </p>
         </div>

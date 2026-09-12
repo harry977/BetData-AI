@@ -26,7 +26,7 @@ La app queda en [http://127.0.0.1:43141](http://127.0.0.1:43141).
 
 1. **Activación** — crear cuenta en el Servidor Oficial Integrado, depósito de activación e ID/correo.
 2. **Simulación visual** (3s, tres estados) → `isUnlocked=true` en `localStorage` y entrada al dashboard.
-3. **Dashboard** — stats de acierto, boleto del día, pestañas Hoy / Mañana / Ayer y tabla de pronósticos.
+3. **Dashboard mobile** — ticker de aciertos, Bankers, Partidos (Hoy/Mañana/Ayer), Bet Builder y barra inferior.
 
 Para volver al gatekeeper usa *Cerrar sesión*.
 

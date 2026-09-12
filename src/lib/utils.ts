@@ -55,3 +55,7 @@ export function bankersOfTheDay(matches: MatchInsight[]) {
 export function matchesForDay(matches: MatchInsight[], day: DayBucket) {
   return matches.filter((match) => match.day === day);
 }
+
+export function recentHits(matches: MatchInsight[]) {
+  return matches.filter((match) => match.day === "yesterday" && match.result?.won);
+}
