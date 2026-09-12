@@ -60,10 +60,10 @@ export function AppShell({ onLock }: AppShellProps) {
           liveMode && "hidden lg:block",
         )}
       >
-        <div className="mx-auto flex max-w-md items-center justify-between gap-2 px-3 py-2 lg:max-w-lg lg:gap-3 lg:px-4 lg:py-2.5">
-          <BetDataLogo className="min-w-0 max-w-[58%]" />
+        <div className="mx-auto flex max-w-md items-center justify-between gap-2 px-3 py-2 lg:max-w-lg lg:gap-2 lg:px-4 lg:py-2.5">
+          <BetDataLogo className="shrink-0" />
           <HeaderNav value={tab} onChange={setTab} />
-          <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-300 lg:text-[11px]">
+          <span className="shrink-0 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-300 lg:text-[11px]">
             {liveCount > 0 ? `${liveCount} en juego` : "IA activa"}
           </span>
         </div>

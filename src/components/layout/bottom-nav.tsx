@@ -18,7 +18,7 @@ type BottomNavProps = {
 
 export function HeaderNav({ value, onChange }: BottomNavProps) {
   return (
-    <div className="hidden items-center gap-1 lg:flex">
+    <div className="hidden min-w-0 items-center gap-0.5 lg:flex">
       {NAV_ITEMS.map((item) => {
         const active = item.id === value;
         const live = item.id === "live";
@@ -28,7 +28,7 @@ export function HeaderNav({ value, onChange }: BottomNavProps) {
             type="button"
             onClick={() => onChange(item.id)}
             className={cn(
-              "rounded-full px-3 py-1.5 text-[12px] font-black uppercase tracking-[0.12em]",
+              "whitespace-nowrap rounded-full px-2 py-1.5 text-[11px] font-black uppercase tracking-[0.08em]",
               active
                 ? live
                   ? "bg-rose-500/15 text-rose-300"

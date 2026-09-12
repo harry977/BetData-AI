@@ -45,7 +45,7 @@ export function BetDataLogo({
         className="h-8 w-auto shrink-0 object-contain object-left drop-shadow-[0_0_12px_rgba(0,230,118,0.4)] lg:h-9"
       />
       {withWordmark ? (
-        <p className="truncate text-[12px] font-black uppercase leading-none tracking-[0.16em] text-[#7CFF9A] lg:text-[13px]">
+        <p className="whitespace-nowrap text-[12px] font-black uppercase leading-none tracking-[0.12em] text-[#7CFF9A] lg:text-[13px]">
           BetData IA
           {version ? (
             <span className="ml-1.5 font-mono text-[10px] font-medium tracking-normal text-emerald-400">
