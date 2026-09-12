@@ -37,8 +37,7 @@ export const WELCOME_BONUS = {
 } as const;
 
 export const SIGNAL_CTA = {
-  hint: "🎁 Promoción de bienvenida disponible para nuevos usuarios (Hasta 500€)",
-  label: "VER SEÑAL Y COMPROBAR CUOTAS",
+  label: "Comprobar cuotas ⚽",
 } as const;
 
 export const RAPIDAPI_FOOTBALL = {
