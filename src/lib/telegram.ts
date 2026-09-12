@@ -88,14 +88,52 @@ export function hapticTap() {
   window.Telegram?.WebApp?.HapticFeedback?.impactOccurred("medium");
 }
 
-export function readTelegramUser() {
-  if (typeof window === "undefined") return null;
-  const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
-  if (!user?.id) return null;
+export type TelegramIdentity = {
+  id: number;
+  label: string;
+  username?: string;
+  firstName?: string;
+  photoUrl?: string;
+};
+
+export function identityFromTelegramUser(user: {
+  id: number;
+  username?: string;
+  first_name?: string;
+  photo_url?: string;
+}): TelegramIdentity {
   const label = user.username
     ? `@${user.username}`
     : user.first_name || `Telegram ${user.id}`;
-  return { id: user.id, label };
+  return {
+    id: user.id,
+    label,
+    username: user.username,
+    firstName: user.first_name,
+    photoUrl: user.photo_url,
+  };
+}
+
+export function readTelegramInitData() {
+  if (typeof window === "undefined") return "";
+  return window.Telegram?.WebApp?.initData ?? "";
+}
+
+export function readTelegramUser(): TelegramIdentity | null {
+  if (typeof window === "undefined") return null;
+  const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  if (!user?.id) return null;
+  return identityFromTelegramUser(user);
+}
+
+export function isTelegramMiniApp() {
+  if (typeof window === "undefined") return false;
+  try {
+    if (isTMA()) return true;
+  } catch {
+    // preview en navegador
+  }
+  return Boolean(window.Telegram?.WebApp?.initDataUnsafe?.user || window.Telegram?.WebApp?.initData);
 }
 
 export function hapticSuccess() {
@@ -123,11 +161,13 @@ declare global {
           impactOccurred: (style: "light" | "medium" | "heavy") => void;
           notificationOccurred: (type: "error" | "success" | "warning") => void;
         };
+        initData?: string;
         initDataUnsafe?: {
           user?: {
             id: number;
             username?: string;
             first_name?: string;
+            photo_url?: string;
           };
         };
       };

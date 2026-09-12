@@ -45,6 +45,18 @@ export const RAPIDAPI_SPORT = {
   base: "https://sportapi7.p.rapidapi.com",
 } as const;
 
+export const TELEGRAM_BOT_USERNAME =
+  process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME?.replace(/^@/, "") ?? "";
+
+export const TELEGRAM_MINI_APP =
+  process.env.NEXT_PUBLIC_TELEGRAM_MINI_APP ?? "";
+
+export const TELEGRAM_OPEN_URL = TELEGRAM_BOT_USERNAME
+  ? TELEGRAM_MINI_APP
+    ? `https://t.me/${TELEGRAM_BOT_USERNAME}/${TELEGRAM_MINI_APP}`
+    : `https://t.me/${TELEGRAM_BOT_USERNAME}`
+  : "https://t.me";
+
 export const ACTIVATION_STATUS = [
   "Abriendo el vestuario…",
   "La IA está calentando…",

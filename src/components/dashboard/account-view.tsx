@@ -57,10 +57,10 @@ export function AccountView({
 
       <section className="rounded-2xl border border-[#1e2538] bg-panel p-4">
         <p className="text-[10px] uppercase tracking-[0.16em] text-zinc-500">
-          Perfil
+          Perfil de Telegram
         </p>
         <p className="mt-1 truncate text-base font-semibold text-zinc-50">
-          {accountId || "Sesión en este móvil"}
+          {accountId || "Cuenta de Telegram"}
         </p>
         <p className="mt-2 text-[13px] text-slate-400">
           Tu racha: {userStreak} día{userStreak === 1 ? "" : "s"} · misión {missionDone}/3

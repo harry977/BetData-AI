@@ -14,6 +14,8 @@ const buttonVariants = cva(
           "border border-zinc-700 bg-zinc-900/60 text-zinc-100 hover:bg-zinc-800 hover:border-zinc-600",
         ghost: "text-zinc-300 hover:bg-zinc-800/80 hover:text-white",
         signal: "bg-cyan-500 text-slate-950 shadow-signal hover:bg-cyan-400",
+        telegram:
+          "bg-[#2AABEE] text-white shadow-[0_0_24px_rgba(42,171,238,0.35)] hover:bg-[#229ED9]",
         destructive: "bg-red-600 text-white hover:bg-red-500",
       },
       size: {
