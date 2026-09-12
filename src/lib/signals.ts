@@ -179,9 +179,7 @@ export function alertPool(matches: MatchInsight[]) {
 }
 
 export function livePlaylist(matches: MatchInsight[]) {
-  const live = activeSignals(matches);
-  if (live.length) return live;
-  return upcomingSignals(matches).slice(0, 12);
+  return activeSignals(matches);
 }
 
 export function whyItems(match: MatchInsight): WhyItem[] {

@@ -41,7 +41,7 @@ Para volver a la landing usa *Cerrar sesión*.
 
 ## RapidAPI (SportAPI / SofaScore)
 
-Sin `RAPIDAPI_KEY`, `/api/fixtures` sirve el mock de `src/lib/mocks/fixtures.ts`.
+`/api/fixtures` pide los partidos del día (`YYYY-MM-DD` UTC) a RapidAPI, con `timezone=Europe/Madrid` en API-Football. Sin clave, sin cuota o sin partidos, la app muestra un estado vacío — nunca datos de prueba.
 
 ```bash
 # .env.local

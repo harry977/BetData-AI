@@ -138,7 +138,7 @@ export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
             <Skeleton className="h-8 w-48" />
             <Skeleton className="h-40 w-full rounded-2xl" />
           </div>
-        ) : (
+        ) : today.length || tomorrow.length || yesterday.length ? (
           <>
             <OptinTipsTable
               title="Adelanto de hoy"
@@ -160,6 +160,10 @@ export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
               onEnter={() => scrollTo("entrar")}
             />
           </>
+        ) : (
+          <p className="px-4 text-center text-sm leading-relaxed text-gray-300">
+            Sin partidos en directo en este momento. Entra para ver la jornada de hoy en cuanto llegue el feed.
+          </p>
         )}
 
         {yesterday.length > 0 ? (

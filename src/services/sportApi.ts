@@ -55,6 +55,7 @@ export type SportTeam = {
   name: string;
   shortName: string;
   nameCode: string;
+  logo?: string;
 };
 
 export type SportEvent = {
@@ -72,6 +73,7 @@ export type SportEvent = {
   country: string;
   countryFlag?: string;
   uniqueTournamentId?: number;
+  leagueLogo?: string;
 };
 
 export type MarketOdds = {
@@ -185,7 +187,8 @@ function teamFromUnknown(value: unknown): SportTeam {
   const name = asString(row.name, "Equipo");
   const shortName = asString(row.shortName, name);
   const nameCode = asString(row.nameCode, shortName.slice(0, 3).toUpperCase());
-  return { id, name, shortName, nameCode };
+  const logo = asString(row.logo) || asString(row.image) || undefined;
+  return { id, name, shortName, nameCode, logo };
 }
 
 function scoreFromUnknown(value: unknown): number | null {

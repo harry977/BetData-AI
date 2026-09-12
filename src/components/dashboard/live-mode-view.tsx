@@ -74,10 +74,10 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
           En directo
         </p>
         <h2 className="mt-3 text-2xl font-black uppercase leading-tight text-white">
-          No hay partidos en curso
+          Sin partidos en directo en este momento
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-slate-400">
-          Cuando arranque uno, aquí verás marcador, minuto y la señal con datos. Mientras, revisa la próxima jornada en Hoy.
+          Cuando arranque uno, aquí verás marcador, minuto y la señal. Mientras, en Hoy están los próximos de la jornada.
         </p>
       </div>
     );
