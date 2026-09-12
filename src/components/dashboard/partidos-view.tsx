@@ -38,12 +38,11 @@ export function PartidosView({
   return (
     <div className="space-y-3">
       <div>
-        <h1 className="text-[15px] font-semibold uppercase tracking-wide text-zinc-50">
-          Hoy · Pronósticos de fútbol de hoy
+        <h1 className="text-[1.35rem] font-semibold tracking-tight text-zinc-50">
+          Partidos
         </h1>
-        <p className="mt-1 text-[13px] leading-relaxed text-zinc-400">
-          Obtén los pronósticos de fútbol de hoy de BetData AI. Cubrimos todos los
-          partidos y todas las ligas.
+        <p className="mt-1 text-[13px] leading-relaxed text-zinc-500">
+          Calendario del día, agrupado por liga. Cada evento lleva su Mejor Pronóstico.
         </p>
       </div>
       <div role="tablist" className="grid grid-cols-2 gap-1 rounded-xl bg-[#080b12] p-1">

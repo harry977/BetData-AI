@@ -22,6 +22,25 @@ export function readUnlockState() {
   return { unlocked, accountId };
 }
 
+export function readViewedSignals(): number[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEYS.viewedSignals);
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((id): id is number => typeof id === "number");
+  } catch {
+    return [];
+  }
+}
+
+export function recordViewedSignal(id: number) {
+  if (typeof window === "undefined") return;
+  const next = [id, ...readViewedSignals().filter((item) => item !== id)].slice(0, 24);
+  window.localStorage.setItem(STORAGE_KEYS.viewedSignals, JSON.stringify(next));
+}
+
 export function persistUnlock(accountId: string) {
   window.localStorage.setItem(STORAGE_KEYS.unlocked, "true");
   window.localStorage.setItem(STORAGE_KEYS.accountId, accountId);

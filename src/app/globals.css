@@ -52,4 +52,8 @@
   .pb-nav {
     padding-bottom: calc(4.75rem + env(safe-area-inset-bottom));
   }
+
+  .live-stage {
+    height: 100dvh;
+  }
 }

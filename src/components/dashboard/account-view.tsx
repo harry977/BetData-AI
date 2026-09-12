@@ -1,47 +1,142 @@
 "use client";
 
-import { Shield } from "lucide-react";
-import { BetDataLogo } from "@/components/brand/betdata-logo";
+import { useEffect, useMemo, useState } from "react";
+import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PLATFORM_STATS } from "@/lib/constants";
+import { resolvedSignals } from "@/lib/signals";
+import { readViewedSignals } from "@/lib/storage";
+import type { MatchInsight } from "@/lib/types";
 import { formatPercent } from "@/lib/utils";
 
 type AccountViewProps = {
   accountId: string;
+  matches: MatchInsight[];
   onLock: () => void;
+  onOpenSignal: (id: number) => void;
 };
 
-export function AccountView({ accountId, onLock }: AccountViewProps) {
+export function AccountView({
+  accountId,
+  matches,
+  onLock,
+  onOpenSignal,
+}: AccountViewProps) {
+  const history = useMemo(() => resolvedSignals(matches).slice(0, 6), [matches]);
+  const [viewed, setViewed] = useState<MatchInsight[]>([]);
+  useEffect(() => {
+    const ids = readViewedSignals();
+    setViewed(
+      ids
+        .map((id) => matches.find((match) => match.id === id))
+        .filter((match): match is MatchInsight => Boolean(match))
+        .slice(0, 6),
+    );
+  }, [matches]);
+
   return (
-    <div className="space-y-4">
-      <BetDataLogo version />
-      <div className="rounded-xl border border-[#1e2538] bg-panel p-4">
-        <p className="text-[11px] uppercase tracking-wide text-zinc-500">Cuenta vinculada</p>
-        <p className="mt-1 text-sm font-semibold text-zinc-50">
+    <div className="space-y-6">
+      <header>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-400">
+          Mi BetData
+        </p>
+        <h1 className="mt-1 text-[1.65rem] font-semibold tracking-tight text-zinc-50">
+          Cuenta
+        </h1>
+      </header>
+
+      <section className="rounded-2xl border border-[#1e2538] bg-panel p-4">
+        <p className="text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+          Cuenta vinculada
+        </p>
+        <p className="mt-1 text-base font-semibold text-zinc-50">
           {accountId || "Sesión activa en este dispositivo"}
         </p>
-        <p className="mt-2 text-[13px] text-zinc-400">
-          Motor desbloqueado. Los pronósticos usan el Modelo BetData Engine.
-        </p>
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <div className="rounded-xl border border-[#1e2538] bg-panel p-3">
-          <p className="text-[10px] uppercase text-zinc-500">Acierto Banker</p>
-          <p className="font-mono text-lg text-emerald-300">
-            {formatPercent(PLATFORM_STATS.bankerHitRate, 1)}
-          </p>
-        </div>
-        <div className="rounded-xl border border-[#1e2538] bg-panel p-3">
-          <p className="text-[10px] uppercase text-zinc-500">Ligas</p>
-          <p className="font-mono text-lg text-emerald-300">
-            +{PLATFORM_STATS.leaguesMonitored}
-          </p>
-        </div>
-      </div>
+      </section>
+
+      <section className="grid grid-cols-2 gap-2">
+        <Stat label="Acierto bankers" value={formatPercent(PLATFORM_STATS.bankerHitRate, 1)} />
+        <Stat label="Ligas" value={`+${PLATFORM_STATS.leaguesMonitored}`} />
+      </section>
+
+      <HistoryList
+        title="Historial"
+        empty="Aún no hay pronósticos resueltos."
+        matches={history}
+        onOpen={onOpenSignal}
+      />
+
+      <HistoryList
+        title="Señales consultadas"
+        empty="Abre un análisis para guardarlo aquí."
+        matches={viewed}
+        onOpen={onOpenSignal}
+      />
+
       <Button variant="outline" className="w-full" onClick={onLock}>
-        <Shield className="h-4 w-4" />
+        <LogOut className="h-4 w-4" />
         Cerrar sesión
       </Button>
     </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-[#1e2538] bg-panel px-3 py-3">
+      <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-500">{label}</p>
+      <p className="mt-1 font-mono text-xl text-emerald-300">{value}</p>
+    </div>
+  );
+}
+
+function HistoryList({
+  title,
+  empty,
+  matches,
+  onOpen,
+}: {
+  title: string;
+  empty: string;
+  matches: MatchInsight[];
+  onOpen: (id: number) => void;
+}) {
+  return (
+    <section className="space-y-2">
+      <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+        {title}
+      </h2>
+      {matches.length === 0 ? (
+        <p className="text-[13px] text-zinc-600">{empty}</p>
+      ) : (
+        <ul className="space-y-1.5">
+          {matches.map((match) => (
+            <li key={`${title}-${match.id}`}>
+              <button
+                type="button"
+                onClick={() => onOpen(match.id)}
+                className="flex w-full items-center justify-between rounded-xl border border-[#1e2538] bg-panel px-3 py-2.5 text-left"
+              >
+                <span className="min-w-0">
+                  <span className="block truncate text-[13px] font-semibold uppercase text-zinc-100">
+                    {match.home.code} — {match.away.code}
+                  </span>
+                  <span className="text-[12px] text-emerald-400">{match.bestTip}</span>
+                </span>
+                {match.result ? (
+                  <span
+                    className={`text-[11px] font-semibold uppercase ${
+                      match.result.won ? "text-emerald-300" : "text-red-300"
+                    }`}
+                  >
+                    {match.result.won ? "Acertado" : "Fallado"}
+                  </span>
+                ) : null}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }

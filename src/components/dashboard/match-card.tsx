@@ -51,11 +51,11 @@ export function MatchCard({ match, day, active = false, onSelect }: MatchCardPro
           </>
         ) : (
           <>
-            <p className="text-[11px] font-semibold leading-tight text-emerald-400">
+            <p className="text-[15px] font-semibold leading-tight text-emerald-400">
               {match.bestTip}
             </p>
             <p className="text-[10px] text-zinc-500">{formatOdds(match.odds.valueMarket)}</p>
-            <p className="mt-1 font-mono text-xs text-emerald-300">
+            <p className="mt-1 font-mono text-sm text-zinc-50">
               {formatConfidence(match.confidence)}
             </p>
             {banker ? (

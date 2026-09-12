@@ -39,8 +39,10 @@ export function BetBuilderView({ matches }: BetBuilderViewProps) {
   return (
     <div className="space-y-3">
       <div>
-        <h1 className="text-xl font-semibold text-zinc-50">Bet Builder</h1>
-        <p className="mt-1 text-[13px] text-zinc-400">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
+          Bet Builder
+        </h2>
+        <p className="mt-1 text-[13px] text-zinc-500">
           Combina Mejor Tips de hoy. Toca un partido para sumarlo al boleto.
         </p>
       </div>
