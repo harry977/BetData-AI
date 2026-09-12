@@ -341,7 +341,7 @@ export async function fetchAllScheduledEvents(date: string): Promise<SportEvent[
 }
 
 export async function fetchLiveEvents(): Promise<SportEvent[]> {
-  const path = `/api/v1/sport/football/events-live`;
+  const path = `/api/v1/sport/football/events/live`;
   const json = await sportGet(path, 20_000);
   return parseEventList(json);
 }

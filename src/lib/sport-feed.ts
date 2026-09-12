@@ -1,10 +1,15 @@
 import { PLATFORM_STATS } from "@/lib/constants";
 import { utcDateOffset } from "@/lib/dates";
 import { MOCK_FIXTURES } from "@/lib/mocks/fixtures";
-import { isPriorityLive, mergeLiveEvent, toMatchInsight } from "@/lib/sport-mapper";
+import {
+  dayBucketFor,
+  isLowQualityLive,
+  isPriorityLive,
+  mergeLiveEvent,
+  toMatchInsight,
+} from "@/lib/sport-mapper";
 import type { FixturesPayload, MatchInsight, SportCategory } from "@/lib/types";
 import {
-  fetchAllScheduledEvents,
   fetchBulkOdds,
   fetchCategories,
   fetchLiveEvents,
@@ -16,8 +21,14 @@ import {
   type SportEvent,
 } from "@/services/sportApi";
 
-const FEED_TTL_MS = 120_000;
-let feedCache: { key: string; savedAt: number; payload: FixturesPayload } | null = null;
+const FEED_TTL_MS = 15_000;
+const FEED_FAIL_TTL_MS = 60_000;
+let feedCache: {
+  key: string;
+  savedAt: number;
+  ttl: number;
+  payload: FixturesPayload;
+} | null = null;
 let categoryMemory: { date: string; savedAt: number; categories: SportCategory[] } | null =
   null;
 const CATEGORY_TTL_MS = 30 * 60 * 1000;
@@ -73,14 +84,7 @@ function uniqueEvents(events: SportEvent[]) {
 }
 
 async function eventsForDate(date: string, categories: SportCategory[]) {
-  try {
-    const bulk = await fetchAllScheduledEvents(date);
-    if (bulk.length) return uniqueEvents(bulk);
-  } catch {
-    /* category fan-out */
-  }
-
-  const selected = selectPriorityCategories(categories, 4);
+  const selected = selectPriorityCategories(categories, 8);
   const collected: SportEvent[] = [];
   for (const category of selected) {
     try {
@@ -112,15 +116,8 @@ function defaultOdds(): EventOdds {
   };
 }
 
-function withMockFallback(apiMatches: MatchInsight[]): MatchInsight[] {
-  if (apiMatches.length === 0) return MOCK_FIXTURES;
-  const merged = [...apiMatches];
-  for (const day of ["today", "tomorrow", "yesterday"] as const) {
-    if (!merged.some((match) => match.day === day)) {
-      merged.push(...MOCK_FIXTURES.filter((match) => match.day === day));
-    }
-  }
-  return merged;
+function withApiOrMock(apiMatches: MatchInsight[]): MatchInsight[] {
+  return apiMatches.length ? apiMatches : MOCK_FIXTURES;
 }
 
 function leagueBoost(match: MatchInsight) {
@@ -152,13 +149,15 @@ function capMatches(matches: MatchInsight[]) {
     (match.isBanker ? 8 : 0);
   const take = (rows: MatchInsight[], limit: number) =>
     rows.slice().sort((a, b) => rank(b) - rank(a)).slice(0, limit);
-  return [...take(byDay.today, 48), ...take(byDay.tomorrow, 16), ...take(byDay.yesterday, 16)];
+  return [...take(byDay.today, 48), ...take(byDay.tomorrow, 32), ...take(byDay.yesterday, 16)];
 }
 
 export async function getFixturesFeed(cachedCategoryIds?: number[]): Promise<FixturesPayload> {
   const today = utcDateOffset(0);
+  const tomorrow = utcDateOffset(1);
+  const yesterday = utcDateOffset(-1);
   const cacheKey = `${today}:${(cachedCategoryIds ?? []).join(",")}`;
-  if (feedCache && feedCache.key === cacheKey && Date.now() - feedCache.savedAt < FEED_TTL_MS) {
+  if (feedCache && feedCache.key === cacheKey && Date.now() - feedCache.savedAt < feedCache.ttl) {
     return feedCache.payload;
   }
 
@@ -168,34 +167,48 @@ export async function getFixturesFeed(cachedCategoryIds?: number[]): Promise<Fix
 
   try {
     const categories = await categoriesForDate(today, cachedCategoryIds);
-    const todayEvents = await eventsForDate(today, categories);
-    const liveEvents = await fetchLiveEvents().catch(() => [] as SportEvent[]);
+    const [todayEvents, tomorrowEvents, yesterdayEvents, liveEvents] = await Promise.all([
+      eventsForDate(today, categories),
+      eventsForDate(tomorrow, categories).catch(() => [] as SportEvent[]),
+      eventsForDate(yesterday, categories).catch(() => [] as SportEvent[]),
+      fetchLiveEvents().catch(() => [] as SportEvent[]),
+    ]);
 
+    const scheduled = uniqueEvents([...todayEvents, ...tomorrowEvents, ...yesterdayEvents]);
     const liveById = new Map(liveEvents.map((event) => [event.id, event]));
-    const mergedToday = todayEvents.map((event) => {
+    const merged = scheduled.map((event) => {
       const live = liveById.get(event.id);
       return live ? mergeLiveEvent(event, live) : event;
     });
     for (const live of liveEvents) {
-      if (!mergedToday.some((event) => event.id === live.id) && isPriorityLive(live)) {
-        mergedToday.push(live);
-      }
+      if (merged.some((event) => event.id === live.id)) continue;
+      if (isLowQualityLive(live) && !isPriorityLive(live)) continue;
+      merged.push(live);
     }
 
-    if (mergedToday.length === 0) {
+    if (merged.length === 0) {
       const fallback = payload("mock", MOCK_FIXTURES, categories);
-      feedCache = { key: cacheKey, savedAt: Date.now(), payload: fallback };
+      feedCache = { key: cacheKey, savedAt: Date.now(), ttl: FEED_FAIL_TTL_MS, payload: fallback };
       return fallback;
     }
 
-    const oddsToday = await oddsMapFor(today);
-    const mapped = mergedToday.map((event) =>
-      toMatchInsight(event, oddsToday.get(event.id) ?? defaultOdds(), today),
-    );
-    const next = payload("sportapi", capMatches(withMockFallback(mapped)), categories);
-    feedCache = { key: cacheKey, savedAt: Date.now(), payload: next };
+    const [oddsToday, oddsTomorrow] = await Promise.all([
+      oddsMapFor(today),
+      oddsMapFor(tomorrow).catch(() => new Map<number, EventOdds>()),
+    ]);
+
+    const mapped = merged.map((event) => {
+      const day = dayBucketFor(event.startTimestamp, today);
+      const odds =
+        (day === "tomorrow" ? oddsTomorrow : oddsToday).get(event.id) ?? defaultOdds();
+      return toMatchInsight(event, odds, today);
+    });
+    const next = payload("sportapi", capMatches(withApiOrMock(mapped)), categories);
+    feedCache = { key: cacheKey, savedAt: Date.now(), ttl: FEED_TTL_MS, payload: next };
     return next;
   } catch {
-    return payload("mock", MOCK_FIXTURES, categoryMemory?.categories ?? []);
+    const fallback = payload("mock", MOCK_FIXTURES, categoryMemory?.categories ?? []);
+    feedCache = { key: cacheKey, savedAt: Date.now(), ttl: FEED_FAIL_TTL_MS, payload: fallback };
+    return fallback;
   }
 }

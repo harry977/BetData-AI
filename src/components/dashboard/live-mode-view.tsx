@@ -19,7 +19,7 @@ type LiveModeViewProps = {
   onSelect: (id: number) => void;
 };
 
-const BEATS = ["EN DIRECTO", "SEÑAL ACTIVA", "LA IA ESTÁ DENTRO", "NUEVA LECTURA"] as const;
+const BEATS = ["EN DIRECTO", "DATOS EN VIVO", "NUEVA LECTURA", "SEÑAL ACTIVA"] as const;
 
 export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProps) {
   const playlist = useMemo(() => livePlaylist(matches), [matches]);
@@ -73,10 +73,10 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
           En directo
         </p>
         <h2 className="mt-3 text-2xl font-black uppercase leading-tight text-white">
-          Ahora mismo el balón está parado
+          No hay partidos en curso
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-slate-400">
-          No hay partidos en juego. Cuando arranque uno, aquí verás el marcador, el minuto y la señal de la IA.
+          Cuando arranque uno, aquí verás marcador, minuto y la señal con datos. Mientras, revisa la próxima jornada en Hoy.
         </p>
       </div>
     );
@@ -101,7 +101,7 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
         </p>
         <AnimatePresence mode="wait">
           <motion.p
-            key={beat}
+            key={live ? beat : "upcoming"}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
@@ -110,8 +110,7 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
               live ? "text-rose-400" : "text-emerald-300",
             )}
           >
-            {live ? "● " : ""}
-            {beat}
+            {live ? `● ${beat}` : "PRÓXIMA JORNADA"}
           </motion.p>
         </AnimatePresence>
       </header>

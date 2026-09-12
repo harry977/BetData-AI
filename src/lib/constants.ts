@@ -36,6 +36,11 @@ export const WELCOME_BONUS = {
     "Actívalo con tu primer depósito y úsalo en los mercados de la Liga BBVA.",
 } as const;
 
+export const SIGNAL_CTA = {
+  hint: "🎁 Promoción de bienvenida disponible para nuevos usuarios (Hasta 500€)",
+  label: "VER SEÑAL Y COMPROBAR CUOTAS",
+} as const;
+
 export const RAPIDAPI_FOOTBALL = {
   host: "api-football-v1.p.rapidapi.com",
   liveFixtures: "https://api-football-v1.p.rapidapi.com/v3/fixtures?live=all",

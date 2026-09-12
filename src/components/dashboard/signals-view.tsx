@@ -34,14 +34,19 @@ export function SignalsView({
     () => featuredSignal(matches, selectedId),
     [matches, selectedId],
   );
+  const liveNow = useMemo(() => activeSignals(matches), [matches]);
   const todayRest = useMemo(() => {
     return matchesForDay(matches, "today")
       .filter((match) => match.id !== featured?.id)
-      .sort((a, b) => b.confidence - a.confidence);
-  }, [matches, featured]);
-  const liveNow = useMemo(() => activeSignals(matches), [matches]);
+      .filter((match) => match.status === "NS" || match.status === "LIVE" || match.status === "HT")
+      .filter((match) => !liveNow.some((live) => live.id === match.id))
+      .sort((a, b) => a.kickoffIso.localeCompare(b.kickoffIso));
+  }, [matches, featured, liveNow]);
   const tomorrow = useMemo(
-    () => matches.filter((match) => match.day === "tomorrow").slice(0, 4),
+    () =>
+      matches
+        .filter((match) => match.day === "tomorrow" && match.status === "NS")
+        .sort((a, b) => a.kickoffIso.localeCompare(b.kickoffIso)),
     [matches],
   );
   const counts = useMemo(() => scanCounts(matches), [matches]);
@@ -83,47 +88,60 @@ export function SignalsView({
 
       <header>
         <p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-400">
-          Jornada de hoy
+          Datos en vivo
         </p>
-        <h1 className="mt-1 text-[1.7rem] font-black uppercase leading-none tracking-tight text-white">
-          La IA ya tiene el partido
+        <h1 className="mt-1 text-[1.55rem] font-black uppercase leading-none tracking-tight text-white">
+          En curso y próxima jornada
         </h1>
       </header>
 
       <MissionCard refreshKey={missionKey} />
 
       {liveNow.length > 0 ? (
-        <button
-          type="button"
-          onClick={() => onOpenLive(liveNow[0].id)}
-          className="flex w-full items-center justify-between rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-left"
-        >
-          <span>
-            <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-rose-300">
-              En juego ahora
+        <section className="space-y-2">
+          <button
+            type="button"
+            onClick={() => onOpenLive(liveNow[0].id)}
+            className="flex w-full items-center justify-between rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-left"
+          >
+            <span>
+              <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-rose-300">
+                En juego ahora · {liveNow.length}
+              </span>
+              <span className="mt-1 block text-sm font-black uppercase text-white">
+                {liveNow[0].home.code} — {liveNow[0].away.code}
+              </span>
             </span>
-            <span className="mt-1 block text-sm font-black uppercase text-white">
-              {liveNow[0].home.code} — {liveNow[0].away.code}
+            <span className="text-[11px] font-black uppercase tracking-[0.14em] text-rose-300">
+              Ver directo →
             </span>
-          </span>
-          <span className="text-[11px] font-black uppercase tracking-[0.14em] text-rose-300">
-            Ver directo →
-          </span>
-        </button>
+          </button>
+          {liveNow
+            .filter((match) => match.id !== featured?.id)
+            .slice(0, 8)
+            .map((match) => (
+            <SignalCard
+              key={match.id}
+              match={match}
+              compact
+              onSelect={() => openWhy(match)}
+            />
+          ))}
+        </section>
       ) : null}
 
       {featured ? (
         <SignalCard match={featured} onWhy={() => openWhy(featured)} />
       ) : (
         <p className="rounded-2xl border border-white/8 bg-[#121726] p-6 text-center text-sm text-slate-400">
-          Hoy todavía no hay señales. La IA sigue escaneando.
+          No hay señales en curso. La IA sigue leyendo la próxima jornada.
         </p>
       )}
 
       {todayRest.length > 0 ? (
         <section className="space-y-2">
           <h2 className="text-[11px] font-black uppercase tracking-[0.16em] text-orange-300">
-            Resto de pronósticos
+            Pendientes de hoy
           </h2>
           {todayRest.map((match) => (
             <SignalCard
@@ -141,12 +159,14 @@ export function SignalsView({
       {tomorrow.length > 0 ? (
         <section className="space-y-2">
           <h2 className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">
-            Mañana
+            Próxima jornada
           </h2>
           {tomorrow.map((match) => (
-            <div
+            <button
               key={match.id}
-              className="flex items-center gap-3 rounded-2xl border border-white/8 bg-[#121726] px-3 py-3"
+              type="button"
+              onClick={() => openWhy(match)}
+              className="flex w-full items-center gap-3 rounded-2xl border border-white/8 bg-[#121726] px-3 py-3 text-left"
             >
               <div className="flex -space-x-2">
                 <TeamCrest team={match.home} size={24} />
@@ -158,7 +178,7 @@ export function SignalsView({
                 </p>
                 <SignalCopy match={match} size="sm" />
               </div>
-            </div>
+            </button>
           ))}
         </section>
       ) : null}

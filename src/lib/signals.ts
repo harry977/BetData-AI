@@ -107,6 +107,10 @@ export function featuredSignal(
     );
     if (found) return found;
   }
+  const live = activeSignals(matches);
+  const liveBanker = live.find((match) => isBanker(match.confidence));
+  if (liveBanker) return liveBanker;
+  if (live[0]) return live[0];
   return topAiSignals(matches, 1)[0] ?? null;
 }
 
@@ -175,7 +179,9 @@ export function alertPool(matches: MatchInsight[]) {
 }
 
 export function livePlaylist(matches: MatchInsight[]) {
-  return activeSignals(matches);
+  const live = activeSignals(matches);
+  if (live.length) return live;
+  return upcomingSignals(matches).slice(0, 12);
 }
 
 export function whyItems(match: MatchInsight): WhyItem[] {

@@ -243,6 +243,13 @@ export function isPriorityLive(event: SportEvent) {
   );
 }
 
+export function isLowQualityLive(event: SportEvent) {
+  const haystack = `${event.leagueName} ${event.country}`.toLowerCase();
+  return /u1[6-9]|u21|u23|youth|reserva|reserve|premier league 2|amistoso|friendly/.test(
+    haystack,
+  );
+}
+
 export function mergeLiveEvent(current: SportEvent, live: SportEvent): SportEvent {
   return {
     ...current,
