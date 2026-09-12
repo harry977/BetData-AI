@@ -30,3 +30,9 @@ export function calendarDayFromYmd(ymd: string) {
 export function madridYmd(date = new Date()) {
   return date.toLocaleDateString("en-CA", { timeZone: DISPLAY_TZ });
 }
+
+export function shiftYmd(ymd: string, days: number) {
+  const [year, month, day] = ymd.split("-").map(Number);
+  const next = new Date(Date.UTC(year, month - 1, day + days));
+  return next.toISOString().slice(0, 10);
+}

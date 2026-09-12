@@ -40,10 +40,10 @@ export function BetBuilderView({ matches }: BetBuilderViewProps) {
     <div className="space-y-3">
       <div>
         <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
-          Bet Builder
+          Combina las señales de hoy
         </h2>
         <p className="mt-1 text-[13px] text-zinc-500">
-          Combina Mejor Tips de hoy. Toca un partido para sumarlo al boleto.
+          Toca un partido para meterlo en el boleto. La IA ya eligió el pick.
         </p>
       </div>
 
@@ -85,22 +85,8 @@ export function BetBuilderView({ matches }: BetBuilderViewProps) {
         }}
       >
         <Zap className="h-4 w-4" />
-        Cargar boleto en Servidor Oficial
+        Ver cuota en el Servidor Oficial
       </Button>
-
-      <section className="rounded-xl border border-[#1e2538] bg-panel p-3">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
-          BetData AI
-        </h2>
-        <p className="mt-2 text-[12px] leading-relaxed text-zinc-400">
-          BetData AI es un servicio avanzado de pronósticos de fútbol impulsado por
-          inteligencia artificial. Su modelo BD APEX AI analiza y valora partidos de
-          más de 700 ligas a nivel global. Cada día se publican selecciones gratuitas
-          y boletos automatizados sin necesidad de registros obligatorios. Cada
-          pronóstico se verifica con el marcador final real y nuestro historial
-          público transparente se remonta a 2021.
-        </p>
-      </section>
     </div>
   );
 }

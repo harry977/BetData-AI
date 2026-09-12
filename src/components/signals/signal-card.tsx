@@ -1,5 +1,6 @@
 "use client";
 
+import { TeamCrest } from "@/components/brand/team-crest";
 import { ConfidenceMeter } from "@/components/signals/confidence-meter";
 import { signalRarity } from "@/lib/signals";
 import type { MatchInsight } from "@/lib/types";
@@ -28,17 +29,9 @@ export function SignalCard({
         onClick={onSelect}
         className="flex w-full items-center gap-3 rounded-2xl border border-white/8 bg-[#121726] px-3 py-3 text-left"
       >
-        <div
-          className={cn(
-            "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xs font-black tabular-nums",
-            rarity === "ELITE"
-              ? "bg-violet-500/15 text-violet-300"
-              : rarity === "STRONG"
-                ? "bg-cyan-500/15 text-cyan-300"
-                : "bg-white/8 text-slate-300",
-          )}
-        >
-          {match.confidence.toFixed(1)}
+        <div className="flex -space-x-2">
+          <TeamCrest team={match.home} size={28} />
+          <TeamCrest team={match.away} size={28} />
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-[13px] font-black uppercase tracking-wide text-white">
@@ -49,8 +42,8 @@ export function SignalCard({
             {clock ? ` · ${clock}` : ""}
           </p>
         </div>
-        <span className="text-[10px] font-black uppercase tracking-[0.16em] text-cyan-300">
-          Why?
+        <span className="text-[11px] font-black tabular-nums text-cyan-300">
+          {match.confidence.toFixed(1)}
         </span>
       </button>
     );
@@ -63,14 +56,14 @@ export function SignalCard({
         rarity === "ELITE"
           ? "border-violet-400/35"
           : rarity === "STRONG"
-            ? "border-cyan-400/30"
+            ? "border-emerald-400/35"
             : "border-white/8",
       )}
     >
       <div className="mb-4 flex items-center justify-between">
-        <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-cyan-300">
+        <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300">
           <Zap className="h-3.5 w-3.5" />
-          AI Signal
+          Mejor señal de hoy
         </p>
         {clock ? (
           <span className="rounded-full bg-rose-500/15 px-2 py-0.5 text-[10px] font-black tabular-nums text-rose-300">
@@ -78,16 +71,22 @@ export function SignalCard({
           </span>
         ) : (
           <span className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">
-            {match.status === "NS" ? "Pre-match" : match.status}
+            {match.status === "NS" ? "Antes del partido" : match.status}
           </span>
         )}
       </div>
-      <p className="text-[22px] font-black uppercase leading-none tracking-tight text-white">
-        {match.home.name}
-      </p>
-      <p className="mt-2 text-[22px] font-black uppercase leading-none tracking-tight text-white">
-        {match.away.name}
-      </p>
+      <div className="flex items-center gap-3">
+        <TeamCrest team={match.home} size={44} />
+        <p className="min-w-0 truncate text-[22px] font-black uppercase leading-none tracking-tight text-white">
+          {match.home.name}
+        </p>
+      </div>
+      <div className="mt-3 flex items-center gap-3">
+        <TeamCrest team={match.away} size={44} />
+        <p className="min-w-0 truncate text-[22px] font-black uppercase leading-none tracking-tight text-white">
+          {match.away.name}
+        </p>
+      </div>
       <p className="mt-4 text-lg font-black uppercase tracking-wide text-emerald-300">
         {match.bestTip}
       </p>
@@ -98,9 +97,9 @@ export function SignalCard({
         <button
           type="button"
           onClick={onWhy}
-          className="mt-5 flex w-full items-center justify-end text-[11px] font-black uppercase tracking-[0.22em] text-cyan-300"
+          className="mt-5 flex w-full items-center justify-end text-[11px] font-black uppercase tracking-[0.18em] text-cyan-300"
         >
-          Why? →
+          ¿Por qué? →
         </button>
       ) : null}
     </article>

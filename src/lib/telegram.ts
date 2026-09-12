@@ -88,6 +88,16 @@ export function hapticTap() {
   window.Telegram?.WebApp?.HapticFeedback?.impactOccurred("medium");
 }
 
+export function readTelegramUser() {
+  if (typeof window === "undefined") return null;
+  const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  if (!user?.id) return null;
+  const label = user.username
+    ? `@${user.username}`
+    : user.first_name || `Telegram ${user.id}`;
+  return { id: user.id, label };
+}
+
 export function hapticSuccess() {
   try {
     if (hapticFeedbackNotificationOccurred.isAvailable()) {
@@ -112,6 +122,13 @@ declare global {
         HapticFeedback?: {
           impactOccurred: (style: "light" | "medium" | "heavy") => void;
           notificationOccurred: (type: "error" | "success" | "warning") => void;
+        };
+        initDataUnsafe?: {
+          user?: {
+            id: number;
+            username?: string;
+            first_name?: string;
+          };
         };
       };
     };

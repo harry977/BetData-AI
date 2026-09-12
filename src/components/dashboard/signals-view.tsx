@@ -2,52 +2,56 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ExternalLink } from "lucide-react";
-import { AiAlert } from "@/components/signals/ai-alert";
-import { AiBattle } from "@/components/signals/ai-battle";
+import { TeamCrest } from "@/components/brand/team-crest";
 import { AiScan } from "@/components/signals/ai-scan";
 import { MissionCard } from "@/components/signals/mission-card";
 import { SignalCard } from "@/components/signals/signal-card";
 import { StreakBoard } from "@/components/signals/streak-board";
 import { WhyPanel } from "@/components/signals/why-panel";
+import { VipCta } from "@/components/layout/vip-cta";
 import { Button } from "@/components/ui/button";
 import { OFFICIAL_SERVER_URL } from "@/lib/constants";
 import { madridYmd } from "@/lib/dates";
 import { recordMissionSignal, recordViewedSignal } from "@/lib/storage";
 import {
   activeSignals,
-  alertPool,
   featuredSignal,
   scanCounts,
-  topAiSignals,
 } from "@/lib/signals";
 import { hapticTap, openExternal } from "@/lib/telegram";
-import { isBanker } from "@/lib/utils";
+import { isBanker, matchesForDay } from "@/lib/utils";
 import type { MatchInsight } from "@/lib/types";
 
 type SignalsViewProps = {
   matches: MatchInsight[];
   selectedId: number | null;
   onSelect: (id: number) => void;
+  onOpenLive: (id: number) => void;
 };
 
 const SCAN_KEY = "betdata_ai_scan_day";
 
-export function SignalsView({ matches, selectedId, onSelect }: SignalsViewProps) {
+export function SignalsView({
+  matches,
+  selectedId,
+  onSelect,
+  onOpenLive,
+}: SignalsViewProps) {
   const featured = useMemo(
     () => featuredSignal(matches, selectedId),
     [matches, selectedId],
   );
-  const others = useMemo(() => {
-    const pool = [
-      ...activeSignals(matches),
-      ...topAiSignals(matches, 6),
-    ].filter((match, index, list) => list.findIndex((item) => item.id === match.id) === index);
-    return pool.filter((match) => match.id !== featured?.id).slice(0, 5);
+  const todayRest = useMemo(() => {
+    return matchesForDay(matches, "today")
+      .filter((match) => match.id !== featured?.id)
+      .sort((a, b) => b.confidence - a.confidence);
   }, [matches, featured]);
-  const alerts = useMemo(() => alertPool(matches), [matches]);
+  const liveNow = useMemo(() => activeSignals(matches), [matches]);
+  const tomorrow = useMemo(
+    () => matches.filter((match) => match.day === "tomorrow").slice(0, 4),
+    [matches],
+  );
   const counts = useMemo(() => scanCounts(matches), [matches]);
-  const liveNow = useMemo(() => activeSignals(matches).length > 0, [matches]);
-  const [alertIndex, setAlertIndex] = useState(0);
   const [whyMatch, setWhyMatch] = useState<MatchInsight | null>(null);
   const [missionKey, setMissionKey] = useState(0);
   const [scanning, setScanning] = useState(false);
@@ -62,20 +66,6 @@ export function SignalsView({ matches, selectedId, onSelect }: SignalsViewProps)
       setScanning(true);
     }
   }, []);
-
-  useEffect(() => {
-    if (alerts.length < 2) return;
-    const timer = window.setInterval(() => {
-      setAlertIndex((current) => (current + 1) % alerts.length);
-    }, 8000);
-    return () => window.clearInterval(timer);
-  }, [alerts.length]);
-
-  function openSignal(id: number) {
-    hapticTap();
-    recordViewedSignal(id);
-    onSelect(id);
-  }
 
   function openWhy(match: MatchInsight) {
     hapticTap();
@@ -99,34 +89,50 @@ export function SignalsView({ matches, selectedId, onSelect }: SignalsViewProps)
       ) : null}
 
       <header>
-        <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.22em] text-rose-400">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-70" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500" />
-          </span>
-          Live AI
+        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-400">
+          Jornada de hoy
         </p>
-        <h1 className="mt-2 text-[1.7rem] font-black uppercase leading-none tracking-tight text-white">
-          {liveNow ? "La IA está analizando ahora" : "La IA está escaneando el día"}
+        <h1 className="mt-1 text-[1.7rem] font-black uppercase leading-none tracking-tight text-white">
+          La IA ya tiene el partido
         </h1>
       </header>
 
-      <AiAlert match={alerts[alertIndex] ?? null} onOpen={openSignal} />
+      <MissionCard refreshKey={missionKey} />
+
+      {liveNow.length > 0 ? (
+        <button
+          type="button"
+          onClick={() => onOpenLive(liveNow[0].id)}
+          className="flex w-full items-center justify-between rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-left"
+        >
+          <span>
+            <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-rose-300">
+              En juego ahora
+            </span>
+            <span className="mt-1 block text-sm font-black uppercase text-white">
+              {liveNow[0].home.code} — {liveNow[0].away.code}
+            </span>
+          </span>
+          <span className="text-[11px] font-black uppercase tracking-[0.14em] text-rose-300">
+            Ver directo →
+          </span>
+        </button>
+      ) : null}
 
       {featured ? (
         <SignalCard match={featured} onWhy={() => openWhy(featured)} />
       ) : (
         <p className="rounded-2xl border border-white/8 bg-[#121726] p-6 text-center text-sm text-slate-400">
-          No hay señales disponibles ahora mismo.
+          Hoy todavía no hay señales. La IA sigue escaneando.
         </p>
       )}
 
-      {others.length > 0 ? (
+      {todayRest.length > 0 ? (
         <section className="space-y-2">
-          <h2 className="text-[11px] font-black uppercase tracking-[0.18em] text-orange-300">
-            Otras señales
+          <h2 className="text-[11px] font-black uppercase tracking-[0.16em] text-orange-300">
+            Resto de pronósticos
           </h2>
-          {others.map((match) => (
+          {todayRest.map((match) => (
             <SignalCard
               key={match.id}
               match={match}
@@ -138,11 +144,36 @@ export function SignalsView({ matches, selectedId, onSelect }: SignalsViewProps)
       ) : null}
 
       <StreakBoard matches={matches} />
-      <MissionCard refreshKey={missionKey} />
-      <AiBattle matches={matches} onChoose={openWhy} />
 
+      {tomorrow.length > 0 ? (
+        <section className="space-y-2">
+          <h2 className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">
+            Mañana
+          </h2>
+          {tomorrow.map((match) => (
+            <div
+              key={match.id}
+              className="flex items-center gap-3 rounded-2xl border border-white/8 bg-[#121726] px-3 py-3"
+            >
+              <div className="flex -space-x-2">
+                <TeamCrest team={match.home} size={24} />
+                <TeamCrest team={match.away} size={24} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[12px] font-black uppercase text-white">
+                  {match.home.code} · {match.away.code}
+                </p>
+                <p className="text-[11px] text-emerald-300">{match.bestTip}</p>
+              </div>
+            </div>
+          ))}
+        </section>
+      ) : null}
+
+      <VipCta />
       <Button
         size="lg"
+        variant="outline"
         className="w-full"
         onClick={() => {
           hapticTap();

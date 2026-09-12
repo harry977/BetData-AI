@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Zap } from "lucide-react";
+import { bandLabel } from "@/lib/copy";
 import { confidenceBand } from "@/lib/signals";
 import type { MatchInsight } from "@/lib/types";
 
@@ -22,11 +23,11 @@ export function AiAlert({ match, onOpen }: AiAlertProps) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -6 }}
           transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-          className="w-full rounded-[24px] border border-cyan-400/25 bg-cyan-500/10 px-4 py-3.5 text-left"
+          className="w-full rounded-[24px] border border-emerald-400/25 bg-emerald-500/10 px-4 py-3.5 text-left"
         >
-          <p className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-cyan-300">
+          <p className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300">
             <Zap className="h-3.5 w-3.5" />
-            Señal detectada
+            Señal caliente
           </p>
           <p className="mt-2 text-base font-black uppercase leading-tight text-white">
             {match.home.name}
@@ -38,8 +39,8 @@ export function AiAlert({ match, onOpen }: AiAlertProps) {
             <span className="ml-2 font-black tabular-nums text-white">
               {match.confidence.toFixed(1)}
             </span>
-            <span className="ml-1 text-[10px] font-black uppercase tracking-[0.16em] text-emerald-400">
-              {confidenceBand(match.confidence)}
+            <span className="ml-1 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-400">
+              {bandLabel(confidenceBand(match.confidence))}
             </span>
           </p>
         </motion.button>

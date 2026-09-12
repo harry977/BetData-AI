@@ -1,7 +1,7 @@
 export const BRAND = {
-  name: "BetData AI",
+  name: "BetData IA",
   version: "v2.4",
-  tagline: "Inteligencia Predictiva con IA",
+  tagline: "La IA que ve el fútbol",
 } as const;
 
 export const PLATFORM_STATS = {
@@ -12,6 +12,7 @@ export const PLATFORM_STATS = {
 
 export const STORAGE_KEYS = {
   mission: "betdata_ai_daily_mission",
+  userStreak: "betdata_ai_user_streak",
   viewedSignals: "betdata_ai_viewed_signals",
   unlocked: "isUnlocked",
   accountId: "betdata_ai_account_id",
@@ -45,9 +46,9 @@ export const RAPIDAPI_SPORT = {
 } as const;
 
 export const ACTIVATION_STATUS = [
-  "Conectando...",
-  "Sincronizando...",
-  "¡Acceso Concedido!",
+  "Abriendo el vestuario…",
+  "La IA está calentando…",
+  "¡Estás dentro!",
 ] as const;
 
 export const ACTIVATION_STEP_MS = 1000;

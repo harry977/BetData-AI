@@ -37,13 +37,13 @@ function clampMeter(value: number) {
 export function whyMeters(match: MatchInsight): WhyMeter[] {
   const goals = match.metrics.xG.home + match.metrics.xG.away;
   return [
-    { key: "form", label: "Form", value: clampMeter(match.hitRate / 10) },
+    { key: "form", label: "Forma", value: clampMeter(match.hitRate / 10) },
     {
       key: "momentum",
-      label: "Momentum",
+      label: "Ritmo",
       value: clampMeter(match.metrics.offensivePressure / 10),
     },
-    { key: "goals", label: "Goals", value: clampMeter(goals * 3.2) },
+    { key: "goals", label: "Goles", value: clampMeter(goals * 3.2) },
   ];
 }
 
@@ -84,7 +84,7 @@ export function resultBoard(matches: MatchInsight[]): ResultBoard {
     hits,
     total,
     pct: total ? Math.round((hits / total) * 100) : 0,
-    label: todayResolved.length ? "Today's signals" : "Yesterday's signals",
+    label: todayResolved.length ? "señales de hoy" : "señales de ayer",
     lastFailed: ticks.length > 0 && ticks[ticks.length - 1] === "loss",
   };
 }
@@ -102,11 +102,11 @@ export function featuredSignal(
   selectedId: number | null,
 ) {
   if (selectedId != null) {
-    const found = matches.find((match) => match.id === selectedId);
+    const found = matches.find(
+      (match) => match.id === selectedId && match.day === "today",
+    );
     if (found) return found;
   }
-  const live = activeSignals(matches);
-  if (live[0]) return live[0];
   return topAiSignals(matches, 1)[0] ?? null;
 }
 
@@ -175,9 +175,7 @@ export function alertPool(matches: MatchInsight[]) {
 }
 
 export function livePlaylist(matches: MatchInsight[]) {
-  const live = activeSignals(matches);
-  if (live.length) return live;
-  return topAiSignals(matches, 8);
+  return activeSignals(matches);
 }
 
 export function whyItems(match: MatchInsight): WhyItem[] {

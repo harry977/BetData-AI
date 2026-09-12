@@ -10,7 +10,7 @@ type OptinTipsTableProps = {
   dateLabel: string;
   matches: MatchInsight[];
   resolved?: boolean;
-  onOpenBonus: () => void;
+  onEnter: () => void;
 };
 
 export function OptinTipsTable({
@@ -18,7 +18,7 @@ export function OptinTipsTable({
   dateLabel,
   matches,
   resolved = false,
-  onOpenBonus,
+  onEnter,
 }: OptinTipsTableProps) {
   if (matches.length === 0) return null;
 
@@ -39,7 +39,7 @@ export function OptinTipsTable({
             <li key={match.id} className="border-t border-[#1e2538]">
               <button
                 type="button"
-                onClick={onOpenBonus}
+                onClick={onEnter}
                 className="grid w-full grid-cols-[3.2rem_1fr_5.4rem] items-center px-3 py-2.5 text-left"
               >
                 <TimeCell match={match} />

@@ -21,7 +21,7 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: `${BRAND.name} — ${BRAND.tagline}`,
   description:
-    "Pronósticos de fútbol con inteligencia predictiva: Bankers del día, confianza 1 a 10 y registro de aciertos.",
+    "Pronósticos de fútbol con IA: señales del día, confianza y partidos en directo.",
   applicationName: BRAND.name,
 };
 

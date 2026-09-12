@@ -2,9 +2,9 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { TeamCrest } from "@/components/brand/team-crest";
 import { ConfidenceMeter } from "@/components/signals/confidence-meter";
 import { WhyPanel } from "@/components/signals/why-panel";
-import { BRAND } from "@/lib/constants";
 import { livePlaylist } from "@/lib/signals";
 import { recordViewedSignal } from "@/lib/storage";
 import { hapticTap } from "@/lib/telegram";
@@ -17,7 +17,7 @@ type LiveModeViewProps = {
   onSelect: (id: number) => void;
 };
 
-const BEATS = ["LIVE", "MATCH UPDATE", "AI ALERT", "NEW SIGNAL"] as const;
+const BEATS = ["EN DIRECTO", "SEÑAL ACTIVA", "LA IA ESTÁ DENTRO", "NUEVA LECTURA"] as const;
 
 export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProps) {
   const playlist = useMemo(() => livePlaylist(matches), [matches]);
@@ -31,7 +31,7 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
       ? playlist[(selectedIndex + 1) % playlist.length]
       : null;
   const [whyOpen, setWhyOpen] = useState(false);
-  const [beat, setBeat] = useState<(typeof BEATS)[number] | "NEXT MATCH">("LIVE");
+  const [beat, setBeat] = useState<(typeof BEATS)[number] | "SIGUIENTE">("EN DIRECTO");
   const [paused, setPaused] = useState(false);
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
@@ -58,17 +58,23 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
         playlist.find((match) => match.id === selectedId) ?? playlist[0];
       const index = playlist.findIndex((match) => match.id === current.id);
       const upcoming = playlist[(index + 1) % playlist.length];
-      setBeat("NEXT MATCH");
+      setBeat("SIGUIENTE");
       onSelectRef.current(upcoming.id);
-    }, 16000);
+    }, 18000);
     return () => window.clearInterval(advance);
   }, [paused, playlist, selectedId]);
 
   if (!selected) {
     return (
-      <div className="flex h-full items-center justify-center px-6 text-center">
-        <p className="text-sm text-slate-400">
-          El motor no tiene partidos en monitorización ahora mismo.
+      <div className="flex h-full flex-col items-center justify-center px-8 text-center">
+        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-rose-400">
+          En directo
+        </p>
+        <h2 className="mt-3 text-2xl font-black uppercase leading-tight text-white">
+          Ahora mismo el balón está parado
+        </h2>
+        <p className="mt-3 text-sm leading-relaxed text-slate-400">
+          No hay partidos en juego. Cuando arranque uno, aquí verás el marcador, el minuto y la señal de la IA.
         </p>
       </div>
     );
@@ -86,10 +92,10 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col px-4 pb-3 pt-5">
+    <div className="flex h-full min-h-0 flex-col bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.16),transparent_42%)] px-4 pb-3 pt-5">
       <header className="text-center">
-        <p className="text-[11px] font-black uppercase tracking-[0.32em] text-cyan-300">
-          {BRAND.name}
+        <p className="text-[11px] font-black uppercase tracking-[0.28em] text-emerald-300">
+          BetData IA
         </p>
         <AnimatePresence mode="wait">
           <motion.p
@@ -98,7 +104,7 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             className={cn(
-              "mt-3 text-sm font-black uppercase tracking-[0.22em]",
+              "mt-3 text-sm font-black uppercase tracking-[0.2em]",
               live ? "text-rose-400" : "text-emerald-300",
             )}
           >
@@ -109,9 +115,9 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto pt-6">
-        <div className="space-y-2">
-          <ScoreRow team={selected.home.name} score={selected.score.home} />
-          <ScoreRow team={selected.away.name} score={selected.score.away} />
+        <div className="space-y-3">
+          <ScoreRow team={selected.home} score={selected.score.home} />
+          <ScoreRow team={selected.away} score={selected.score.away} />
         </div>
         <p
           className={cn(
@@ -123,10 +129,10 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
         </p>
 
         <div className="mt-8 border-y border-white/10 py-6">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-cyan-300">
-            AI Signal
+          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-cyan-300">
+            Señal de la IA
           </p>
-          <p className="mt-2 text-4xl font-black uppercase leading-none text-white">
+          <p className="mt-2 break-words text-4xl font-black uppercase leading-none text-white">
             {selected.bestTip}
           </p>
           <div className="mt-5">
@@ -142,15 +148,15 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
           }}
           className="mt-6 w-full text-left"
         >
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-cyan-300">
-            Why?
+          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-cyan-300">
+            ¿Cómo lo sabe?
           </p>
-          <p className="mt-3 text-2xl font-black tabular-nums text-white">{shots} shots</p>
+          <p className="mt-3 text-2xl font-black tabular-nums text-white">{shots} tiros</p>
           <p className="mt-1 text-2xl font-black tabular-nums text-white">
             {xg.toFixed(2)} xG
           </p>
           <p className="mt-1 text-2xl font-black tabular-nums text-emerald-300">
-            {selected.metrics.offensivePressure}% momentum
+            {selected.metrics.offensivePressure}% ritmo
           </p>
         </button>
 
@@ -160,8 +166,8 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
             onClick={() => pick(next.id)}
             className="mt-8 w-full border-t border-white/10 pt-5 text-left"
           >
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-              Next signal
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+              Siguiente
             </p>
             <p className="mt-1 text-xl font-black uppercase text-white">
               {next.home.code} — {next.away.code}
@@ -169,28 +175,30 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
           </button>
         ) : null}
 
-        <div className="mt-6 flex gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {playlist.map((match) => {
-            const active = match.id === selected.id;
-            return (
-              <button
-                key={match.id}
-                type="button"
-                onClick={() => pick(match.id)}
-                className={cn(
-                  "min-w-[5.5rem] shrink-0 rounded-xl border px-3 py-2 text-left",
-                  active
-                    ? "border-cyan-400/50 bg-cyan-500/10"
-                    : "border-white/10 bg-white/5",
-                )}
-              >
-                <p className="truncate text-[11px] font-black uppercase text-white">
-                  {match.home.code}–{match.away.code}
-                </p>
-              </button>
-            );
-          })}
-        </div>
+        {playlist.length > 1 ? (
+          <div className="mt-6 flex gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {playlist.map((match) => {
+              const active = match.id === selected.id;
+              return (
+                <button
+                  key={match.id}
+                  type="button"
+                  onClick={() => pick(match.id)}
+                  className={cn(
+                    "min-w-[5.5rem] shrink-0 rounded-xl border px-3 py-2 text-left",
+                    active
+                      ? "border-emerald-400/50 bg-emerald-500/10"
+                      : "border-white/10 bg-white/5",
+                  )}
+                >
+                  <p className="truncate text-[11px] font-black uppercase text-white">
+                    {match.home.code}–{match.away.code}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
       </div>
 
       {whyOpen ? (
@@ -200,13 +208,22 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
   );
 }
 
-function ScoreRow({ team, score }: { team: string; score: number | null }) {
+function ScoreRow({
+  team,
+  score,
+}: {
+  team: MatchInsight["home"];
+  score: number | null;
+}) {
   return (
-    <div className="flex items-end justify-between gap-3">
-      <p className="min-w-0 truncate text-[28px] font-black uppercase leading-none tracking-tight text-white">
-        {team}
-      </p>
-      <p className="text-5xl font-black tabular-nums leading-none text-white">
+    <div className="flex items-center justify-between gap-3">
+      <div className="flex min-w-0 items-center gap-3">
+        <TeamCrest team={team} size={40} />
+        <p className="min-w-0 truncate text-[22px] font-black uppercase leading-none tracking-tight text-white">
+          {team.name}
+        </p>
+      </div>
+      <p className="shrink-0 text-5xl font-black tabular-nums leading-none text-white">
         {score ?? "–"}
       </p>
     </div>

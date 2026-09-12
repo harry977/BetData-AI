@@ -29,14 +29,14 @@ export function WhyPanel({
   const meters = whyMeters(match);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end bg-black/70" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] flex items-end bg-black/70" onClick={onClose}>
       <div
-        className="w-full rounded-t-[28px] border-t border-white/10 bg-[#121726] p-5 pb-8"
+        className="w-full rounded-t-[28px] border-t border-white/10 bg-[#121726] p-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
         onClick={(e) => e.stopPropagation()}
       >
-        <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-cyan-300">
+        <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-cyan-300">
           <Brain className="h-4 w-4" />
-          Why did AI pick this?
+          ¿Por qué lo ha visto la IA?
         </p>
         <p className="mt-3 text-lg font-black uppercase leading-tight text-white">
           {match.home.name} · {match.away.name}
@@ -53,9 +53,9 @@ export function WhyPanel({
         <button
           type="button"
           onClick={onClose}
-          className="mt-6 h-12 w-full rounded-2xl bg-white text-sm font-black uppercase tracking-[0.18em] text-[#0b0e17]"
+          className="mt-6 h-12 w-full rounded-2xl bg-white text-sm font-black uppercase tracking-[0.16em] text-[#0b0e17]"
         >
-          Got it
+          Entendido
         </button>
       </div>
     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { bandLabel, rarityLabel } from "@/lib/copy";
 import { confidenceBand, signalRarity } from "@/lib/signals";
 import { cn } from "@/lib/utils";
 
@@ -13,25 +14,10 @@ export function ConfidenceMeter({
   const band = confidenceBand(confidence);
   const rarity = signalRarity(confidence);
   const pct = Math.min(100, Math.max(0, (confidence / 10) * 100));
-
   const fill =
-    band === "HIGH"
-      ? "bg-emerald-400"
-      : band === "MEDIUM"
-        ? "bg-amber-400"
-        : "bg-slate-400";
-  const label =
-    band === "HIGH"
-      ? "HIGH CONFIDENCE"
-      : band === "MEDIUM"
-        ? "MEDIUM CONFIDENCE"
-        : "LOW CONFIDENCE";
+    band === "HIGH" ? "bg-emerald-400" : band === "MEDIUM" ? "bg-amber-400" : "bg-slate-400";
   const color =
-    band === "HIGH"
-      ? "text-emerald-300"
-      : band === "MEDIUM"
-        ? "text-amber-300"
-        : "text-slate-400";
+    band === "HIGH" ? "text-emerald-300" : band === "MEDIUM" ? "text-amber-300" : "text-slate-400";
 
   return (
     <div className={cn("space-y-1.5", compact && "space-y-1")}>
@@ -45,16 +31,12 @@ export function ConfidenceMeter({
           style={{ width: `${pct}%` }}
         />
       </div>
-      <p className={cn("text-[10px] font-black uppercase tracking-[0.18em]", color)}>
-        {label}
+      <p className={cn("text-[11px] font-black uppercase tracking-[0.16em]", color)}>
+        {bandLabel(band)}
       </p>
-      {rarity === "ELITE" ? (
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-violet-300">
-          Elite signal
-        </p>
-      ) : rarity === "STRONG" ? (
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-300">
-          Strong signal
+      {rarity !== "STANDARD" ? (
+        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-cyan-300">
+          {rarityLabel(rarity)}
         </p>
       ) : null}
     </div>

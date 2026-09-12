@@ -60,7 +60,7 @@ export function MatchCard({ match, day, active = false, onSelect }: MatchCardPro
             </p>
             {banker ? (
               <Badge variant="banker" className="mt-1">
-                Banker
+                Señal fuerte
               </Badge>
             ) : null}
           </>

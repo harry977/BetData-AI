@@ -1,4 +1,5 @@
 import { STORAGE_KEYS } from "@/lib/constants";
+import { shiftYmd } from "@/lib/dates";
 
 function isTruthyFlag(value: string | null) {
   return value === "true" || value === "1";
@@ -63,6 +64,33 @@ export function recordMissionSignal(date: string, id: number) {
   window.localStorage.setItem(
     STORAGE_KEYS.mission,
     JSON.stringify({ date, ids }),
+  );
+  if (ids.length >= 3) bumpUserStreak(date);
+}
+
+type UserStreak = { count: number; lastDate: string };
+
+export function readUserStreak(): UserStreak {
+  if (typeof window === "undefined") return { count: 0, lastDate: "" };
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEYS.userStreak);
+    if (!raw) return { count: 0, lastDate: "" };
+    const parsed = JSON.parse(raw) as UserStreak;
+    if (typeof parsed.count !== "number") return { count: 0, lastDate: "" };
+    return parsed;
+  } catch {
+    return { count: 0, lastDate: "" };
+  }
+}
+
+function bumpUserStreak(date: string) {
+  const current = readUserStreak();
+  if (current.lastDate === date) return;
+  const yesterday = shiftYmd(date, -1);
+  const count = current.lastDate === yesterday ? current.count + 1 : 1;
+  window.localStorage.setItem(
+    STORAGE_KEYS.userStreak,
+    JSON.stringify({ count, lastDate: date }),
   );
 }
 

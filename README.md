@@ -1,8 +1,6 @@
-# BetData AI
+# BetData IA
 
-Telegram Mini App de **inteligencia de fútbol en vivo**. La IA escanea el día, detecta señales y las explica en un feed tipo juego — no en un dashboard de métricas.
-
-**BetData AI** — Inteligencia Predictiva con IA.
+Telegram Mini App de **inteligencia de fútbol en vivo**. La IA escanea el día, destaca la señal más fuerte y explica el porqué. Pensada para usarse y retransmitirse en vertical.
 
 ## Stack
 
@@ -24,31 +22,25 @@ La app queda en [http://127.0.0.1:43141](http://127.0.0.1:43141).
 
 ## Flujo
 
-1. **Opt-in** — landing de tips gratuitos y bono de bienvenida hacia el Servidor Oficial.
-2. **Acceder** — simulación visual (3s) → `isUnlocked=true` en `localStorage`.
-3. **AI feed** — SCAN → señal destacada → WHY → streak / resultados.
-4. **LIVE** — interfaz 9:16 para retransmitir, con texto gigante y alertas.
+1. **Landing** — “No le pagues más a los tipsters. La IA lo hace por ti.” CTA: *Entrar y ver pronósticos*.
+2. **Registro** — Telegram si estás en la Mini App; si no, usuario o correo.
+3. **Hoy** — misión, mejor señal, resto del día, rachas y Canal VIP.
+4. **En directo** — solo partidos en juego, 9:16. Si no hay live, estado vacío.
+5. **Mi cuenta** — progreso, boleto, bono de hasta 500€ (después de entrar) y ajustes.
 
-Para volver al gatekeeper usa *Cerrar sesión*.
+El bono **no** aparece en la landing. Dentro de la app no se habla de tipsters.
 
-## Navegación
-
-- **AI** — feed de señales, scan, battle y misión del día
-- **Matches** — partidos por día, con análisis visual
-- **LIVE** — broadcast mode 9:16
-- **Account** — sesión, Bet Builder e historial
+Para volver a la landing usa *Cerrar sesión*.
 
 ## Telegram Mini App
 
 1. Crea un bot con [@BotFather](https://t.me/BotFather).
-2. Configura *Menu Button* / *Mini App* apuntando a la URL pública (Vercel u otro host HTTPS).
-3. Abre la Mini App desde Telegram. Fuera de Telegram el preview de navegador funciona igual; `openLink` cae a `window.open`.
+2. Configura *Menu Button* / *Mini App* apuntando a la URL pública (HTTPS).
+3. En Telegram, el botón *Entrar con Telegram* usa el usuario de `initData`.
 
 ## RapidAPI (SportAPI / SofaScore)
 
 Sin `RAPIDAPI_KEY`, `/api/fixtures` sirve el mock de `src/lib/mocks/fixtures.ts`.
-
-Con clave, el servidor consulta **SportAPI** (`sportapi7.p.rapidapi.com`). Las categorías del día se cachean 30 minutos. Si la API falla o no hay eventos, se usan los mocks.
 
 ```bash
 # .env.local

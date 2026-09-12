@@ -1,33 +1,18 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  CalendarDays,
-  ChevronDown,
-  Gift,
-  Loader2,
-  LogIn,
-  Trophy,
-  UserPlus,
-} from "lucide-react";
-import { useMemo, useState } from "react";
+import { ChevronDown, Loader2, LogIn, Send, Trophy } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { BetDataLogo } from "@/components/brand/betdata-logo";
 import { OptinTipsTable } from "@/components/gatekeeper/optin-tips-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFixtures } from "@/hooks/use-fixtures";
-import {
-  ACTIVATION_STATUS,
-  ACTIVATION_STEP_MS,
-  BONUS_URL,
-  BRAND,
-  PLATFORM_STATS,
-  WELCOME_BONUS,
-} from "@/lib/constants";
+import { ACTIVATION_STATUS, ACTIVATION_STEP_MS, BRAND } from "@/lib/constants";
 import { calendarDayFromYmd, formatCalendarDay, utcDateOffset } from "@/lib/dates";
-import { isLigaBbva, uniqueLeagues } from "@/lib/leagues";
-import { hapticSuccess, hapticTap, openExternal } from "@/lib/telegram";
+import { uniqueLeagues } from "@/lib/leagues";
+import { hapticSuccess, hapticTap, readTelegramUser } from "@/lib/telegram";
 import { matchesForDay } from "@/lib/utils";
 
 type GatekeeperViewProps = {
@@ -39,9 +24,18 @@ export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
   const [accountId, setAccountId] = useState("");
   const [activating, setActivating] = useState(false);
   const [statusIndex, setStatusIndex] = useState(0);
-  const [accessOpen, setAccessOpen] = useState(false);
+  const [error, setError] = useState("");
+  const [telegramUser, setTelegramUser] = useState<string | null>(null);
 
-  const matches = data?.response ?? [];
+  useEffect(() => {
+    const user = readTelegramUser();
+    if (user) {
+      setTelegramUser(user.label);
+      setAccountId(user.label);
+    }
+  }, []);
+
+  const matches = useMemo(() => data?.response ?? [], [data]);
   const today = useMemo(() => {
     return matchesForDay(matches, "today")
       .slice()
@@ -58,7 +52,6 @@ export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
     () => matchesForDay(matches, "yesterday").slice(0, 8),
     [matches],
   );
-  const ligaBbva = useMemo(() => today.filter(isLigaBbva).slice(0, 6), [today]);
   const leagues = useMemo(() => uniqueLeagues(today), [today]);
 
   const todayLabel = today[0]
@@ -73,18 +66,20 @@ export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
 
   const resolvedHits = yesterday.filter((match) => match.result?.won).length;
 
-  function openBonus() {
-    hapticTap();
-    openExternal(BONUS_URL);
-  }
-
   function scrollTo(id: string) {
     hapticTap();
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  async function handleActivate() {
+  async function handleActivate(forcedId?: string) {
+    const id = (forcedId ?? accountId).trim();
+    if (!id) {
+      setError("Pon tu usuario de Telegram o un correo para entrar.");
+      scrollTo("entrar");
+      return;
+    }
     if (activating) return;
+    setError("");
     setActivating(true);
     setStatusIndex(0);
     hapticTap();
@@ -93,7 +88,7 @@ export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
       await new Promise((resolve) => setTimeout(resolve, ACTIVATION_STEP_MS));
     }
     hapticSuccess();
-    onUnlock(accountId.trim());
+    onUnlock(id);
   }
 
   const statusText = ACTIVATION_STATUS[statusIndex];
@@ -107,71 +102,40 @@ export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
       <section className="relative overflow-hidden px-4 pb-8 pt-10 text-center">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(16,185,129,0.22),transparent_42%)]" />
         <div className="relative">
-          <h1 className="text-[2.05rem] font-semibold leading-[1.12] tracking-tight text-zinc-50">
-            Pronósticos de Fútbol con IA
+          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-400">
+            {BRAND.name}
+          </p>
+          <h1 className="mt-3 text-[2rem] font-black leading-[1.12] tracking-tight text-zinc-50">
+            No le pagues más a los tipsters. La IA lo hace por ti.
           </h1>
           <p className="mx-auto mt-3 max-w-[22rem] text-[15px] leading-relaxed text-zinc-400">
-            {BRAND.name} analiza el día con BD APEX AI: más de {PLATFORM_STATS.leaguesMonitored}{" "}
-            ligas y picks actualizados con SportAPI. Cada jornada, pronósticos gratis.
+            Entra, mira cómo lee los partidos y decide con datos. El resto es ruido.
           </p>
 
-          <div className="mx-auto mt-5 max-w-sm rounded-2xl border border-emerald-400/35 bg-emerald-500/15 px-4 py-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-300">
-              Liga BBVA
-            </p>
-            <p className="mt-1 text-lg font-semibold leading-tight text-zinc-50">
-              {WELCOME_BONUS.headline}
-            </p>
-            <p className="mt-1 text-[13px] leading-snug text-emerald-100/80">
-              {WELCOME_BONUS.detail}
-            </p>
-          </div>
-
-          <div className="mx-auto mt-5 flex max-w-sm flex-col gap-2.5">
-            <Button size="lg" className="h-12 rounded-full text-base" onClick={openBonus}>
-              Reclamar bono de {WELCOME_BONUS.amount}
-              <Gift className="h-4 w-4" />
-            </Button>
+          <div className="mx-auto mt-6 flex max-w-sm flex-col gap-2.5">
+            {telegramUser ? (
+              <Button size="lg" className="h-12 rounded-full text-base" onClick={() => void handleActivate(telegramUser)}>
+                Entrar con Telegram
+                <Send className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button size="lg" className="h-12 rounded-full text-base" onClick={() => scrollTo("entrar")}>
+                Entrar y ver pronósticos
+                <LogIn className="h-4 w-4" />
+              </Button>
+            )}
             <Button
               size="lg"
               variant="outline"
               className="h-12 rounded-full"
               onClick={() => scrollTo("pronosticos-gratis")}
             >
-              Ver pronósticos gratis
+              Ver un adelanto
               <ChevronDown className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </section>
-
-      {ligaBbva.length > 0 ? (
-        <section className="px-4 pb-6">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-400">
-            Liga BBVA · Hoy {todayLabel}
-          </p>
-          <div className="mt-2 space-y-2">
-            {ligaBbva.map((match) => (
-              <button
-                key={match.id}
-                type="button"
-                onClick={openBonus}
-                className="flex w-full items-center justify-between rounded-2xl border border-emerald-400/25 bg-emerald-500/10 px-3 py-2.5 text-left"
-              >
-                <span className="min-w-0">
-                  <span className="block truncate text-[13px] font-semibold text-zinc-50">
-                    {match.home.name} — {match.away.name}
-                  </span>
-                  <span className="text-[12px] text-emerald-300">{match.bestTip}</span>
-                </span>
-                <span className="font-mono text-sm text-emerald-200">
-                  {match.confidence.toFixed(1)}
-                </span>
-              </button>
-            ))}
-          </div>
-        </section>
-      ) : null}
 
       <div id="pronosticos-gratis" className="space-y-8 pb-8">
         {loading ? (
@@ -182,39 +146,39 @@ export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
         ) : (
           <>
             <OptinTipsTable
-              title="Pronósticos gratis de hoy"
+              title="Adelanto de hoy"
               dateLabel={todayLabel}
               matches={today}
-              onOpenBonus={openBonus}
+              onEnter={() => scrollTo("entrar")}
             />
             <OptinTipsTable
-              title="Pronósticos gratis de mañana"
+              title="Adelanto de mañana"
               dateLabel={tomorrowLabel}
               matches={tomorrow}
-              onOpenBonus={openBonus}
+              onEnter={() => scrollTo("entrar")}
             />
             <OptinTipsTable
-              title="Pronósticos gratis de ayer, resueltos"
+              title="Ayer, ya resuelto"
               dateLabel={yesterdayLabel}
               matches={yesterday}
               resolved
-              onOpenBonus={openBonus}
+              onEnter={() => scrollTo("entrar")}
             />
           </>
         )}
 
         {yesterday.length > 0 ? (
           <p className="px-4 text-[13px] leading-relaxed text-zinc-500">
-            De los {yesterday.length} pronósticos gratis resueltos ayer, acertamos{" "}
-            {resolvedHits}. Cada pick se cruza con el marcador final real.
+            De los {yesterday.length} pronósticos de ayer, la IA acertó {resolvedHits}.
+            Entra para ver el porqué de cada señal.
           </p>
         ) : null}
       </div>
 
       {leagues.length > 0 ? (
-        <section className="px-4 pb-10">
+        <section className="px-4 pb-8">
           <p className="text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
-            Ligas principales
+            Ligas de hoy
           </p>
           <div className="mt-3 grid grid-cols-2 gap-2">
             {leagues.map((league) => (
@@ -229,76 +193,63 @@ export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
         </section>
       ) : null}
 
-      <section className="px-4 pb-8">
-        <p className="text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-400">
-          Historial desde 2021
-        </p>
-        <h2 className="mt-2 text-center text-[1.65rem] font-semibold leading-tight text-zinc-50">
-          Un modelo propio de inteligencia futbolística
-        </h2>
-        <p className="mt-3 text-[14px] leading-relaxed text-zinc-400">
-          BD APEX AI valora partidos con forma reciente, cuotas implícitas y xG cuando
-          SportAPI lo publica. Cada día se actualizan los pronósticos de hoy, mañana y
-          los resueltos de ayer.
-        </p>
-      </section>
-
-      <section id="acceder" className="px-4 pb-10">
-        <button
-          type="button"
-          onClick={() => {
-            hapticTap();
-            setAccessOpen((open) => !open);
-          }}
-          className="flex w-full items-center justify-between rounded-2xl border border-[#1e2538] bg-panel px-4 py-3 text-left"
-        >
-          <span>
-            <span className="block text-[11px] uppercase tracking-[0.14em] text-zinc-500">
-              Ya tienes cuenta
-            </span>
-            <span className="text-sm font-semibold text-zinc-100">Acceder a BetData AI</span>
-          </span>
-          <ChevronDown className={`h-4 w-4 text-zinc-500 ${accessOpen ? "rotate-180" : ""}`} />
-        </button>
-        {accessOpen ? (
-          <div className="mt-2 rounded-2xl border border-[#1e2538] bg-panel p-3">
-            <Input
-              autoComplete="email"
-              placeholder="ID de usuario o correo"
-              value={accountId}
-              onChange={(event) => setAccountId(event.target.value)}
-              disabled={activating}
-            />
-            <Button
-              className="mt-2 w-full"
-              size="lg"
-              disabled={activating}
-              onClick={() => void handleActivate()}
-            >
-              Activar motor
+      <section id="entrar" className="px-4 pb-10">
+        <div className="rounded-[24px] border border-emerald-400/25 bg-[#121726] p-4">
+          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-emerald-300">
+            Registro
+          </p>
+          <h2 className="mt-2 text-xl font-black text-white">Entra y ver pronósticos</h2>
+          <p className="mt-1 text-[13px] text-slate-400">
+            {telegramUser
+              ? `Te reconocemos como ${telegramUser}. Un toque y estás dentro.`
+              : "Usuario de Telegram o correo. Así la IA te deja pasar."}
+          </p>
+          {telegramUser ? (
+            <Button className="mt-4 w-full" size="lg" disabled={activating} onClick={() => void handleActivate(telegramUser)}>
+              Continuar con Telegram
             </Button>
-          </div>
-        ) : null}
+          ) : (
+            <>
+              <Input
+                className="mt-4"
+                autoComplete="username"
+                placeholder="@usuario o correo"
+                value={accountId}
+                onChange={(event) => {
+                  setAccountId(event.target.value);
+                  setError("");
+                }}
+                disabled={activating}
+              />
+              {error ? <p className="mt-2 text-[12px] text-rose-300">{error}</p> : null}
+              <Button
+                className="mt-3 w-full"
+                size="lg"
+                disabled={activating}
+                onClick={() => void handleActivate()}
+              >
+                Entrar y ver pronósticos
+              </Button>
+            </>
+          )}
+        </div>
         <p className="mt-3 text-center text-[10px] text-zinc-600">
           +18. Análisis, no consejo de apuesta. Juega con responsabilidad.
         </p>
       </section>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[#1e2538] bg-[#0b0e17]/95 backdrop-blur-xl">
-        <div className="mx-auto grid max-w-md grid-cols-5 px-1 pb-[env(safe-area-inset-bottom)] pt-1">
+        <div className="mx-auto grid max-w-md grid-cols-3 px-1 pb-[env(safe-area-inset-bottom)] pt-1">
+          <NavItem icon={Trophy} label="Adelanto" onClick={() => scrollTo("pronosticos-gratis")} />
+          <NavItem icon={LogIn} label="Entrar" accent onClick={() => scrollTo("entrar")} />
           <NavItem
-            icon={Trophy}
-            label="Hoy"
-            onClick={() => scrollTo("pronosticos-gratis")}
+            icon={Send}
+            label="Telegram"
+            onClick={() => {
+              if (telegramUser) void handleActivate(telegramUser);
+              else scrollTo("entrar");
+            }}
           />
-          <NavItem
-            icon={CalendarDays}
-            label="Partidos"
-            onClick={() => scrollTo("pronosticos-gratis")}
-          />
-          <NavItem icon={Gift} label="Bono" accent onClick={openBonus} />
-          <NavItem icon={LogIn} label="Acceder" onClick={() => scrollTo("acceder")} />
-          <NavItem icon={UserPlus} label="Registro" onClick={openBonus} />
         </div>
       </nav>
 
@@ -325,7 +276,7 @@ function NavItem({
   onClick,
   accent = false,
 }: {
-  icon: typeof Gift;
+  icon: typeof LogIn;
   label: string;
   onClick: () => void;
   accent?: boolean;

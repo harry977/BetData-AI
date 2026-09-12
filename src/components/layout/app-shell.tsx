@@ -5,17 +5,13 @@ import { useEffect, useMemo, useState } from "react";
 import { BetDataLogo } from "@/components/brand/betdata-logo";
 import { AccountView } from "@/components/dashboard/account-view";
 import { LiveModeView } from "@/components/dashboard/live-mode-view";
-import { PartidosView } from "@/components/dashboard/partidos-view";
 import { SignalsView } from "@/components/dashboard/signals-view";
 import { BottomNav, type AppTab } from "@/components/layout/bottom-nav";
-import { HitsTicker } from "@/components/layout/hits-ticker";
-import { SyncBanner } from "@/components/layout/sync-banner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFixtures } from "@/hooks/use-fixtures";
 import { recordViewedSignal, readUnlockState } from "@/lib/storage";
-import type { DayBucket } from "@/lib/types";
-import { liveMatches, matchesForDay, recentHits } from "@/lib/utils";
+import { liveMatches } from "@/lib/utils";
 
 type AppShellProps = {
   onLock: () => void;
@@ -23,8 +19,7 @@ type AppShellProps = {
 
 export function AppShell({ onLock }: AppShellProps) {
   const { data, error, loading, reload } = useFixtures();
-  const [tab, setTab] = useState<AppTab>("ai");
-  const [day, setDay] = useState<DayBucket>("today");
+  const [tab, setTab] = useState<AppTab>("hoy");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [accountId, setAccountId] = useState("");
   useEffect(() => {
@@ -32,28 +27,22 @@ export function AppShell({ onLock }: AppShellProps) {
   }, []);
 
   const matches = useMemo(() => data?.response ?? [], [data]);
-  const hits = useMemo(() => recentHits(matches), [matches]);
-  const live = useMemo(() => liveMatches(matches), [matches]);
-  const tickerItems = live.length > 0 ? live.slice(0, 12) : hits;
+  const liveCount = useMemo(() => liveMatches(matches).length, [matches]);
   const liveMode = tab === "live";
-  const feedMode = tab === "ai";
 
   function handleSelect(id: number) {
-    const picked = matches.find((match) => match.id === id);
-    if (picked) setDay(picked.day);
     recordViewedSignal(id);
     setSelectedId(id);
   }
 
-  function handleDay(next: DayBucket) {
-    setDay(next);
-    const first = matchesForDay(matches, next)[0];
-    if (first) setSelectedId(first.id);
+  function openLive(id: number) {
+    handleSelect(id);
+    setTab("live");
   }
 
   function openFromAccount(id: number) {
     handleSelect(id);
-    setTab("ai");
+    setTab("hoy");
   }
 
   return (
@@ -62,12 +51,10 @@ export function AppShell({ onLock }: AppShellProps) {
         <header className="sticky top-0 z-30 border-b border-[#1e2538] bg-[#0b0e17]/95 backdrop-blur-xl">
           <div className="mx-auto flex max-w-md items-center justify-between px-4 py-2.5">
             <BetDataLogo />
-            <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-cyan-300">
-              AI live
+            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-300">
+              {liveCount > 0 ? `${liveCount} en juego` : "IA activa"}
             </span>
           </div>
-          {feedMode ? null : <HitsTicker hits={tickerItems} />}
-          {feedMode ? null : <SyncBanner />}
         </header>
       )}
 
@@ -97,20 +84,12 @@ export function AppShell({ onLock }: AppShellProps) {
 
         {!loading && !error ? (
           <>
-            {tab === "ai" ? (
+            {tab === "hoy" ? (
               <SignalsView
                 matches={matches}
                 selectedId={selectedId}
                 onSelect={handleSelect}
-              />
-            ) : null}
-            {tab === "partidos" ? (
-              <PartidosView
-                matches={matches}
-                day={day}
-                selectedId={selectedId}
-                onDayChange={handleDay}
-                onSelect={handleSelect}
+                onOpenLive={openLive}
               />
             ) : null}
             {tab === "live" ? (
