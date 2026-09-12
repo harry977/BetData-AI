@@ -23,7 +23,7 @@ La app queda en [http://127.0.0.1:43141](http://127.0.0.1:43141).
 ## Flujo
 
 1. **Landing** — “No le pagues más a los tipsters. La IA lo hace por ti.” CTA: *Entra con Telegram*.
-2. **Registro** — un toque con tu cuenta de Telegram (Mini App `initData` o Login Widget). Sin correo ni contraseña.
+2. **Registro** — Telegram (Mini App o Login Widget) y también desde el navegador. Sin correo ni contraseña.
 3. **Hoy** — misión, mejor señal en lenguaje claro y CTA para apostar/activar el bono de 500€, resto del día y rachas.
 4. **En directo** — solo partidos en juego, 9:16. Cada partido muestra la señal de la IA y el mismo CTA del bono. Si no hay live, estado vacío.
 5. **Mi cuenta** — progreso, boleto, bono de hasta 500€ (después de entrar) y ajustes.
@@ -37,7 +37,7 @@ Para volver a la landing usa *Cerrar sesión*.
 1. Crea un bot con [@BotFather](https://t.me/BotFather).
 2. Configura *Menu Button* / *Mini App* apuntando a la URL pública (HTTPS).
 3. En Telegram, *Entra con Telegram* usa el usuario de `initData` (un toque).
-4. En web, el Login Widget necesita el dominio en `/setdomain` y `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME`. Opcional: `TELEGRAM_BOT_TOKEN` para validar la firma.
+4. En el navegador, el mismo botón te deja entrar. Si configuras `NEXT_PUBLIC_TELEGRAM_BOT_ID` y `/setdomain`, abre el login oficial de Telegram. Opcional: `TELEGRAM_BOT_TOKEN` para validar la firma.
 
 ## RapidAPI (SportAPI / SofaScore)
 

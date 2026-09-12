@@ -3,33 +3,26 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  TELEGRAM_BOT_USERNAME,
-  TELEGRAM_OPEN_URL,
-} from "@/lib/constants";
+import { TELEGRAM_BOT_ID, TELEGRAM_BOT_USERNAME, TELEGRAM_OPEN_URL } from "@/lib/constants";
+import { readOrCreateBrowserIdentity } from "@/lib/storage";
 import {
   hapticTap,
   identityFromTelegramUser,
+  isTelegramMiniApp,
+  loginWithTelegramPopup,
   openExternal,
   readTelegramInitData,
   readTelegramUser,
   type TelegramIdentity,
+  type TelegramWidgetUser,
 } from "@/lib/telegram";
 import { cn } from "@/lib/utils";
-
-type TelegramWidgetUser = {
-  id: number;
-  first_name: string;
-  last_name?: string;
-  username?: string;
-  photo_url?: string;
-  auth_date: number;
-  hash: string;
-};
 
 type TelegramLoginProps = {
   onSuccess: (identity: TelegramIdentity) => void;
   busy?: boolean;
+  hint?: boolean;
+  showBrowserButton?: boolean;
   className?: string;
 };
 
@@ -42,9 +35,10 @@ declare global {
 export function TelegramLogin({
   onSuccess,
   busy = false,
+  hint = true,
+  showBrowserButton = true,
   className,
 }: TelegramLoginProps) {
-  const widgetHost = useRef<HTMLDivElement>(null);
   const [session, setSession] = useState<TelegramIdentity | null>(null);
   const [error, setError] = useState("");
   const [checking, setChecking] = useState(false);
@@ -55,7 +49,7 @@ export function TelegramLogin({
     const sync = () => setSession(readTelegramUser());
     sync();
     const tick = window.setInterval(sync, 300);
-    const stop = window.setTimeout(() => window.clearInterval(tick), 5000);
+    const stop = window.setTimeout(() => window.clearInterval(tick), 8000);
     return () => {
       window.clearInterval(tick);
       window.clearTimeout(stop);
@@ -64,31 +58,14 @@ export function TelegramLogin({
 
   useEffect(() => {
     window.onBetDataTelegramAuth = (user) => {
-      void finishWidget(user);
+      void finishTelegramUser(user);
     };
     return () => {
       delete window.onBetDataTelegramAuth;
     };
-    // The widget callback always reads the latest onSuccess via ref.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (session || !TELEGRAM_BOT_USERNAME || !widgetHost.current) return;
-    if (widgetHost.current.querySelector("script, iframe")) return;
-    const script = document.createElement("script");
-    script.src = "https://telegram.org/js/telegram-widget.js?22";
-    script.async = true;
-    script.setAttribute("data-telegram-login", TELEGRAM_BOT_USERNAME);
-    script.setAttribute("data-size", "large");
-    script.setAttribute("data-radius", "12");
-    script.setAttribute("data-userpic", "false");
-    script.setAttribute("data-request-access", "write");
-    script.setAttribute("data-onauth", "onBetDataTelegramAuth(user)");
-    widgetHost.current.appendChild(script);
-  }, [session]);
-
-  async function finishWidget(user: TelegramWidgetUser) {
+  async function finishTelegramUser(user: TelegramWidgetUser) {
     setError("");
     setChecking(true);
     hapticTap();
@@ -117,12 +94,7 @@ export function TelegramLogin({
     }
   }
 
-  async function enterWithMiniApp() {
-    const user = readTelegramUser();
-    if (!user) {
-      setError("Abre BetData IA desde Telegram para entrar con un toque.");
-      return;
-    }
+  async function enterWithMiniApp(user: TelegramIdentity) {
     setError("");
     setChecking(true);
     hapticTap();
@@ -160,73 +132,86 @@ export function TelegramLogin({
     }
   }
 
+  function enterFromBrowser() {
+    hapticTap();
+    onSuccess(readOrCreateBrowserIdentity());
+  }
+
+  async function enter() {
+    const live = readTelegramUser();
+    if (live) {
+      await enterWithMiniApp(live);
+      return;
+    }
+
+    if (TELEGRAM_BOT_ID) {
+      setChecking(true);
+      setError("");
+      try {
+        const user = await loginWithTelegramPopup(TELEGRAM_BOT_ID);
+        if (user) {
+          await finishTelegramUser(user);
+          return;
+        }
+        setChecking(false);
+        return;
+      } catch {
+        setChecking(false);
+      }
+    }
+
+    enterFromBrowser();
+  }
+
   const wait = busy || checking;
-  const showWidget = !session && Boolean(TELEGRAM_BOT_USERNAME);
+  const inTelegram = Boolean(session) || isTelegramMiniApp();
 
   return (
     <div className={cn("space-y-3", className)}>
-      {session || !showWidget ? (
+      <Button
+        type="button"
+        size="lg"
+        variant="telegram"
+        className="h-12 w-full rounded-full text-[15px] font-black"
+        disabled={wait}
+        onClick={() => void enter()}
+      >
+        {wait ? <Loader2 className="h-4 w-4 animate-spin" /> : <TelegramGlyph />}
+        {session ? `Entra con Telegram · ${session.label}` : "Entra con Telegram"}
+      </Button>
+
+      {!inTelegram && showBrowserButton ? (
         <Button
           type="button"
           size="lg"
-          variant="telegram"
-          className="h-12 w-full rounded-full text-[15px] font-black"
+          variant="outline"
+          className="h-12 w-full rounded-full text-[14px] font-black"
           disabled={wait}
-          onClick={() => {
-            const live = readTelegramUser();
-            if (live) {
-              void enterWithMiniApp();
-              return;
-            }
-            if (TELEGRAM_BOT_USERNAME) {
-              openExternal(TELEGRAM_OPEN_URL);
-              return;
-            }
-            setError("Abre BetData IA desde Telegram para entrar con un toque.");
-          }}
+          onClick={enterFromBrowser}
         >
-          {wait ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <TelegramGlyph />
-          )}
-          {session
-            ? `Entra con Telegram · ${session.label}`
-            : "Entra con Telegram"}
+          Entrar desde el navegador
         </Button>
-      ) : (
-        <div className="relative h-12 overflow-hidden rounded-full bg-[#2AABEE]">
-          <div className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center gap-2 text-[15px] font-black text-white">
-            <TelegramGlyph />
-            Entra con Telegram
-          </div>
-          <div
-            ref={widgetHost}
-            className="absolute inset-0 z-10 flex items-center justify-center opacity-0 [&>iframe]:!h-12 [&>iframe]:!min-w-full [&>iframe]:scale-x-150"
-          />
-        </div>
-      )}
+      ) : null}
 
-      {!session ? (
+      {hint ? (
         <p className="text-center text-[12px] leading-snug text-slate-400">
-          Un toque. Telegram confirma tu cuenta y entras. Sin contraseñas ni
-          formularios.
+          {inTelegram
+            ? "Un toque y entras con tu cuenta de Telegram. Sin contraseña."
+            : "En Telegram entra con tu cuenta. En el navegador, el mismo acceso te deja pasar."}
           {TELEGRAM_BOT_USERNAME ? (
             <>
               {" "}
-              Si no ves el botón,{" "}
+              También puedes{" "}
               <button
                 type="button"
                 className="font-semibold text-[#7dd3fc] underline-offset-2 hover:underline"
                 onClick={() => openExternal(TELEGRAM_OPEN_URL)}
               >
-                ábrela en Telegram
+                abrir la Mini App
               </button>
               .
             </>
-          ) : (
-            <> Ábrela desde Telegram para entrar al instante.</>
-          )}
+          ) : null}
         </p>
       ) : null}
 

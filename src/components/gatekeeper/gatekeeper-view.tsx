@@ -112,19 +112,12 @@ export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
           </p>
 
           <div className="mx-auto mt-6 flex max-w-sm flex-col gap-2.5">
-            {telegramUser ? (
-              <TelegramLogin onSuccess={handleActivate} busy={activating} />
-            ) : (
-              <Button
-                size="lg"
-                variant="telegram"
-                className="h-12 rounded-full text-base font-black"
-                onClick={() => scrollTo("entrar")}
-              >
-                <Send className="h-4 w-4" />
-                Entra con Telegram
-              </Button>
-            )}
+            <TelegramLogin
+              onSuccess={handleActivate}
+              busy={activating}
+              hint={false}
+              showBrowserButton={false}
+            />
             <Button
               size="lg"
               variant="outline"
@@ -203,7 +196,7 @@ export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
           <p className="mt-1 text-[13px] text-slate-400">
             {telegramUser
               ? `Te reconocemos como ${telegramUser.label}. Un toque y estás dentro.`
-              : "Regístrate o inicia sesión con tu cuenta de Telegram. Un toque, sin contraseña."}
+              : "En Telegram, un toque con tu cuenta. En el navegador, entra igual y mira los pronósticos."}
           </p>
           <TelegramLogin className="mt-4" onSuccess={handleActivate} busy={activating} />
         </div>

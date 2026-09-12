@@ -65,7 +65,7 @@ export async function POST(request: Request) {
   const user = fromInit ?? fallback;
   if (!user?.id) {
     return NextResponse.json(
-      { error: "Abre BetData IA desde Telegram para entrar." },
+      { error: "No hemos recibido la cuenta de Telegram." },
       { status: 400 },
     );
   }

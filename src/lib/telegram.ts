@@ -94,6 +94,17 @@ export type TelegramIdentity = {
   username?: string;
   firstName?: string;
   photoUrl?: string;
+  source?: "telegram" | "browser";
+};
+
+export type TelegramWidgetUser = {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  photo_url?: string;
+  auth_date: number;
+  hash: string;
 };
 
 export function identityFromTelegramUser(user: {
@@ -111,6 +122,7 @@ export function identityFromTelegramUser(user: {
     username: user.username,
     firstName: user.first_name,
     photoUrl: user.photo_url,
+    source: "telegram",
   };
 }
 
@@ -134,6 +146,37 @@ export function isTelegramMiniApp() {
     // preview en navegador
   }
   return Boolean(window.Telegram?.WebApp?.initDataUnsafe?.user || window.Telegram?.WebApp?.initData);
+}
+
+export function loadTelegramLoginApi() {
+  if (typeof window === "undefined") return Promise.reject(new Error("No window"));
+  if (window.Telegram?.Login?.auth) return Promise.resolve();
+  return new Promise<void>((resolve, reject) => {
+    const existing = document.querySelector("script[data-betdata-telegram-login]");
+    if (existing) {
+      existing.addEventListener("load", () => resolve());
+      existing.addEventListener("error", () => reject(new Error("Telegram Login no cargó")));
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://telegram.org/js/telegram-widget.js?22";
+    script.async = true;
+    script.dataset.betdataTelegramLogin = "1";
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Telegram Login no cargó"));
+    document.head.appendChild(script);
+  });
+}
+
+export async function loginWithTelegramPopup(botId: string) {
+  await loadTelegramLoginApi();
+  const auth = window.Telegram?.Login?.auth;
+  if (!auth) return null;
+  return new Promise<TelegramWidgetUser | null>((resolve) => {
+    auth({ bot_id: botId, request_access: "write", lang: "es" }, (user) => {
+      resolve(user || null);
+    });
+  });
 }
 
 export function hapticSuccess() {
@@ -170,6 +213,12 @@ declare global {
             photo_url?: string;
           };
         };
+      };
+      Login?: {
+        auth: (
+          options: { bot_id: string; request_access?: string; lang?: string },
+          callback: (user: TelegramWidgetUser | false | null) => void,
+        ) => void;
       };
     };
   }

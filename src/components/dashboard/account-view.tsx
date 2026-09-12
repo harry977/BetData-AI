@@ -57,7 +57,7 @@ export function AccountView({
 
       <section className="rounded-2xl border border-[#1e2538] bg-panel p-4">
         <p className="text-[10px] uppercase tracking-[0.16em] text-zinc-500">
-          Perfil de Telegram
+          {accountId.startsWith("@") ? "Perfil de Telegram" : "Sesión en este navegador"}
         </p>
         <p className="mt-1 truncate text-base font-semibold text-zinc-50">
           {accountId || "Cuenta de Telegram"}

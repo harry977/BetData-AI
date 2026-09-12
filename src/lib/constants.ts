@@ -16,6 +16,7 @@ export const STORAGE_KEYS = {
   viewedSignals: "betdata_ai_viewed_signals",
   unlocked: "isUnlocked",
   accountId: "betdata_ai_account_id",
+  browserSession: "betdata_ai_browser_session",
   legacyUnlocked: "betdata_ai_unlocked",
   legacyAccountId: "betdata_ai_partner_id",
 } as const;
@@ -47,6 +48,8 @@ export const RAPIDAPI_SPORT = {
 
 export const TELEGRAM_BOT_USERNAME =
   process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME?.replace(/^@/, "") ?? "";
+
+export const TELEGRAM_BOT_ID = process.env.NEXT_PUBLIC_TELEGRAM_BOT_ID ?? "";
 
 export const TELEGRAM_MINI_APP =
   process.env.NEXT_PUBLIC_TELEGRAM_MINI_APP ?? "";

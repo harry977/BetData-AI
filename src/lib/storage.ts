@@ -101,6 +101,30 @@ export function persistUnlock(accountId: string) {
   window.localStorage.removeItem(STORAGE_KEYS.legacyAccountId);
 }
 
+export function readOrCreateBrowserIdentity() {
+  if (typeof window === "undefined") {
+    return { id: 0, label: "Navegador", source: "browser" as const };
+  }
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEYS.browserSession);
+    if (raw) {
+      const parsed = JSON.parse(raw) as { id?: number; label?: string };
+      if (typeof parsed.id === "number" && parsed.label) {
+        return { id: parsed.id, label: parsed.label, source: "browser" as const };
+      }
+    }
+  } catch {
+    // create a new one below
+  }
+  const identity = {
+    id: Date.now() % 1_000_000_000,
+    label: "Navegador",
+    source: "browser" as const,
+  };
+  window.localStorage.setItem(STORAGE_KEYS.browserSession, JSON.stringify(identity));
+  return identity;
+}
+
 export function clearUnlock() {
   window.localStorage.removeItem(STORAGE_KEYS.unlocked);
   window.localStorage.removeItem(STORAGE_KEYS.accountId);
