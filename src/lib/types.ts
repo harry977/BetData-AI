@@ -98,6 +98,10 @@ export type FixturesPayload = {
   generatedAt: string;
   stats: PlatformStats;
   response: MatchInsight[];
+  matches?: MatchInsight[];
+  data?: MatchInsight[];
+  events?: MatchInsight[];
+  fixtures?: MatchInsight[];
   categories?: SportCategory[];
   error?: string;
 };
@@ -142,6 +146,10 @@ export type LiveMatchesPayload = {
   connected: boolean;
   generatedAt: string;
   matches: MatchInsight[];
+  data?: MatchInsight[];
+  events?: MatchInsight[];
+  fixtures?: MatchInsight[];
+  response?: MatchInsight[];
   cards: LiveMatchCard[];
   error?: string;
 };

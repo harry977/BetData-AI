@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { extractMatchRows } from "@/lib/sport-mapper";
+import { ingestSportFeedJson } from "@/lib/feed-rows";
 import type { FixturesPayload, MatchInsight } from "@/lib/types";
 
 const POLL_MS = 20_000;
@@ -11,37 +11,54 @@ export function useFixtures() {
   const [matches, setMatches] = useState<MatchInsight[]>([]);
   const [data, setData] = useState<FixturesPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const matchesRef = useRef(matches);
-  matchesRef.current = matches;
+  const [loading, setLoading] = useState(false);
   const inFlightRef = useRef(false);
 
-  const reload = useCallback(async (opts?: { silent?: boolean }) => {
+  const reload = useCallback(async () => {
     if (inFlightRef.current) return;
     inFlightRef.current = true;
-    const silent = Boolean(opts?.silent && matchesRef.current.length > 0);
-    if (!silent) setLoading(true);
     const controller = new AbortController();
     const timer = window.setTimeout(() => controller.abort(), CLIENT_TIMEOUT_MS);
     try {
-      const res = await fetch(`/api/fixtures?_=${Date.now()}`, {
+      const http = await fetch(`/api/fixtures?_=${Date.now()}`, {
         cache: "no-store",
         signal: controller.signal,
         headers: { "Cache-Control": "no-store" },
       });
-      if (!res.ok) {
-        throw new Error("No se pudieron cargar los pronósticos.");
+      const res = await http.json();
+      setLoading(false);
+      const rawMatches =
+        res?.data ||
+        res?.fixtures ||
+        res?.events ||
+        res?.matches ||
+        (Array.isArray(res) ? res : []);
+      const rows = ingestSportFeedJson(
+        Array.isArray(rawMatches) && rawMatches.length > 0 ? { matches: rawMatches } : res,
+      );
+      if (rows.length === 0) {
+        console.log("[DEBUG FRONTEND DATA]:", res);
       }
-      const json = (await res.json()) as FixturesPayload;
-      const rows = extractMatchRows(json);
       setMatches(rows);
       setData({
-        ...json,
+        source: res?.source ?? "sportapi",
+        connected: res?.connected === true || rows.length > 0,
+        generatedAt: res?.generatedAt ?? new Date().toISOString(),
+        stats: res?.stats ?? {
+          matchesAnalyzedToday: rows.length,
+          bankerHitRate: 0,
+          leaguesMonitored: 0,
+        },
         response: rows,
-        connected: json.connected === true || rows.length > 0,
+        matches: rows,
+        data: rows,
+        events: rows,
+        fixtures: rows,
+        error: rows.length === 0 ? res?.error : undefined,
       });
-      setError(rows.length === 0 && json.error ? json.error : null);
+      setError(rows.length === 0 && res?.error ? String(res.error) : null);
     } catch (err) {
+      setLoading(false);
       setError(
         err instanceof Error && err.name === "AbortError"
           ? "SportAPI tardó demasiado. Reintenta."
@@ -58,7 +75,7 @@ export function useFixtures() {
 
   useEffect(() => {
     void reload();
-    const id = window.setInterval(() => void reload({ silent: true }), POLL_MS);
+    const id = window.setInterval(() => void reload(), POLL_MS);
     return () => window.clearInterval(id);
   }, [reload]);
 

@@ -26,7 +26,8 @@ type LiveModeViewProps = {
 const BEATS = ["EN DIRECTO", "DATOS EN VIVO", "NUEVA LECTURA", "SEÑAL ACTIVA"] as const;
 
 export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProps) {
-  const playlist = useMemo(() => (matches.length ? matches : []), [matches]);
+  const rawMatches = matches;
+  const playlist = useMemo(() => (rawMatches.length ? rawMatches : []), [rawMatches]);
   const selected =
     playlist.find((match) => match.id === selectedId) ?? playlist[0] ?? null;
   const selectedIndex = selected
@@ -72,10 +73,26 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
 
   if (!selected) {
     return (
-      <div className="flex flex-1 items-center justify-center px-6 py-16 text-center">
+      <div className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
         <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">
-          {matches.length === 0 ? "Cargando partidos…" : "Elige un partido"}
+          {rawMatches.length === 0 ? "No hay partidos en el feed ahora." : "Elige un partido"}
         </p>
+        {rawMatches.length > 0 ? (
+          <div className="mt-6 w-full space-y-2 text-left">
+            {rawMatches.map((match, index) => (
+              <button
+                key={`${match.id}-${index}`}
+                type="button"
+                onClick={() => onSelect(match.id)}
+                className="w-full rounded-2xl border border-white/10 bg-white/5 p-3 text-left"
+              >
+                <p className="truncate text-[13px] font-black uppercase text-white">
+                  {match.home.name} {match.score.home ?? "–"}–{match.score.away ?? "–"} {match.away.name}
+                </p>
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
     );
   }
@@ -186,16 +203,14 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
           </button>
         ) : null}
 
-        {playlist.length > 1 ? (
+        {playlist.length > 0 ? (
           <div className="mt-6 space-y-3 pb-2">
             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
-              Más partidos en directo
+              Parrilla del feed · {playlist.length}
             </p>
-            {playlist
-              .filter((match) => match.id !== selected.id)
-              .map((match) => (
+            {playlist.map((match, index) => (
                 <div
-                  key={match.id}
+                  key={`${match.id}-${index}`}
                   className="rounded-2xl border border-white/10 bg-white/5 p-3 lg:min-h-[5.75rem] lg:p-5"
                 >
                   <button

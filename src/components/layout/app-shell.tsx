@@ -21,9 +21,8 @@ type AppShellProps = {
 };
 
 export function AppShell({ onLock }: AppShellProps) {
-  const { matches: fixtureMatches, error, loading, reload } = useFixtures();
-  const { matches: liveHookMatches, error: liveError, loading: liveLoading } =
-    useLiveMatches(true);
+  const { matches: fixtureMatches, error, reload } = useFixtures();
+  const { matches: liveHookMatches, error: liveError } = useLiveMatches(true);
   const [tab, setTab] = useState<AppTab>("hoy");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [accountId, setAccountId] = useState("");
@@ -39,7 +38,6 @@ export function AppShell({ onLock }: AppShellProps) {
   const feedConnected = matches.length > 0;
   const liveCount = useMemo(() => liveMatches(matches).length, [matches]);
   const liveMode = tab === "live";
-  const loadingFeed = (loading || liveLoading) && matches.length === 0;
   const feedError = matches.length === 0 ? error || liveError : null;
 
   function handleSelect(id: number) {
@@ -78,10 +76,8 @@ export function AppShell({ onLock }: AppShellProps) {
             {feedConnected
               ? liveCount > 0
                 ? `EN VIVO · CONECTADO A SPORTAPI · ${liveCount}`
-                : "EN VIVO · CONECTADO A SPORTAPI"
-              : loadingFeed
-                ? "Cargando…"
-                : "SportAPI"}
+                : `EN VIVO · CONECTADO A SPORTAPI · ${matches.length}`
+              : "SportAPI"}
           </span>
         </div>
         <div className="mx-auto hidden max-w-lg justify-center px-4 pb-1 lg:flex">
@@ -117,7 +113,6 @@ export function AppShell({ onLock }: AppShellProps) {
         {tab === "hoy" ? (
           <SignalsView
             matches={matches}
-            loading={loadingFeed}
             selectedId={selectedId}
             onSelect={handleSelect}
             onOpenLive={openLive}
@@ -125,7 +120,7 @@ export function AppShell({ onLock }: AppShellProps) {
         ) : null}
         {tab === "live" ? (
           <LiveModeView
-            matches={matches}
+            matches={liveHookMatches.length > 0 ? liveHookMatches : matches}
             selectedId={selectedId}
             onSelect={handleSelect}
           />

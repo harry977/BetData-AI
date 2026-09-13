@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { extractMatchRows, mergeLiveInsights } from "@/lib/sport-mapper";
+import { ingestSportFeedJson } from "@/lib/feed-rows";
+import { mergeLiveInsights } from "@/lib/sport-mapper";
 import type { LiveMatchesPayload, MatchInsight } from "@/lib/types";
 
 const POLL_MS = 8_000;
@@ -11,37 +12,50 @@ export function useLiveMatches(enabled = true) {
   const [matches, setMatches] = useState<MatchInsight[]>([]);
   const [data, setData] = useState<LiveMatchesPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(enabled);
-  const matchesRef = useRef(matches);
-  matchesRef.current = matches;
+  const [loading, setLoading] = useState(false);
   const inFlightRef = useRef(false);
 
-  const reload = useCallback(async (opts?: { silent?: boolean }) => {
-    if (inFlightRef.current) return;
+  const reload = useCallback(async () => {
+    if (!enabled || inFlightRef.current) return;
     inFlightRef.current = true;
-    const silent = Boolean(opts?.silent && matchesRef.current.length > 0);
-    if (!silent) setLoading(true);
     const controller = new AbortController();
     const timer = window.setTimeout(() => controller.abort(), CLIENT_TIMEOUT_MS);
     try {
-      const res = await fetch(`/api/matches/live?_=${Date.now()}`, {
+      const http = await fetch(`/api/matches/live?_=${Date.now()}`, {
         cache: "no-store",
         signal: controller.signal,
         headers: { "Cache-Control": "no-store" },
       });
-      if (!res.ok) {
-        throw new Error("No se pudieron cargar los partidos en directo.");
+      const res = await http.json();
+      setLoading(false);
+      const rawMatches =
+        res?.data ||
+        res?.fixtures ||
+        res?.events ||
+        res?.matches ||
+        (Array.isArray(res) ? res : []);
+      const rows = ingestSportFeedJson(
+        Array.isArray(rawMatches) && rawMatches.length > 0 ? { matches: rawMatches } : res,
+      );
+      if (rows.length === 0) {
+        console.log("[DEBUG FRONTEND DATA]:", res);
       }
-      const json = (await res.json()) as LiveMatchesPayload;
-      const rows = extractMatchRows(json);
       setMatches(rows);
       setData({
-        ...json,
+        source: res?.source ?? "sportapi",
+        connected: res?.connected === true || rows.length > 0,
+        generatedAt: res?.generatedAt ?? new Date().toISOString(),
         matches: rows,
-        connected: json.connected === true || rows.length > 0,
+        data: rows,
+        events: rows,
+        fixtures: rows,
+        response: rows,
+        cards: Array.isArray(res?.cards) ? res.cards : [],
+        error: rows.length === 0 ? res?.error : undefined,
       });
-      setError(rows.length === 0 && json.error ? json.error : null);
+      setError(rows.length === 0 && res?.error ? String(res.error) : null);
     } catch (err) {
+      setLoading(false);
       setError(
         err instanceof Error && err.name === "AbortError"
           ? "SportAPI tardó demasiado. Reintenta."
@@ -54,7 +68,7 @@ export function useLiveMatches(enabled = true) {
       inFlightRef.current = false;
       setLoading(false);
     }
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
     if (!enabled) {
@@ -62,7 +76,7 @@ export function useLiveMatches(enabled = true) {
       return;
     }
     void reload();
-    const id = window.setInterval(() => void reload({ silent: true }), POLL_MS);
+    const id = window.setInterval(() => void reload(), POLL_MS);
     return () => window.clearInterval(id);
   }, [enabled, reload]);
 

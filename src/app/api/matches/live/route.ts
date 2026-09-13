@@ -31,6 +31,10 @@ export async function GET() {
         connected: false,
         generatedAt: new Date().toISOString(),
         matches: [],
+        data: [],
+        events: [],
+        fixtures: [],
+        response: [],
         cards: [],
         error: message.includes("401")
           ? "SportAPI rechazó la clave (401)."

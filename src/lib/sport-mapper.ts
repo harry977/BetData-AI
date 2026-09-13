@@ -1,3 +1,4 @@
+import { ingestSportFeedJson } from "@/lib/feed-rows";
 import { buildLiveMetrics } from "@/lib/metrics";
 import type {
   DayBucket,
@@ -342,40 +343,33 @@ export function mergeLiveInsights(
   return Array.from(map.values());
 }
 
-function realRows(rows: MatchInsight[] | undefined) {
-  return (rows ?? []).filter((match) => match && typeof match.id === "number");
-}
-
 export function extractMatchRows(payload: unknown): MatchInsight[] {
-  if (!payload || typeof payload !== "object") return [];
-  const record = payload as Record<string, unknown>;
-  for (const key of ["matches", "response", "data", "events", "fixtures"] as const) {
-    const value = record[key];
-    if (!Array.isArray(value) || value.length === 0) continue;
-    const first = value[0];
-    if (first && typeof first === "object" && ("home" in first || "id" in first)) {
-      return value as MatchInsight[];
-    }
-  }
-  return [];
+  return ingestSportFeedJson(payload);
 }
 
 export function mergeMatchRows(...lists: MatchInsight[][]) {
   const map = new Map<number, MatchInsight>();
+  const extras: MatchInsight[] = [];
   for (const list of lists) {
     for (const row of list) {
-      if (row && typeof row.id === "number") map.set(row.id, row);
+      if (!row) continue;
+      const id = typeof row.id === "number" ? row.id : Number(row.id);
+      if (Number.isFinite(id)) {
+        map.set(id, { ...row, id });
+      } else {
+        extras.push(row);
+      }
     }
   }
-  return Array.from(map.values());
+  return [...Array.from(map.values()), ...extras];
 }
 
 export function composeMatchFeed(
   fixtures: FixturesPayload | null,
   live: LiveMatchesPayload | null,
 ): { matches: MatchInsight[]; connected: boolean; source: FeedSource } {
-  const fixtureRows = extractMatchRows(fixtures) || realRows(fixtures?.response);
-  const liveRows = extractMatchRows(live) || realRows(live?.matches);
+  const fixtureRows = extractMatchRows(fixtures);
+  const liveRows = extractMatchRows(live);
   const matches = mergeMatchRows(fixtureRows, liveRows);
   return {
     matches,

@@ -46,6 +46,10 @@ function payload(
       leaguesMonitored: PLATFORM_STATS.leaguesMonitored,
     },
     response,
+    matches: response,
+    data: response,
+    events: response,
+    fixtures: response,
     categories: [],
   };
 }
@@ -132,6 +136,10 @@ export async function getLiveMatchesFeed(): Promise<LiveMatchesPayload> {
     connected: false,
     generatedAt: new Date().toISOString(),
     matches: [],
+    data: [],
+    events: [],
+    fixtures: [],
+    response: [],
     cards: [],
   };
 
@@ -154,6 +162,10 @@ export async function getLiveMatchesFeed(): Promise<LiveMatchesPayload> {
       connected: true,
       generatedAt: new Date().toISOString(),
       matches,
+      data: matches,
+      events: matches,
+      fixtures: matches,
+      response: matches,
       cards: matches.map(toLiveMatchCard),
     };
   } catch (error) {
