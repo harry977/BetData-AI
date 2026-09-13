@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { TeamCrest } from "@/components/brand/team-crest";
-import { AiScan } from "@/components/signals/ai-scan";
 import { MissionCard } from "@/components/signals/mission-card";
 import { SignalCard } from "@/components/signals/signal-card";
 import { SignalCopy } from "@/components/signals/signal-copy";
@@ -12,7 +11,7 @@ import { MatchSheet } from "@/components/signals/match-sheet";
 import { ScanningLiveState } from "@/components/signals/scanning-live-state";
 import { madridYmd } from "@/lib/dates";
 import { recordMissionSignal, recordViewedSignal } from "@/lib/storage";
-import { activeSignals, featuredSignal, scanCounts } from "@/lib/signals";
+import { activeSignals, featuredSignal } from "@/lib/signals";
 import { hapticTap } from "@/lib/telegram";
 import { isBanker, matchesForDay } from "@/lib/utils";
 import type { MatchInsight } from "@/lib/types";
@@ -23,8 +22,6 @@ type SignalsViewProps = {
   onSelect: (id: number) => void;
   onOpenLive: (id: number) => void;
 };
-
-const SCAN_KEY = "betdata_ai_scan_day";
 
 export function SignalsView({
   matches,
@@ -51,21 +48,16 @@ export function SignalsView({
         .sort((a, b) => a.kickoffIso.localeCompare(b.kickoffIso)),
     [matches],
   );
-  const counts = useMemo(() => scanCounts(matches), [matches]);
+  const leftover = useMemo(() => {
+    const shown = new Set(
+      [...liveNow, ...todayRest, ...tomorrow, featured]
+        .filter((match): match is MatchInsight => Boolean(match))
+        .map((match) => match.id),
+    );
+    return matches.filter((match) => !shown.has(match.id));
+  }, [matches, liveNow, todayRest, tomorrow, featured]);
   const [whyMatch, setWhyMatch] = useState<MatchInsight | null>(null);
   const [missionKey, setMissionKey] = useState(0);
-  const [scanning, setScanning] = useState(false);
-
-  useEffect(() => {
-    const day = madridYmd();
-    try {
-      if (window.sessionStorage.getItem(SCAN_KEY) === day) return;
-      window.sessionStorage.setItem(SCAN_KEY, day);
-      setScanning(true);
-    } catch {
-      setScanning(true);
-    }
-  }, []);
 
   function openWhy(match: MatchInsight) {
     hapticTap();
@@ -84,14 +76,6 @@ export function SignalsView({
 
   return (
     <div className="space-y-5">
-      {scanning ? (
-        <AiScan
-          matches={counts.matches}
-          signals={counts.signals}
-          onDone={() => setScanning(false)}
-        />
-      ) : null}
-
       <header>
         <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-neon">
           <LivePulse />
@@ -180,6 +164,22 @@ export function SignalsView({
                 <SignalCopy match={match} size="sm" />
               </div>
             </button>
+          ))}
+        </section>
+      ) : null}
+
+      {leftover.length > 0 && liveNow.length === 0 && todayRest.length === 0 && tomorrow.length === 0 ? (
+        <section className="space-y-2">
+          <h2 className="text-[11px] font-black uppercase tracking-[0.16em] text-orange-300">
+            Partidos del feed
+          </h2>
+          {leftover.slice(0, 24).map((match) => (
+            <SignalCard
+              key={match.id}
+              match={match}
+              compact
+              onSelect={() => openWhy(match)}
+            />
           ))}
         </section>
       ) : null}

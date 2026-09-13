@@ -333,10 +333,13 @@ export async function getLiveMatchesFeed(): Promise<LiveMatchesPayload> {
   try {
     const liveEvents = await fetchLiveEvents();
     const matches = capLiveMatches(
-      liveEvents
-        .map((event) => toMatchInsight(event, defaultOdds(), today))
-        .filter((match) => isInPlayStatus(match.status)),
+      liveEvents.map((event) => {
+        const match = toMatchInsight(event, defaultOdds(), today);
+        if (match.status === "NS") return { ...match, status: "LIVE" as const };
+        return match;
+      }),
     );
+    console.info(`[sportapi] live feed mapped ${matches.length}/${liveEvents.length}`);
     return {
       source: "sportapi",
       connected: true,
@@ -344,7 +347,16 @@ export async function getLiveMatchesFeed(): Promise<LiveMatchesPayload> {
       matches,
       cards: matches.map(toLiveMatchCard),
     };
-  } catch {
+  } catch (error) {
+    const status =
+      error && typeof error === "object" && "status" in error
+        ? Number((error as { status?: number }).status)
+        : 0;
+    console.error(
+      "[sportapi] live feed failed",
+      status || "",
+      error instanceof Error ? error.message : error,
+    );
     return empty;
   }
 }

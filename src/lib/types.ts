@@ -99,6 +99,7 @@ export type FixturesPayload = {
   stats: PlatformStats;
   response: MatchInsight[];
   categories?: SportCategory[];
+  error?: string;
 };
 
 export type MatchIncidentType =
@@ -142,6 +143,7 @@ export type LiveMatchesPayload = {
   generatedAt: string;
   matches: MatchInsight[];
   cards: LiveMatchCard[];
+  error?: string;
 };
 
 export type CategoriesPayload = {

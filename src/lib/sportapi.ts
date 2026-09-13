@@ -202,10 +202,46 @@ export async function sportGetBinary(
   }
 }
 
+async function sportGetOnce<T>(
+  path: string,
+  timeoutMs: number,
+): Promise<T> {
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const { status, text } = await sportFetch(path, timeoutMs);
+    if (status === 429 && attempt < 2) {
+      const waitMs = 500 * 2 ** attempt;
+      console.warn(`[sportapi] 429 ${path} retry ${attempt + 1} in ${waitMs}ms`);
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+      continue;
+    }
+    if (status === 401 || status === 403) {
+      console.error(`[sportapi] ${status} unauthorized ${path}`);
+      throw new SportApiError(status, path, `SportAPI ${status} ${path}`);
+    }
+    if (status < 200 || status >= 300) {
+      lastError = new SportApiError(
+        status,
+        path,
+        `SportAPI ${status} ${path} ${text.slice(0, 160)}`,
+      );
+      console.error(`[sportapi] ${status} ${path}`);
+      break;
+    }
+    try {
+      return JSON.parse(text) as T;
+    } catch {
+      throw new SportApiError(status, path, `SportAPI JSON inválido ${path}`);
+    }
+  }
+  throw lastError ?? new SportApiError(0, path, `SportAPI failed ${path}`);
+}
+
 export async function sportGet<T = unknown>(
   path: string,
   ttlMs = 0,
   timeoutMs = DEFAULT_TIMEOUT_MS,
+  bypassQueue = false,
 ): Promise<T> {
   const cacheKey = `get:${path}`;
   if (ttlMs > 0) {
@@ -213,30 +249,9 @@ export async function sportGet<T = unknown>(
     if (cached !== null) return cached;
   }
 
-  const json = await enqueue(async () => {
-    let lastError: Error | null = null;
-    for (let attempt = 0; attempt < 2; attempt += 1) {
-      const { status, text } = await sportFetch(path, timeoutMs);
-      if (status === 429 && attempt === 0) {
-        await new Promise((resolve) => setTimeout(resolve, 800));
-        continue;
-      }
-      if (status < 200 || status >= 300) {
-        lastError = new SportApiError(
-          status,
-          path,
-          `SportAPI ${status} ${path} ${text.slice(0, 160)}`,
-        );
-        break;
-      }
-      try {
-        return JSON.parse(text) as T;
-      } catch {
-        throw new SportApiError(status, path, `SportAPI JSON inválido ${path}`);
-      }
-    }
-    throw lastError ?? new SportApiError(0, path, `SportAPI failed ${path}`);
-  });
+  const json = bypassQueue
+    ? await sportGetOnce<T>(path, timeoutMs)
+    : await enqueue(() => sportGetOnce<T>(path, timeoutMs));
 
   if (ttlMs > 0) writeCache(cacheKey, json);
   return json;
@@ -457,8 +472,10 @@ export async function fetchAllScheduledEvents(date: string): Promise<SportEvent[
 
 export async function fetchLiveEvents(): Promise<SportEvent[]> {
   const path = `/api/v1/sport/football/events/live`;
-  const json = await sportGet(path, 0);
-  return parseEventList(json);
+  const json = await sportGet(path, 0, DEFAULT_TIMEOUT_MS, true);
+  const events = parseEventList(json);
+  console.info(`[sportapi] live events ${events.length}`);
+  return events;
 }
 
 export async function fetchEvent(eventId: number): Promise<SportEvent | null> {

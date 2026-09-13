@@ -15,7 +15,6 @@ import { useFixtures } from "@/hooks/use-fixtures";
 import { useLiveMatches } from "@/hooks/use-live-matches";
 import { composeMatchFeed } from "@/lib/sport-mapper";
 import { recordViewedSignal, readUnlockState } from "@/lib/storage";
-import type { MatchInsight } from "@/lib/types";
 import { cn, liveMatches } from "@/lib/utils";
 
 type AppShellProps = {
@@ -24,29 +23,30 @@ type AppShellProps = {
 
 export function AppShell({ onLock }: AppShellProps) {
   const { data, error, loading, reload } = useFixtures();
-  const { data: liveData } = useLiveMatches(true);
+  const { data: liveData, error: liveError, loading: liveLoading } = useLiveMatches(true);
   const [tab, setTab] = useState<AppTab>("hoy");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [accountId, setAccountId] = useState("");
-  const composed = useMemo(
-    () => composeMatchFeed(data, liveData),
-    [data, liveData],
-  );
-  const [matches, setMatches] = useState<MatchInsight[]>([]);
 
   useEffect(() => {
     setAccountId(readUnlockState().accountId);
   }, []);
 
-  useEffect(() => {
-    setMatches(composed.matches);
-  }, [composed]);
-
-  const visibleMatches = composed.matches.length > 0 ? composed.matches : matches;
+  const composed = useMemo(
+    () => composeMatchFeed(data, liveData),
+    [data, liveData],
+  );
+  const visibleMatches = composed.matches;
   const feedConnected = composed.connected || visibleMatches.length > 0;
   const liveCount = useMemo(() => liveMatches(visibleMatches).length, [visibleMatches]);
   const liveMode = tab === "live";
-  const showScanning = visibleMatches.length === 0 && !error && loading;
+  const waiting =
+    visibleMatches.length === 0 &&
+    !data &&
+    !liveData &&
+    (loading || liveLoading);
+  const feedError =
+    visibleMatches.length === 0 ? error || liveError || data?.error || liveData?.error : null;
 
   function handleSelect(id: number) {
     recordViewedSignal(id);
@@ -103,12 +103,12 @@ export function AppShell({ onLock }: AppShellProps) {
             : "mx-auto max-w-md px-3 pb-nav pt-4 lg:max-w-lg lg:px-4 lg:pb-10 lg:pt-6"
         }
       >
-        {error && visibleMatches.length === 0 ? (
+        {feedError ? (
           <div className="rounded-xl border border-red-500/30 bg-red-950/40 p-4 text-sm text-red-200">
             <div className="flex items-start gap-2">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
               <div className="space-y-3">
-                <p>{error}</p>
+                <p>{feedError}</p>
                 <Button variant="outline" size="sm" onClick={() => void reload()}>
                   <RefreshCcw className="h-3.5 w-3.5" />
                   Reintentar
@@ -118,9 +118,9 @@ export function AppShell({ onLock }: AppShellProps) {
           </div>
         ) : null}
 
-        {showScanning ? <ScanningLiveState /> : null}
+        {waiting ? <ScanningLiveState /> : null}
 
-        {visibleMatches.length > 0 || (!loading && !error) ? (
+        {visibleMatches.length > 0 || (!waiting && !feedError) ? (
           <>
             {tab === "hoy" ? (
               <SignalsView

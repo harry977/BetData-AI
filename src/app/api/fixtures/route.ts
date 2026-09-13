@@ -21,10 +21,23 @@ export async function GET(request: Request) {
       cachedCategoryIds.length ? cachedCategoryIds : undefined,
     );
     return NextResponse.json(payload, { headers: NO_STORE });
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "SportAPI fixtures failed";
+    console.error("[sportapi] /api/fixtures", message);
     return NextResponse.json(
-      { error: "No se pudieron cargar los pronósticos." },
-      { status: 502, headers: NO_STORE },
+      {
+        source: "sportapi",
+        connected: false,
+        generatedAt: new Date().toISOString(),
+        stats: { matchesAnalyzedToday: 0, bankerHitRate: 0, leaguesMonitored: 0 },
+        response: [],
+        error: message.includes("401")
+          ? "SportAPI rechazó la clave (401)."
+          : message.includes("429")
+            ? "SportAPI limitó las peticiones (429). Reintenta en unos segundos."
+            : "No se pudieron cargar los pronósticos.",
+      },
+      { status: 200, headers: NO_STORE },
     );
   }
 }
