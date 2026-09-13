@@ -48,11 +48,11 @@ export function BetBuilderView({ matches }: BetBuilderViewProps) {
         </p>
       </div>
 
-      <div className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 p-3">
-        <p className="text-[11px] uppercase tracking-wide text-emerald-300">
+      <div className="rounded-xl border border-neon/30 bg-neon/10 p-3">
+        <p className="text-[11px] uppercase tracking-wide text-neon">
           Boleto combinado · {selected.length} selecciones
         </p>
-        <p className="mt-1 font-mono text-2xl text-emerald-400">
+        <p className="mt-1 font-mono text-2xl text-neon">
           {selected.length ? formatOdds(combinedOdds) : "—"}
         </p>
         <div className="mt-2 space-y-1">

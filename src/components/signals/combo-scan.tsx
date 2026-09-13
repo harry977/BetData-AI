@@ -35,7 +35,7 @@ export function ComboScan({ onDone }: { onDone: () => void }) {
       </p>
       <ul className="mt-3 space-y-1.5">
         {LINES.slice(0, line + 1).map((item, index) => (
-          <li key={item} className={index === line ? "text-[#00E676]" : "text-slate-400"}>
+          <li key={item} className={index === line ? "text-neon" : "text-slate-400"}>
             {index === line ? "▸ " : "✓ "}
             {item}
           </li>

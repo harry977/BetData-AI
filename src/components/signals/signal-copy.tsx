@@ -33,7 +33,7 @@ export function SignalCopy({
           size === "lg" && "text-sm lg:text-xl",
           size === "md" && "text-[12px] lg:text-base",
           size === "sm" && "text-[11px] lg:text-sm",
-          hero ? "text-white lg:mt-2 lg:text-4xl lg:font-black lg:leading-tight lg:tracking-tight" : "text-emerald-300/90",
+          hero ? "text-white lg:mt-2 lg:text-4xl lg:font-black lg:leading-tight lg:tracking-tight" : "text-neon/90",
         )}
       >
         {copy.market}

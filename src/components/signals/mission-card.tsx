@@ -22,7 +22,7 @@ export function MissionCard({ refreshKey }: { refreshKey: number }) {
       </p>
       {complete ? (
         <>
-          <p className="mt-3 text-lg font-black uppercase text-emerald-300">Misión completada</p>
+          <p className="mt-3 text-lg font-black uppercase text-neon">Misión completada</p>
           <p className="mt-1 text-[13px] font-semibold text-slate-300">
             Has abierto 3 señales fuertes. Vuelve mañana a por otra racha.
           </p>

@@ -12,9 +12,9 @@ type ConfidenceBarProps = {
 };
 
 const tones = {
-  neon: "from-emerald-600 via-emerald-400 to-cyan-400",
-  signal: "from-cyan-700 via-cyan-400 to-emerald-400",
-  amber: "from-amber-600 via-amber-400 to-emerald-400",
+  neon: "from-[#6b9900] via-neon to-cyan-400",
+  signal: "from-cyan-700 via-cyan-400 to-neon",
+  amber: "from-amber-600 via-amber-400 to-neon",
 };
 
 export function ConfidenceBar({

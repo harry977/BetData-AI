@@ -37,7 +37,7 @@ export function HitsTicker({ hits }: HitsTickerProps) {
               <span className="whitespace-nowrap text-[11px] text-zinc-300">
                 {match.home.code} vs {match.away.code}
               </span>
-              <span className="whitespace-nowrap text-[11px] font-semibold text-emerald-400">
+              <span className="whitespace-nowrap text-[11px] font-semibold text-neon">
                 {explainTip(match.bestTip, match.home.name, match.away.name).plain}
               </span>
               <span className="text-[#1e2538]">•</span>

@@ -25,7 +25,7 @@ export function signalRarity(value: number): SignalRarity {
 export function rarityTone(rarity: SignalRarity) {
   if (rarity === "ELITE") return "text-violet-300 border-violet-400/40";
   if (rarity === "STRONG") return "text-cyan-300 border-cyan-400/40";
-  return "text-emerald-300 border-emerald-500/30";
+  return "text-neon border-neon/30";
 }
 
 export type WhyMeter = { key: string; label: string; value: number };

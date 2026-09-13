@@ -11,7 +11,7 @@ export function BetBonusCta({ className }: { className?: string }) {
       type="button"
       size="lg"
       className={cn(
-        "h-12 w-full rounded-2xl text-[15px] font-black shadow-[0_0_24px_rgba(16,185,129,0.35)]",
+        "h-12 w-full rounded-2xl text-[15px] font-black shadow-[0_0_24px_rgba(184,255,0,0.35)]",
         className,
       )}
       onClick={(event) => {

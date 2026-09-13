@@ -101,9 +101,9 @@ export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
       </header>
 
       <section className="relative overflow-hidden px-4 pb-8 pt-10 text-center">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(16,185,129,0.22),transparent_42%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(184,255,0,0.22),transparent_42%)]" />
         <div className="relative">
-          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-400">
+          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-neon">
             {BRAND.name}
           </p>
           <h1 className="mt-3 text-[2rem] font-black leading-[1.12] tracking-tight text-zinc-50">
@@ -228,7 +228,7 @@ export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
             exit={{ opacity: 0 }}
             className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-[#0b0e17]/92 px-6 text-center backdrop-blur-md"
           >
-            <Loader2 className="h-9 w-9 animate-spin text-emerald-400" />
+            <Loader2 className="h-9 w-9 animate-spin text-neon" />
             <p className="text-base font-medium text-zinc-100">{statusText}</p>
           </motion.div>
         ) : null}
@@ -253,7 +253,7 @@ function NavItem({
       type="button"
       onClick={onClick}
       className={`flex min-h-[3.5rem] flex-col items-center justify-center gap-0.5 text-[10px] font-semibold ${
-        accent ? "text-emerald-400" : "text-zinc-500"
+        accent ? "text-neon" : "text-zinc-500"
       }`}
     >
       <Icon className="h-5 w-5" />

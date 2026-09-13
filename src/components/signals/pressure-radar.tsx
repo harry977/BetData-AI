@@ -20,7 +20,7 @@ export function PressureRadar({ match, className }: PressureRadarProps) {
         <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400 lg:text-xs lg:text-gray-300">
           {split.live ? "Radar de presión · 5 min" : "Radar de presión"}
         </p>
-        <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#00E676] lg:text-xs">
+        <p className="text-[10px] font-black uppercase tracking-[0.12em] text-neon lg:text-xs">
           {split.dominant === "even"
             ? "Empate técnico"
             : `${split.dominant === "home" ? match.home.code : match.away.code} ${split.pressureIndex}%`}
@@ -35,7 +35,7 @@ export function PressureRadar({ match, className }: PressureRadarProps) {
         <div
           className={cn(
             "relative h-full transition-[width] duration-700 ease-out",
-            split.dominant === "home" ? "bg-[#00E676]" : "bg-emerald-950",
+            split.dominant === "home" ? "bg-neon" : "bg-[#1a2200]",
             homeHot && "animate-pressure-ping",
           )}
           style={{ width: `${split.homePct}%` }}
@@ -43,7 +43,7 @@ export function PressureRadar({ match, className }: PressureRadarProps) {
         <div
           className={cn(
             "relative h-full transition-[width] duration-700 ease-out",
-            split.dominant === "away" ? "bg-[#00E676]" : "bg-slate-600/80",
+            split.dominant === "away" ? "bg-neon" : "bg-slate-600/80",
             awayHot && "animate-pressure-ping",
           )}
           style={{ width: `${split.awayPct}%` }}
@@ -54,22 +54,22 @@ export function PressureRadar({ match, className }: PressureRadarProps) {
         <span
           className={cn(
             "inline-flex items-center gap-1.5",
-            split.dominant === "home" ? "text-[#00E676]" : "text-slate-400",
+            split.dominant === "home" ? "text-neon" : "text-slate-400",
           )}
         >
           {match.home.code} {split.homePct}%
           {homeHot ? (
-            <span className="h-1.5 w-1.5 animate-ping rounded-full bg-[#00E676]" />
+            <span className="h-1.5 w-1.5 animate-ping rounded-full bg-neon" />
           ) : null}
         </span>
         <span
           className={cn(
             "inline-flex items-center gap-1.5",
-            split.dominant === "away" ? "text-[#00E676]" : "text-slate-400",
+            split.dominant === "away" ? "text-neon" : "text-slate-400",
           )}
         >
           {awayHot ? (
-            <span className="h-1.5 w-1.5 animate-ping rounded-full bg-[#00E676]" />
+            <span className="h-1.5 w-1.5 animate-ping rounded-full bg-neon" />
           ) : null}
           {match.away.code} {split.awayPct}%
         </span>

@@ -15,7 +15,7 @@ import type {
 } from "@/services/sportApi";
 
 const TEAM_COLORS: [string, string][] = [
-  ["#10b981", "#064e3b"],
+  ["#B8FF00", "#3d4d00"],
   ["#06b6d4", "#164e63"],
   ["#f59e0b", "#78350f"],
   ["#ef4444", "#7f1d1d"],

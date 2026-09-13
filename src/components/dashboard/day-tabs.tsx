@@ -28,7 +28,7 @@ export function DayTabs({ value, onChange }: DayTabsProps) {
             onClick={() => onChange(tab.id)}
             className={cn(
               "rounded-lg px-2 py-2 text-[11px] font-semibold",
-              active ? "bg-emerald-500/15 text-emerald-300" : "text-zinc-500",
+              active ? "bg-neon/15 text-neon" : "text-zinc-500",
             )}
           >
             {tab.label}

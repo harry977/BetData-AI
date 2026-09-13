@@ -18,7 +18,7 @@ export function DailyTicket({ matches, selectedId, onSelect }: DailyTicketProps)
     <section className="space-y-2">
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
-          <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
+          <Sparkles className="h-3.5 w-3.5 text-neon" />
           Boleto del Día
         </h2>
         <Badge variant="default">Bankers +70%</Badge>

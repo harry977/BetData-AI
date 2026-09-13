@@ -15,16 +15,16 @@ export function ConfidenceMeter({
   const rarity = signalRarity(confidence);
   const pct = Math.min(100, Math.max(0, (confidence / 10) * 100));
   const fill =
-    band === "HIGH" ? "bg-emerald-400 lg:bg-[#00E676]" : band === "MEDIUM" ? "bg-amber-400" : "bg-slate-400";
+    band === "HIGH" ? "bg-neon" : band === "MEDIUM" ? "bg-amber-400" : "bg-slate-400";
   const color =
-    band === "HIGH" ? "text-emerald-300" : band === "MEDIUM" ? "text-amber-300" : "text-slate-400";
+    band === "HIGH" ? "text-neon" : band === "MEDIUM" ? "text-amber-300" : "text-slate-400";
 
   return (
     <div className={cn("space-y-1.5", compact && "space-y-1")}>
       <p
         className={cn(
           "font-black leading-none tabular-nums",
-          compact ? "text-2xl text-white" : "text-3xl text-white lg:text-6xl lg:text-[#00E676] lg:drop-shadow-[0_0_22px_rgba(0,230,118,0.72)]",
+          compact ? "text-2xl text-white" : "text-3xl text-white lg:text-6xl lg:text-neon lg:drop-shadow-[0_0_22px_rgba(184,255,0,0.72)]",
         )}
       >
         {confidence.toFixed(1)}

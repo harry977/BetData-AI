@@ -93,7 +93,7 @@ export function CombinadasView({ matches }: CombinadasViewProps) {
   return (
     <div className="space-y-5">
       <header>
-        <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-[#00E676]">
+        <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-neon">
           <Layers className="h-4 w-4" />
           Combinadas IA
         </p>
@@ -109,7 +109,7 @@ export function CombinadasView({ matches }: CombinadasViewProps) {
             <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
               Cuota total objetivo
             </p>
-            <p className="font-mono text-2xl font-black tabular-nums text-[#00E676]">
+            <p className="font-mono text-2xl font-black tabular-nums text-neon">
               {targetOdds.toFixed(2)}
             </p>
           </div>
@@ -120,7 +120,7 @@ export function CombinadasView({ matches }: CombinadasViewProps) {
             step={0.05}
             value={targetOdds}
             onChange={(event) => setTargetOdds(Number(event.target.value))}
-            className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-[#00E676]"
+            className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-neon"
             aria-label="Cuota total objetivo"
           />
           <div className="mt-3 flex flex-wrap gap-2">
@@ -135,7 +135,7 @@ export function CombinadasView({ matches }: CombinadasViewProps) {
                 className={cn(
                   "rounded-full border px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em]",
                   Math.abs(targetOdds - preset.value) < 0.05
-                    ? "border-[#00E676] bg-[#00E676]/15 text-[#00E676]"
+                    ? "border-neon bg-neon/15 text-neon"
                     : "border-white/10 text-slate-300",
                 )}
               >
@@ -161,7 +161,7 @@ export function CombinadasView({ matches }: CombinadasViewProps) {
                 className={cn(
                   "rounded-2xl border px-1 py-2 text-[11px] font-black uppercase tracking-[0.06em]",
                   legs === option.id
-                    ? "border-[#00E676] bg-[#00E676]/15 text-[#00E676]"
+                    ? "border-neon bg-neon/15 text-neon"
                     : "border-white/10 text-slate-300",
                 )}
               >
@@ -186,7 +186,7 @@ export function CombinadasView({ matches }: CombinadasViewProps) {
                   className={cn(
                     "rounded-full border px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.06em]",
                     on
-                      ? "border-[#00E676] bg-[#00E676]/15 text-[#00E676]"
+                      ? "border-neon bg-neon/15 text-neon"
                       : "border-white/10 text-slate-400",
                   )}
                 >
@@ -220,7 +220,7 @@ export function CombinadasView({ matches }: CombinadasViewProps) {
             step={0.1}
             value={minConfidence}
             onChange={(event) => setMinConfidence(Number(event.target.value))}
-            className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-[#00E676]"
+            className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-neon"
             aria-label="Confianza mínima"
           />
         </div>
@@ -250,15 +250,15 @@ export function CombinadasView({ matches }: CombinadasViewProps) {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
-            className="rounded-[28px] border border-[#00E676]/40 bg-[#04150c] p-4 shadow-[0_0_28px_rgba(0,230,118,0.18)]"
+            className="rounded-[28px] border border-neon/40 bg-[#121800] p-4 shadow-[0_0_28px_rgba(184,255,0,0.18)]"
           >
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#00E676]">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-neon">
               Boleto combinado IA
             </p>
-            <p className="mt-2 text-4xl font-black tabular-nums text-[#00E676]">
+            <p className="mt-2 text-4xl font-black tabular-nums text-neon">
               {formatOdds(ticket.totalOdds)}
             </p>
-            <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.12em] text-emerald-200/80">
+            <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.12em] text-neon/80">
               Objetivo {formatOdds(ticket.targetOdds)} · media {ticket.avgConfidence}/10
             </p>
 
@@ -284,9 +284,9 @@ export function CombinadasView({ matches }: CombinadasViewProps) {
                       <p className="font-mono text-sm font-black text-white">
                         {formatOdds(leg.odds)}
                       </p>
-                      <p className="mt-1 text-lg font-black tabular-nums text-[#00E676]">
+                      <p className="mt-1 text-lg font-black tabular-nums text-neon">
                         {leg.confidence.toFixed(1)}
-                        <span className="text-xs text-emerald-200/70">/10</span>
+                        <span className="text-xs text-neon/70">/10</span>
                       </p>
                     </div>
                   </div>

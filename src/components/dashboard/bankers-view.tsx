@@ -29,14 +29,14 @@ export function BankersView({
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-400">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-neon">
           Con tecnología de BD APEX AI
         </p>
         <h1 className="mt-1 text-xl font-semibold text-zinc-50">
           Pronóstico del Día y Boleto del Día
         </h1>
         <p className="mt-1 text-[13px] leading-relaxed text-zinc-400">
-          El Pronóstico del Día y el Boleto del Día de BetData AI: picks banker de
+          El Pronóstico del Día y el Boleto del Día de RadarBet IA: picks banker de
           fútbol elegidos por la IA con una confianza superior a 8/10, más un boleto
           listo para jugar.
         </p>
@@ -89,8 +89,8 @@ export function BankersView({
 
 function MetricBadge({ label }: { label: string }) {
   return (
-    <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-2 py-2">
-      <p className="text-center text-[9px] font-semibold uppercase leading-tight tracking-wide text-emerald-300">
+    <div className="rounded-xl border border-neon/25 bg-neon/10 px-2 py-2">
+      <p className="text-center text-[9px] font-semibold uppercase leading-tight tracking-wide text-neon">
         {label}
       </p>
     </div>

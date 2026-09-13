@@ -10,7 +10,7 @@
     --card-foreground: 210 40% 96%;
     --popover: 228 28% 10%;
     --popover-foreground: 210 40% 96%;
-    --primary: 160 84% 39%;
+    --primary: 77 100% 50%;
     --primary-foreground: 226 36% 7%;
     --secondary: 227 24% 14%;
     --secondary-foreground: 210 40% 96%;
@@ -22,7 +22,7 @@
     --destructive-foreground: 0 0% 100%;
     --border: 227 22% 18%;
     --input: 227 22% 18%;
-    --ring: 160 84% 39%;
+    --ring: 77 100% 50%;
     --radius: 0.9rem;
   }
 
@@ -39,7 +39,7 @@
   body {
     @apply text-foreground;
     background-image:
-      radial-gradient(circle at top, rgba(16, 185, 129, 0.12), transparent 34%),
+      radial-gradient(circle at top, rgba(184, 255, 0, 0.12), transparent 34%),
       linear-gradient(180deg, #0b0e17 0%, #080b12 100%);
   }
 }

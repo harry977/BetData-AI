@@ -48,7 +48,7 @@ export function AccountView({
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-400">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neon">
           Tu vestuario
         </p>
         <h1 className="mt-1 text-[1.65rem] font-semibold tracking-tight text-zinc-50">
@@ -71,13 +71,13 @@ export function AccountView({
       <StreakBoard matches={matches} />
       <MissionCard refreshKey={missionDone} />
 
-      <section className="rounded-[24px] border border-emerald-400/30 bg-emerald-500/10 p-4">
-        <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-emerald-300">
+      <section className="rounded-[24px] border border-neon/30 bg-neon/10 p-4">
+        <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-neon">
           <Gift className="h-3.5 w-3.5" />
           Desbloqueado
         </p>
         <p className="mt-2 text-lg font-black text-white">{WELCOME_BONUS.headline}</p>
-        <p className="mt-1 text-[13px] leading-snug text-emerald-100/80">
+        <p className="mt-1 text-[13px] leading-snug text-neon/70/80">
           {WELCOME_BONUS.detail}
         </p>
         <Button
@@ -92,7 +92,7 @@ export function AccountView({
       </section>
 
       <section className="rounded-[24px] border border-white/8 bg-[#121726] p-4">
-        <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-[#00E676]">
+        <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-neon">
           <Layers className="h-3.5 w-3.5" />
           Combinadas IA
         </p>
@@ -166,14 +166,14 @@ function HistoryList({
                   <span className="block truncate text-[13px] font-semibold uppercase text-zinc-100">
                     {match.home.code} — {match.away.code}
                   </span>
-                  <span className="text-[12px] leading-snug text-emerald-400">
+                  <span className="text-[12px] leading-snug text-neon">
                     {explainTip(match.bestTip, match.home.name, match.away.name).plain}
                   </span>
                 </span>
                 {match.result ? (
                   <span
                     className={`text-[11px] font-semibold uppercase ${
-                      match.result.won ? "text-emerald-300" : "text-red-300"
+                      match.result.won ? "text-neon" : "text-red-300"
                     }`}
                   >
                     {match.result.won ? "Acertado" : "Fallado"}

@@ -1,7 +1,8 @@
 export const BRAND = {
-  name: "BetData IA",
-  version: "v2.4",
+  name: "RadarBet IA",
+  version: "v2.5",
   tagline: "La IA que ve el fútbol",
+  lime: "#B8FF00",
 } as const;
 
 export const PLATFORM_STATS = {

@@ -132,7 +132,7 @@ function TipCell({
         className={cn(
           "text-[11px] font-semibold leading-snug",
           resolved && won
-            ? "text-emerald-300"
+            ? "text-neon"
             : resolved && won === false
               ? "text-red-300"
               : "text-zinc-100",
@@ -141,13 +141,13 @@ function TipCell({
         {resolved && won ? "✓ " : null}
         {copy.plain}
       </p>
-      <p className="mt-0.5 text-[10px] text-emerald-300/90">{copy.market}</p>
+      <p className="mt-0.5 text-[10px] text-neon/90">{copy.market}</p>
       <p className="mt-1 text-[11px]">
-        <span className="text-emerald-400/90">{match.odds.valueMarket.toFixed(2)}</span>
+        <span className="text-neon/90">{match.odds.valueMarket.toFixed(2)}</span>
         <span
           className={cn(
             "ml-1 font-semibold",
-            isBanker(match.confidence) ? "text-emerald-300" : "text-zinc-400",
+            isBanker(match.confidence) ? "text-neon" : "text-zinc-400",
           )}
         >
           {match.confidence.toFixed(1)}

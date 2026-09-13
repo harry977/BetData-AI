@@ -27,7 +27,7 @@ export function StreakBoard({ matches }: { matches: MatchInsight[] }) {
               <span
                 key={i}
                 className={`h-2.5 w-2.5 rounded-full ${
-                  on ? "bg-emerald-400" : miss ? "bg-transparent ring-1 ring-white/30" : "bg-white/15"
+                  on ? "bg-neon" : miss ? "bg-transparent ring-1 ring-white/30" : "bg-white/15"
                 }`}
               />
             );
@@ -49,7 +49,7 @@ export function StreakBoard({ matches }: { matches: MatchInsight[] }) {
           {board.ticks.slice(0, 10).map((tick, i) => (
             <span
               key={i}
-              className={`text-[11px] font-black ${tick === "win" ? "text-emerald-400" : "text-rose-400"}`}
+              className={`text-[11px] font-black ${tick === "win" ? "text-neon" : "text-rose-400"}`}
             >
               {tick === "win" ? "✓" : "✕"}
             </span>

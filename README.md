@@ -1,4 +1,4 @@
-# BetData IA
+# RadarBet IA
 
 Telegram Mini App de **inteligencia de fútbol en vivo**. La IA escanea el día, destaca la señal más fuerte y explica el porqué. Pensada para usarse y retransmitirse en vertical.
 
@@ -8,7 +8,7 @@ Telegram Mini App de **inteligencia de fútbol en vivo**. La IA escanea el día,
 - Tailwind CSS + shadcn/ui
 - Framer Motion + Recharts
 - `@telegram-apps/sdk` + script oficial `telegram-web-app.js`
-- Feed SportAPI (SofaScore vía RapidAPI). Sin clave o sin partidos: estado vacío, nunca mocks.
+- Feed SportAPI (SofaScore vía RapidAPI). Si no hay clave, cuota o jornada completa, la app muestra una **simulación** con partidos de demostración para que radar, alerta de gol, resultados del día y combinadas se puedan ver.
 
 ## Cómo arrancar
 
@@ -24,9 +24,9 @@ La app queda en [http://127.0.0.1:43141](http://127.0.0.1:43141).
 
 1. **Landing** — “Deja de regalar tu dinero a los tipsters. Pásate a la IA.” CTA: *Probar gratis en Telegram*.
 2. **Registro** — Telegram (Mini App o Login Widget) y también desde el navegador. Sin correo ni contraseña.
-3. **Hoy** — partidos en curso y próxima jornada (API en tiempo real), señal más fuerte y CTA para comprobar cuotas. En cabecera: **Resultados hoy** (solo partidos cerrados de hoy). **Ver ficha** abre el desglose del partido (bottom sheet en móvil, panel derecho en escritorio): mercados, barras de stats y contexto.
-4. **En directo** — solo partidos en juego, 9:16. Cada partido muestra la señal de la IA, radar de presión (últimos 5 min) y, si la presión supera 80% o la probabilidad de gol 85%, una alerta de gol inminente. Si no hay live, estado vacío.
-5. **Combinadas IA** — cuota objetivo, número de partidos, mercados y confianza mínima. Genera un boleto con picks y cuotas reales del día.
+3. **Hoy** — partidos en curso y próxima jornada, señal más fuerte y CTA para comprobar cuotas. En cabecera: **Resultados hoy** (solo partidos cerrados de hoy). **Ver ficha** abre el desglose del partido (bottom sheet en móvil, panel derecho en escritorio): mercados, barras de stats y contexto.
+4. **En directo** — solo partidos en juego, 9:16. Cada partido muestra la señal de la IA, radar de presión (últimos 5 min) y, si la presión supera 80% o la probabilidad de gol 85%, una alerta de gol inminente.
+5. **Combinadas IA** — cuota objetivo, número de partidos, mercados y confianza mínima. Genera un boleto con picks y cuotas del día.
 6. **Mi cuenta** — progreso, bono de hasta 500€ (después de entrar) y ajustes.
 
 El bono **no** aparece en la landing. Dentro de la app no se habla de tipsters.
@@ -42,7 +42,7 @@ Para volver a la landing usa *Cerrar sesión*.
 
 ## RapidAPI (SportAPI / SofaScore)
 
-`/api/fixtures` pide los partidos del día (`YYYY-MM-DD` UTC) a RapidAPI, con `timezone=Europe/Madrid` en API-Football. Sin clave, sin cuota o sin partidos, la app muestra un estado vacío — nunca datos de prueba.
+`/api/fixtures` pide los partidos del día (`YYYY-MM-DD` UTC) a RapidAPI, con `timezone=Europe/Madrid` en API-Football. Sin clave, sin cuota o si el feed no cubre directo + cerrados + combinada, la app usa una jornada simulada (chip **Simulación**).
 
 ```bash
 # .env.local

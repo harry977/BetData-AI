@@ -65,12 +65,17 @@ export function AppShell({ onLock }: AppShellProps) {
         <div className="mx-auto flex max-w-md items-center justify-between gap-2 px-3 py-2 lg:max-w-lg lg:gap-2 lg:px-4 lg:py-2.5">
           <BetDataLogo className="shrink-0" />
           <HeaderNav value={tab} onChange={setTab} />
-          <span className="shrink-0 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-300 lg:text-[11px]">
+          <span className="shrink-0 rounded-full border border-neon/30 bg-neon/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-neon lg:text-[11px]">
             {liveCount > 0 ? `${liveCount} en juego` : "IA activa"}
           </span>
         </div>
-        <div className="mx-auto max-w-md px-3 pb-2 lg:max-w-lg lg:px-4">
+        <div className="mx-auto max-w-md space-y-2 px-3 pb-2 lg:max-w-lg lg:px-4">
           <DailyHitsBadge matches={matches} />
+          {data?.source === "mock" ? (
+            <p className="rounded-xl border border-neon/25 bg-neon/10 px-3 py-1.5 text-center text-[10px] font-black uppercase tracking-[0.14em] text-neon">
+              Simulación · jornada de demostración
+            </p>
+          ) : null}
         </div>
       </header>
 

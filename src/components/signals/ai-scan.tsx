@@ -56,7 +56,7 @@ export function AiScan({
             <h2 className="mt-5 text-5xl font-black tabular-nums leading-none text-white">
               {signals}
             </h2>
-            <p className="mt-3 text-sm font-black uppercase tracking-[0.2em] text-emerald-300">
+            <p className="mt-3 text-sm font-black uppercase tracking-[0.2em] text-neon">
               Señales encontradas
             </p>
           </>

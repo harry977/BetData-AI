@@ -14,21 +14,20 @@ export function BetDataLogo({
   version = false,
   lockup = false,
 }: LogoProps) {
+  void withWordmark;
   if (lockup) {
     return (
       <div className={cn("flex flex-col items-center gap-2", className)}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/brand/betdata-lockup.png"
+          src="/brand/radarbet-lockup.jpg"
           alt={BRAND.name}
-          width={240}
-          height={222}
-          className="h-24 w-auto object-contain sm:h-28"
+          width={1080}
+          height={382}
+          className="h-16 w-auto max-w-[min(92vw,440px)] object-contain drop-shadow-[0_0_22px_rgba(184,255,0,0.28)] sm:h-20"
         />
         {version ? (
-          <span className="font-mono text-[11px] font-medium text-emerald-400">
-            {BRAND.version}
-          </span>
+          <span className="font-mono text-[11px] font-medium text-neon">{BRAND.version}</span>
         ) : null}
       </div>
     );
@@ -38,21 +37,16 @@ export function BetDataLogo({
     <div className={cn("flex min-w-0 items-center gap-2", className)}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/brand/betdata-mark.png"
-        alt=""
-        width={40}
-        height={26}
-        className="h-8 w-auto shrink-0 object-contain object-left drop-shadow-[0_0_12px_rgba(0,230,118,0.4)] lg:h-9"
+        src="/brand/radarbet-lockup.jpg"
+        alt={BRAND.name}
+        width={1080}
+        height={382}
+        className="h-9 w-auto max-w-[min(58vw,240px)] shrink-0 object-contain object-left drop-shadow-[0_0_16px_rgba(184,255,0,0.32)] sm:h-10 lg:h-11"
       />
-      {withWordmark ? (
-        <p className="whitespace-nowrap text-[12px] font-black uppercase leading-none tracking-[0.12em] text-[#7CFF9A] lg:text-[13px]">
-          BetData IA
-          {version ? (
-            <span className="ml-1.5 font-mono text-[10px] font-medium tracking-normal text-emerald-400">
-              {BRAND.version}
-            </span>
-          ) : null}
-        </p>
+      {version ? (
+        <span className="hidden font-mono text-[10px] font-medium tracking-normal text-neon sm:inline">
+          {BRAND.version}
+        </span>
       ) : null}
     </div>
   );

@@ -33,7 +33,7 @@ export function HeaderNav({ value, onChange }: BottomNavProps) {
               active
                 ? live
                   ? "bg-rose-500/15 text-rose-300"
-                  : "bg-emerald-500/15 text-[#00E676]"
+                  : "bg-neon/15 text-neon"
                 : "text-gray-300 hover:bg-white/5",
             )}
           >
@@ -59,7 +59,7 @@ export function BottomNav({ value, onChange }: BottomNavProps) {
               onClick={() => onChange(item.id)}
               className={cn(
                 "flex min-h-[3.5rem] flex-col items-center justify-center gap-0.5 rounded-lg px-0.5 py-1.5 text-[11px] font-semibold leading-tight",
-                active ? (live ? "text-red-400" : "text-emerald-400") : "text-zinc-500",
+                active ? (live ? "text-red-400" : "text-neon") : "text-zinc-500",
               )}
             >
               <item.icon className="h-5 w-5" />

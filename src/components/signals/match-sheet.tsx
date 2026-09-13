@@ -151,7 +151,7 @@ function SheetBody({
           </div>
           <div className="shrink-0 text-center">
             <p className="text-3xl font-black tabular-nums leading-none text-white">{clock.score}</p>
-            <p className="mt-1 text-[11px] font-black uppercase tracking-[0.14em] text-emerald-300">
+            <p className="mt-1 text-[11px] font-black uppercase tracking-[0.14em] text-neon">
               {clock.meta}
             </p>
           </div>
@@ -163,14 +163,14 @@ function SheetBody({
           </div>
         </div>
 
-        <div className="mt-4 rounded-[22px] border border-[#00E676]/40 bg-black/40 p-4 shadow-[0_0_24px_rgba(0,230,118,0.18)]">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00E676]">
+        <div className="mt-4 rounded-[22px] border border-neon/40 bg-black/40 p-4 shadow-[0_0_24px_rgba(184,255,0,0.18)]">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neon">
             Mejor consejo IA
           </p>
           <div className="mt-2">
             <SignalCopy match={match} size="md" />
           </div>
-          <p className="mt-3 font-black leading-none tabular-nums text-[#00E676]">
+          <p className="mt-3 font-black leading-none tabular-nums text-neon">
             <span className="text-5xl">{match.confidence.toFixed(1)}</span>
             <span className="ml-1 text-lg text-gray-300">/10</span>
           </p>
@@ -192,7 +192,7 @@ function SheetBody({
                 key={cell.key}
                 className={cn(
                   "rounded-2xl border bg-black/30 px-3 py-3",
-                  cell.highlight ? "border-[#00E676]/50" : "border-white/8",
+                  cell.highlight ? "border-neon/50" : "border-white/8",
                 )}
               >
                 <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">
@@ -202,7 +202,7 @@ function SheetBody({
                   {cell.pick}
                 </p>
                 {cell.odds ? (
-                  <p className="mt-1 font-mono text-xs text-emerald-300">{cell.odds}</p>
+                  <p className="mt-1 font-mono text-xs text-neon">{cell.odds}</p>
                 ) : null}
               </div>
             ))}
@@ -360,7 +360,7 @@ function CompareBar({
       </div>
       <div className="flex h-2.5 overflow-hidden rounded-full bg-black/70 ring-1 ring-white/10">
         <div
-          className="h-full bg-[#00E676] transition-[width] duration-700"
+          className="h-full bg-neon transition-[width] duration-700"
           style={{ width: `${share.homePct}%` }}
         />
         <div

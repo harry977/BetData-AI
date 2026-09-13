@@ -9,12 +9,20 @@ export function useEventStatistics(eventId: number) {
   const [metrics, setMetrics] = useState<LiveMetrics | null>(
     () => memory.get(eventId) ?? null,
   );
-  const [loading, setLoading] = useState(!memory.has(eventId));
+  const [loading, setLoading] = useState(
+    () => eventId < 910000 && !memory.has(eventId),
+  );
 
   useEffect(() => {
     const cached = memory.get(eventId);
     if (cached) {
       setMetrics(cached);
+      setLoading(false);
+      return;
+    }
+
+    const DEMO_EVENT_FROM = 910000;
+    if (eventId >= DEMO_EVENT_FROM) {
       setLoading(false);
       return;
     }

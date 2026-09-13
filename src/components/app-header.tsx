@@ -14,7 +14,7 @@ export function AppHeader({ connected, version = false }: AppHeaderProps) {
         <BetDataLogo version={version} />
         {connected ? (
           <Badge variant="default" className="gap-1.5 px-2.5 py-1">
-            <span className="h-1.5 w-1.5 animate-pulseGlow rounded-full bg-emerald-400" />
+            <span className="h-1.5 w-1.5 animate-pulseGlow rounded-full bg-neon" />
             Pronósticos en vivo
           </Badge>
         ) : (
@@ -33,7 +33,7 @@ export function StatusDot({ on }: { on: boolean }) {
     <span
       className={cn(
         "inline-block h-2 w-2 rounded-full",
-        on ? "bg-emerald-400 shadow-neon" : "bg-amber-400",
+        on ? "bg-neon shadow-neon" : "bg-amber-400",
       )}
     />
   );

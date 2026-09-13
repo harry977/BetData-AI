@@ -54,7 +54,7 @@ export function AiBattle({
               </div>
             ))}
           </div>
-          <p className="mt-3 text-[11px] font-black uppercase tracking-[0.16em] text-emerald-300">
+          <p className="mt-3 text-[11px] font-black uppercase tracking-[0.16em] text-neon">
             Winner · {pair.winner.home.code} — {pair.winner.away.code}
           </p>
         </article>

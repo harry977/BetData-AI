@@ -57,7 +57,7 @@ export function XgChart({ match }: XgChartProps) {
               }}
               labelFormatter={(minute) => `Min ${minute}`}
             />
-            <Bar dataKey={match.home.code} fill="#10b981" radius={[3, 3, 0, 0]} />
+            <Bar dataKey={match.home.code} fill="#B8FF00" radius={[3, 3, 0, 0]} />
             <Bar dataKey={match.away.code} fill="#06b6d4" radius={[3, 3, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>

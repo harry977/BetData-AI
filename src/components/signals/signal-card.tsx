@@ -47,7 +47,7 @@ export function SignalCard({
             <SignalCopy match={match} size="sm" />
           </div>
         </div>
-        <span className="text-[11px] font-black tabular-nums text-cyan-300 lg:text-xl lg:text-[#00E676]">
+        <span className="text-[11px] font-black tabular-nums text-cyan-300 lg:text-xl lg:text-neon">
           {match.confidence.toFixed(1)}
         </span>
       </button>
@@ -63,7 +63,7 @@ export function SignalCard({
         rarity === "ELITE"
           ? "border-violet-400/35"
           : rarity === "STRONG"
-            ? "border-emerald-400/35"
+            ? "border-neon/35"
             : "border-white/8",
         alert.show &&
           "border-orange-400/80 shadow-[0_0_32px_rgba(255,87,34,0.28)]",
@@ -71,7 +71,7 @@ export function SignalCard({
     >
       <GoalAlert match={match} className="mb-4 lg:mb-5" />
       <div className="mb-4 flex items-center justify-between lg:mb-8">
-        <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300 lg:text-sm">
+        <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-neon lg:text-sm">
           <Zap className="h-3.5 w-3.5 lg:h-4 lg:w-4" />
           Mejor señal de hoy
         </p>

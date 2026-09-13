@@ -39,7 +39,7 @@ export function MatchDetail({ match }: MatchDetailProps) {
             ) : null}
           </div>
           <SignalCopy match={view} size="md" />
-          <p className="font-mono text-sm text-emerald-300/80">
+          <p className="font-mono text-sm text-neon/80">
             {formatOdds(view.odds.valueMarket)}
           </p>
           <p className="text-[13px] leading-relaxed text-zinc-400">

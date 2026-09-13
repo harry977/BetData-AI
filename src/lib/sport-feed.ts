@@ -1,5 +1,6 @@
 import { PLATFORM_STATS } from "@/lib/constants";
 import { shiftYmd } from "@/lib/dates";
+import { buildDemoFixtures, demoFeedCoversProduct } from "@/lib/mocks/demo-fixtures";
 import {
   dayBucketFor,
   isLowQualityLive,
@@ -162,19 +163,21 @@ export async function getFixturesFeed(cachedCategoryIds?: number[]): Promise<Fix
   const yesterday = shiftYmd(today, -1);
   const cacheKey = `${today}:${(cachedCategoryIds ?? []).join(",")}`;
   if (feedCache && feedCache.key === cacheKey && Date.now() - feedCache.savedAt < feedCache.ttl) {
+    if (feedCache.payload.source === "mock") return feedCache.payload;
     const cachedLive = feedCache.payload.response.some((match) =>
       isInPlayStatus(match.status),
     );
     if (!cachedLive) return feedCache.payload;
   }
 
-  const empty = payload(hasSportApiKey() ? "sportapi" : "rapidapi", []);
+  const demo = payload("mock", buildDemoFixtures());
 
   if (!hasSportApiKey()) {
-    return empty;
+    feedCache = { key: cacheKey, savedAt: Date.now(), ttl: FEED_FAIL_TTL_MS, payload: demo };
+    return demo;
   }
 
-  try {
+  const liveFeed = (async (): Promise<FixturesPayload | null> => {
     const categories = await categoriesForDate(today, cachedCategoryIds);
     const [
       footballToday,
@@ -217,10 +220,7 @@ export async function getFixturesFeed(cachedCategoryIds?: number[]): Promise<Fix
       merged.push(live);
     }
 
-    if (merged.length === 0) {
-      feedCache = { key: cacheKey, savedAt: Date.now(), ttl: FEED_FAIL_TTL_MS, payload: empty };
-      return { ...empty, categories };
-    }
+    if (merged.length === 0) return { ...demo, categories };
 
     const [oddsToday, oddsTomorrow] = await Promise.all([
       oddsMapFor(today),
@@ -234,14 +234,25 @@ export async function getFixturesFeed(cachedCategoryIds?: number[]): Promise<Fix
       return toMatchInsight(event, odds, today);
     });
     const source = footballToday.length || footballLive.length ? "rapidapi" : "sportapi";
-    const next = payload(source, capMatches(mapped), categories);
-    const hasLive = next.response.some((match) => isInPlayStatus(match.status));
-    feedCache = hasLive
-      ? null
-      : { key: cacheKey, savedAt: Date.now(), ttl: FEED_TTL_MS, payload: next };
-    return next;
+    return payload(source, capMatches(mapped), categories);
+  })();
+
+  try {
+    const result = await Promise.race([
+      liveFeed,
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), 4500)),
+    ]);
+    if (result && result.source !== "mock" && demoFeedCoversProduct(result.response)) {
+      const hasLive = result.response.some((match) => isInPlayStatus(match.status));
+      feedCache = hasLive
+        ? null
+        : { key: cacheKey, savedAt: Date.now(), ttl: FEED_TTL_MS, payload: result };
+      return result;
+    }
   } catch {
-    feedCache = { key: cacheKey, savedAt: Date.now(), ttl: FEED_FAIL_TTL_MS, payload: empty };
-    return empty;
+    /* demo fallback */
   }
+
+  feedCache = { key: cacheKey, savedAt: Date.now(), ttl: FEED_FAIL_TTL_MS, payload: demo };
+  return demo;
 }

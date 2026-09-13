@@ -88,7 +88,7 @@ export function SignalsView({
       ) : null}
 
       <header>
-        <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-emerald-400">
+        <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-neon">
           <LivePulse />
           Datos en vivo
         </p>
@@ -132,7 +132,7 @@ export function SignalsView({
         </section>
       ) : (
         <section className="rounded-2xl border border-white/8 bg-[#121726] px-5 py-6 text-center">
-          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-300">
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-neon">
             En directo
           </p>
           <h2 className="mt-2 text-xl font-black uppercase leading-tight text-white">

@@ -45,7 +45,7 @@ const config: Config = {
         ring: "hsl(var(--ring))",
         navy: "#0b0e17",
         panel: "#121726",
-        neon: "#00E676",
+        neon: "#B8FF00",
         signal: "#06b6d4",
       },
       borderRadius: {
@@ -58,7 +58,7 @@ const config: Config = {
         mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
       },
       boxShadow: {
-        neon: "0 0 24px -6px rgba(16, 185, 129, 0.65)",
+        neon: "0 0 24px -6px rgba(184, 255, 0, 0.55)",
         signal: "0 0 24px -6px rgba(6, 182, 212, 0.55)",
       },
       keyframes: {
@@ -77,11 +77,11 @@ const config: Config = {
         pressurePing: {
           "0%, 100%": {
             filter: "brightness(1)",
-            boxShadow: "inset 0 0 0 0 rgba(0, 230, 118, 0.35)",
+            boxShadow: "inset 0 0 0 0 rgba(184, 255, 0, 0.35)",
           },
           "50%": {
             filter: "brightness(1.35)",
-            boxShadow: "inset 0 0 12px 2px rgba(0, 230, 118, 0.55)",
+            boxShadow: "inset 0 0 12px 2px rgba(184, 255, 0, 0.55)",
           },
         },
       },

@@ -162,7 +162,7 @@ export function matchShareText(match: MatchInsight) {
   const btts = match.markets.btts;
   const bttsLabel = btts.pick === "GG" ? "BTTS Sí" : "BTTS No";
   return [
-    `BetData IA · ${match.home.name} vs ${match.away.name}`,
+    `RadarBet IA · ${match.home.name} vs ${match.away.name}`,
     `${match.league.name} · ${clock}`,
     `Mejor consejo: ${copy.plain}`,
     `${copy.market} · confianza ${match.confidence.toFixed(1)}/10`,

@@ -100,11 +100,11 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.16),transparent_42%)] px-4 pb-3 pt-5 lg:min-h-[calc(100dvh-4.5rem)] lg:px-6 lg:pt-8">
+    <div className="flex h-full min-h-0 flex-col bg-[radial-gradient(circle_at_50%_0%,rgba(184,255,0,0.16),transparent_42%)] px-4 pb-3 pt-5 lg:min-h-[calc(100dvh-4.5rem)] lg:px-6 lg:pt-8">
       <header className="text-center">
         <DailyHitsBadge matches={matches} className="mb-3 lg:hidden" />
-        <p className="text-[11px] font-black uppercase tracking-[0.28em] text-emerald-300">
-          BetData IA
+        <p className="text-[11px] font-black uppercase tracking-[0.28em] text-neon">
+          RadarBet IA
         </p>
         <AnimatePresence mode="wait">
           <motion.p
@@ -114,7 +114,7 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
             exit={{ opacity: 0, y: -6 }}
             className={cn(
               "mt-3 inline-flex items-center justify-center gap-2 text-sm font-black uppercase tracking-[0.2em]",
-              live ? "text-rose-400" : "text-emerald-300",
+              live ? "text-rose-400" : "text-neon",
             )}
           >
             {live ? <LivePulse /> : null}
@@ -169,7 +169,7 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
           <p className="mt-1 text-2xl font-black tabular-nums text-white">
             {xg.toFixed(2)} xG
           </p>
-          <p className="mt-1 text-2xl font-black tabular-nums text-emerald-300">
+          <p className="mt-1 text-2xl font-black tabular-nums text-neon">
             {selected.metrics.offensivePressure}% ritmo
           </p>
           <PressureRadar match={selected} className="mt-4" />

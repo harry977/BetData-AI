@@ -31,8 +31,8 @@ export function PressureChart({ match }: PressureChartProps) {
           <AreaChart data={match.metrics.pressureHistory}>
             <defs>
               <linearGradient id="pressureHome" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.45} />
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                <stop offset="5%" stopColor="#B8FF00" stopOpacity={0.45} />
+                <stop offset="95%" stopColor="#B8FF00" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="pressureAway" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.35} />
@@ -66,7 +66,7 @@ export function PressureChart({ match }: PressureChartProps) {
               type="monotone"
               dataKey="home"
               name={match.home.code}
-              stroke="#10b981"
+              stroke="#B8FF00"
               fill="url(#pressureHome)"
               strokeWidth={2}
             />

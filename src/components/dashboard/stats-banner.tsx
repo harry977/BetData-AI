@@ -22,7 +22,7 @@ export function StatsBanner({ stats }: StatsBannerProps) {
           <p className="text-[9px] uppercase leading-tight tracking-wide text-zinc-500">
             {item.label}
           </p>
-          <p className="mt-1 font-mono text-sm text-emerald-300">{item.value}</p>
+          <p className="mt-1 font-mono text-sm text-neon">{item.value}</p>
         </div>
       ))}
     </section>

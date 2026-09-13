@@ -23,7 +23,7 @@ export function MatchCard({ match, day, active = false, onSelect }: MatchCardPro
       className={cn(
         "flex w-full items-center gap-2.5 rounded-xl border px-2.5 py-2.5 text-left",
         active
-          ? "border-emerald-400/40 bg-[#152033] shadow-neon"
+          ? "border-neon/40 bg-[#152033] shadow-neon"
           : "border-[#1e2538] bg-panel",
       )}
     >

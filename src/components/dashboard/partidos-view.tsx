@@ -90,7 +90,7 @@ export function PartidosView({
           Sobre los Pronósticos de Fútbol
         </h2>
         <p className="mt-2 text-[12px] leading-relaxed text-zinc-400">
-          En esta página, BetData AI ofrece predicciones de fútbol completas para todos
+          En esta página, RadarBet IA ofrece predicciones de fútbol completas para todos
           los partidos de hoy en todas las ligas. Para cada evento, nuestros algoritmos
           de IA eligen un “Mejor Pronóstico” junto con un valor de confianza preciso y
           mercados que incluyen Resultado Final, Más/Menos y Ambos Equipos Marcan. Las
@@ -119,7 +119,7 @@ function ScopeTab({
       onClick={onClick}
       className={cn(
         "rounded-lg px-2 py-2 text-[11px] font-semibold",
-        active ? "bg-emerald-500/15 text-emerald-300" : "text-zinc-500",
+        active ? "bg-neon/15 text-neon" : "text-zinc-500",
       )}
     >
       {label}

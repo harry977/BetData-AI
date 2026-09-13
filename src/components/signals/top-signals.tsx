@@ -28,7 +28,7 @@ export function TopSignals({ matches, selectedId, onSelect }: TopSignalsProps) {
                 onClick={() => onSelect(match.id)}
                 className={`flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left ${
                   active
-                    ? "border-emerald-400/40 bg-[#152033]"
+                    ? "border-neon/40 bg-[#152033]"
                     : "border-[#1e2538] bg-panel"
                 }`}
               >
@@ -41,7 +41,7 @@ export function TopSignals({ matches, selectedId, onSelect }: TopSignalsProps) {
                     <SignalCopy match={match} size="sm" />
                   </span>
                 </span>
-                <span className="font-mono text-sm text-emerald-300">
+                <span className="font-mono text-sm text-neon">
                   {formatConfidence(match.confidence)}
                 </span>
               </button>
