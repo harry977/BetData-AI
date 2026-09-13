@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { TeamCrest } from "@/components/brand/team-crest";
 import { AiScan } from "@/components/signals/ai-scan";
 import { MissionCard } from "@/components/signals/mission-card";
-import { DailyHitsBadge } from "@/components/signals/daily-hits-badge";
 import { SignalCard } from "@/components/signals/signal-card";
 import { SignalCopy } from "@/components/signals/signal-copy";
 import { StreakBoard } from "@/components/signals/streak-board";
@@ -144,8 +143,6 @@ export function SignalsView({
           </p>
         </section>
       )}
-
-      <DailyHitsBadge matches={matches} className="hidden sm:flex" />
 
       {featured ? (
         <SignalCard match={featured} onWhy={() => openWhy(featured)} />

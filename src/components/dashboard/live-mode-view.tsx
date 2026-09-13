@@ -102,7 +102,7 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
   return (
     <div className="flex h-full min-h-0 flex-col bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.16),transparent_42%)] px-4 pb-3 pt-5 lg:min-h-[calc(100dvh-4.5rem)] lg:px-6 lg:pt-8">
       <header className="text-center">
-        <DailyHitsBadge matches={matches} compact className="mb-3 lg:hidden" />
+        <DailyHitsBadge matches={matches} className="mb-3 lg:hidden" />
         <p className="text-[11px] font-black uppercase tracking-[0.28em] text-emerald-300">
           BetData IA
         </p>

@@ -64,14 +64,11 @@ export function AppShell({ onLock }: AppShellProps) {
         <div className="mx-auto flex max-w-md items-center justify-between gap-2 px-3 py-2 lg:max-w-lg lg:gap-2 lg:px-4 lg:py-2.5">
           <BetDataLogo className="shrink-0" />
           <HeaderNav value={tab} onChange={setTab} />
-          <div className="flex shrink-0 items-center gap-1.5">
-            <DailyHitsBadge matches={matches} compact className="hidden sm:inline-flex" />
-            <span className="shrink-0 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-300 lg:text-[11px]">
-              {liveCount > 0 ? `${liveCount} en juego` : "IA activa"}
-            </span>
-          </div>
+          <span className="shrink-0 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-300 lg:text-[11px]">
+            {liveCount > 0 ? `${liveCount} en juego` : "IA activa"}
+          </span>
         </div>
-        <div className="mx-auto max-w-md px-3 pb-2 sm:hidden lg:max-w-lg lg:px-4">
+        <div className="mx-auto max-w-md px-3 pb-2 lg:max-w-lg lg:px-4">
           <DailyHitsBadge matches={matches} />
         </div>
       </header>
