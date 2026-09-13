@@ -149,6 +149,11 @@ export function snapshotToMetrics(
     snapshot.xG.away,
     elapsed,
     snapshot.shotsOnTarget,
+    {
+      possession: snapshot.possession,
+      corners: snapshot.corners,
+      cards: snapshot.cards,
+    },
   );
 }
 

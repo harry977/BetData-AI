@@ -13,6 +13,7 @@ import {
   setMiniAppBackgroundColor,
   setMiniAppHeaderColor,
 } from "@telegram-apps/sdk";
+import { TELEGRAM_OPEN_URL } from "@/lib/constants";
 
 let bootstrapped = false;
 
@@ -68,12 +69,42 @@ export function openExternal(url: string) {
   }
 
   const webApp = window.Telegram?.WebApp;
+  if (url.startsWith("https://t.me/") && webApp?.openTelegramLink) {
+    webApp.openTelegramLink(url);
+    return;
+  }
   if (webApp?.openLink) {
     webApp.openLink(url);
     return;
   }
 
   window.open(url, "_blank", "noopener,noreferrer");
+}
+
+export async function shareToTelegram(text: string, url?: string) {
+  hapticTap();
+  const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url || TELEGRAM_OPEN_URL)}&text=${encodeURIComponent(text)}`;
+  const webApp = typeof window !== "undefined" ? window.Telegram?.WebApp : undefined;
+
+  if (webApp?.switchInlineQuery) {
+    try {
+      webApp.switchInlineQuery(text, ["users", "groups", "channels", "bots"]);
+      return;
+    } catch {
+      // fallback below
+    }
+  }
+
+  if (typeof navigator !== "undefined" && navigator.share) {
+    try {
+      await navigator.share({ text, url: url || TELEGRAM_OPEN_URL });
+      return;
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+    }
+  }
+
+  openExternal(shareUrl);
 }
 
 export function hapticTap() {
@@ -200,6 +231,11 @@ declare global {
         setHeaderColor?: (color: string) => void;
         setBackgroundColor?: (color: string) => void;
         openLink?: (url: string) => void;
+        openTelegramLink?: (url: string) => void;
+        switchInlineQuery?: (
+          query: string,
+          chatTypes?: Array<"users" | "groups" | "channels" | "bots">,
+        ) => void;
         HapticFeedback?: {
           impactOccurred: (style: "light" | "medium" | "heavy") => void;
           notificationOccurred: (type: "error" | "success" | "warning") => void;

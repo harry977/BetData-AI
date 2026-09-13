@@ -8,7 +8,7 @@ import { SignalCard } from "@/components/signals/signal-card";
 import { SignalCopy } from "@/components/signals/signal-copy";
 import { StreakBoard } from "@/components/signals/streak-board";
 import { LivePulse } from "@/components/signals/live-pulse";
-import { WhyPanel } from "@/components/signals/why-panel";
+import { MatchSheet } from "@/components/signals/match-sheet";
 import { madridYmd } from "@/lib/dates";
 import { recordMissionSignal, recordViewedSignal } from "@/lib/storage";
 import { activeSignals, featuredSignal, scanCounts } from "@/lib/signals";
@@ -197,9 +197,7 @@ export function SignalsView({
         </section>
       ) : null}
 
-      {whyMatch ? (
-        <WhyPanel match={whyMatch} onClose={() => setWhyMatch(null)} />
-      ) : null}
+      <MatchSheet match={whyMatch} onClose={() => setWhyMatch(null)} />
     </div>
   );
 }

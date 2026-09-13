@@ -131,7 +131,7 @@ export function SignalCard({
           onClick={onWhy}
           className="mt-3 flex w-full items-center justify-end text-[11px] font-black uppercase tracking-[0.18em] text-cyan-300 lg:mt-4 lg:justify-center lg:text-sm"
         >
-          ¿Por qué? →
+          Ver ficha →
         </button>
       ) : null}
     </article>

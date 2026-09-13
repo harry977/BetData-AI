@@ -11,7 +11,7 @@ import { PressureRadar } from "@/components/signals/pressure-radar";
 import { SignalCopy } from "@/components/signals/signal-copy";
 import { LivePulse } from "@/components/signals/live-pulse";
 import { goalAlert } from "@/lib/stream-widgets";
-import { WhyPanel } from "@/components/signals/why-panel";
+import { MatchSheet } from "@/components/signals/match-sheet";
 import { livePlaylist } from "@/lib/signals";
 import { recordViewedSignal } from "@/lib/storage";
 import { hapticTap } from "@/lib/telegram";
@@ -163,7 +163,7 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
           className="mt-6 w-full text-left"
         >
           <p className="text-[11px] font-black uppercase tracking-[0.22em] text-cyan-300">
-            ¿Cómo lo sabe?
+            Ficha del partido
           </p>
           <p className="mt-3 text-2xl font-black tabular-nums text-white">{shots} tiros</p>
           <p className="mt-1 text-2xl font-black tabular-nums text-white">
@@ -221,9 +221,7 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
         ) : null}
       </div>
 
-      {whyOpen ? (
-        <WhyPanel match={selected} onClose={() => setWhyOpen(false)} />
-      ) : null}
+      <MatchSheet match={whyOpen ? selected : null} onClose={() => setWhyOpen(false)} />
     </div>
   );
 }

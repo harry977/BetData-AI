@@ -38,6 +38,11 @@ export function buildLiveMetrics(
   xgAway: number,
   elapsed = 90,
   shotsOnTarget?: { home: number; away: number },
+  extras?: {
+    possession?: LiveMetrics["possession"];
+    corners?: LiveMetrics["corners"];
+    cards?: LiveMetrics["cards"];
+  },
 ): LiveMetrics {
   return {
     offensivePressure: pressure,
@@ -52,5 +57,8 @@ export function buildLiveMetrics(
     },
     pressureHistory: metricSeries(pressure, Math.max(20, 100 - pressure)) as PressurePoint[],
     xGHistory: metricSeries(xgHome, xgAway, 5, elapsed, "xg") as XGPoint[],
+    possession: extras?.possession ?? null,
+    corners: extras?.corners ?? null,
+    cards: extras?.cards ?? null,
   };
 }

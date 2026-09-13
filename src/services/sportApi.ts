@@ -96,6 +96,7 @@ export type EventStatSnapshot = {
   shotsOnTarget: { home: number; away: number };
   corners: { home: number; away: number };
   possession: { home: number; away: number };
+  cards: { home: number; away: number } | null;
 };
 
 function sportHeaders(): Record<string, string> {
@@ -600,14 +601,25 @@ export function parseEventStatistics(payload: unknown): EventStatSnapshot | null
   const shots = pick(["shots on target", "shots on goal", "on target"]);
   const corners = pick(["corner kicks", "corners"]);
   const possession = pick(["ball possession", "possession"]);
+  const yellow = pick(["yellow cards", "yellow card"]);
+  const red = pick(["red cards", "red card"]);
 
-  if (!xG && !shots && !corners && !possession) return null;
+  if (!xG && !shots && !corners && !possession && !yellow && !red) return null;
+
+  const cards =
+    yellow || red
+      ? {
+          home: (yellow?.home ?? 0) + (red?.home ?? 0),
+          away: (yellow?.away ?? 0) + (red?.away ?? 0),
+        }
+      : null;
 
   return {
     xG: xG ?? { home: 0.4, away: 0.3 },
     shotsOnTarget: shots ?? { home: 0, away: 0 },
     corners: corners ?? { home: 0, away: 0 },
     possession: possession ?? { home: 50, away: 50 },
+    cards,
   };
 }
 

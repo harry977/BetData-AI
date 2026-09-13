@@ -30,13 +30,18 @@ export type XGPoint = {
   away: number;
 };
 
+export type SidePair = { home: number; away: number };
+
 export type LiveMetrics = {
   offensivePressure: number;
-  xG: { home: number; away: number };
-  dangerousAttacksPerMinute: { home: number; away: number };
-  shotsOnTarget: { home: number; away: number };
+  xG: SidePair;
+  dangerousAttacksPerMinute: SidePair;
+  shotsOnTarget: SidePair;
   pressureHistory: PressurePoint[];
   xGHistory: XGPoint[];
+  possession: SidePair | null;
+  corners: SidePair | null;
+  cards: SidePair | null;
 };
 
 export type Markets = {
