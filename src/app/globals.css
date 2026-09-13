@@ -67,3 +67,12 @@
     height: 100dvh;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-bounce,
+  .animate-pulse,
+  .animate-ping,
+  .animate-pressure-ping {
+    animation: none !important;
+  }
+}

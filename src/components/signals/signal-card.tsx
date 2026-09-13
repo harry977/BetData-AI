@@ -3,8 +3,11 @@
 import { TeamCrest } from "@/components/brand/team-crest";
 import { BetBonusCta } from "@/components/signals/bet-bonus-cta";
 import { ConfidenceMeter } from "@/components/signals/confidence-meter";
+import { GoalAlert } from "@/components/signals/goal-alert";
+import { HeroLiveStrip } from "@/components/signals/hero-live-strip";
 import { SignalCopy } from "@/components/signals/signal-copy";
 import { signalRarity } from "@/lib/signals";
+import { goalAlert } from "@/lib/stream-widgets";
 import type { MatchInsight } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Zap } from "lucide-react";
@@ -51,17 +54,22 @@ export function SignalCard({
     );
   }
 
+  const alert = goalAlert(match);
+
   return (
     <article
       className={cn(
-        "rounded-[28px] border bg-[#121726] p-5 lg:p-8",
+        "rounded-[28px] border bg-[#121726] p-5 transition-shadow duration-500 lg:p-8",
         rarity === "ELITE"
           ? "border-violet-400/35"
           : rarity === "STRONG"
             ? "border-emerald-400/35"
             : "border-white/8",
+        alert.show &&
+          "border-orange-400/80 shadow-[0_0_32px_rgba(255,87,34,0.28)]",
       )}
     >
+      <GoalAlert match={match} className="mb-4 lg:mb-5" />
       <div className="mb-4 flex items-center justify-between lg:mb-8">
         <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300 lg:text-sm">
           <Zap className="h-3.5 w-3.5 lg:h-4 lg:w-4" />
@@ -115,6 +123,7 @@ export function SignalCard({
       <div className="mt-5 lg:mt-8 lg:text-center">
         <ConfidenceMeter confidence={match.confidence} />
       </div>
+      <HeroLiveStrip match={match} className="mt-5 lg:mt-7" />
       <BetBonusCta className="mt-5 lg:mt-8" />
       {onWhy ? (
         <button

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { TeamCrest } from "@/components/brand/team-crest";
 import { AiScan } from "@/components/signals/ai-scan";
 import { MissionCard } from "@/components/signals/mission-card";
+import { DailyHitsBadge } from "@/components/signals/daily-hits-badge";
 import { SignalCard } from "@/components/signals/signal-card";
 import { SignalCopy } from "@/components/signals/signal-copy";
 import { StreakBoard } from "@/components/signals/streak-board";
@@ -145,7 +146,10 @@ export function SignalsView({
       )}
 
       {featured ? (
-        <SignalCard match={featured} onWhy={() => openWhy(featured)} />
+        <section className="space-y-2">
+          <DailyHitsBadge matches={matches} className="hidden sm:flex" />
+          <SignalCard match={featured} onWhy={() => openWhy(featured)} />
+        </section>
       ) : todayRest.length === 0 && tomorrow.length === 0 ? (
         <p className="rounded-2xl border border-white/8 bg-[#121726] p-6 text-center text-sm text-gray-300">
           Sin partidos en directo en este momento. Los próximos de la jornada de hoy aparecerán aquí.

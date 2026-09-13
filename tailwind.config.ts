@@ -74,11 +74,22 @@ const config: Config = {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },
         },
+        pressurePing: {
+          "0%, 100%": {
+            filter: "brightness(1)",
+            boxShadow: "inset 0 0 0 0 rgba(0, 230, 118, 0.35)",
+          },
+          "50%": {
+            filter: "brightness(1.35)",
+            boxShadow: "inset 0 0 12px 2px rgba(0, 230, 118, 0.55)",
+          },
+        },
       },
       animation: {
         pulseGlow: "pulseGlow 2s ease-in-out infinite",
         scan: "scan 3.2s linear infinite",
         ticker: "ticker 22s linear infinite",
+        "pressure-ping": "pressurePing 1.1s ease-in-out infinite",
       },
     },
   },
