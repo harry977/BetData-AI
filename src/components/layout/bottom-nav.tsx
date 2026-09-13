@@ -19,7 +19,7 @@ type BottomNavProps = {
 
 export function HeaderNav({ value, onChange }: BottomNavProps) {
   return (
-    <div className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 lg:flex">
+    <div className="flex min-w-0 items-center justify-center gap-1">
       {NAV_ITEMS.map((item) => {
         const active = item.id === value;
         const live = item.id === "live";

@@ -62,12 +62,14 @@ export function AppShell({ onLock }: AppShellProps) {
           liveMode && "hidden lg:block",
         )}
       >
-        <div className="mx-auto flex max-w-md items-center justify-between gap-2 px-3 py-2 lg:max-w-lg lg:gap-2 lg:px-4 lg:py-2.5">
-          <BetDataLogo className="shrink-0" />
-          <HeaderNav value={tab} onChange={setTab} />
-          <span className="shrink-0 rounded-full border border-neon/30 bg-neon/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-neon lg:text-[11px]">
+        <div className="mx-auto flex max-w-md items-center justify-between gap-3 px-3 py-3 lg:max-w-lg lg:px-4 lg:py-3.5">
+          <BetDataLogo className="min-w-0" />
+          <span className="shrink-0 rounded-full border border-neon/30 bg-neon/10 px-2 py-1 text-[9px] font-semibold uppercase tracking-wide text-neon sm:text-[10px] lg:text-[11px]">
             {liveCount > 0 ? `${liveCount} en juego` : "IA activa"}
           </span>
+        </div>
+        <div className="mx-auto hidden max-w-lg justify-center px-4 pb-1 lg:flex">
+          <HeaderNav value={tab} onChange={setTab} />
         </div>
         <div className="mx-auto max-w-md space-y-2 px-3 pb-2 lg:max-w-lg lg:px-4">
           <DailyHitsBadge matches={matches} />
