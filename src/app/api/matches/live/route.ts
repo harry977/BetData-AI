@@ -10,12 +10,21 @@ const NO_STORE = {
 };
 
 export async function GET() {
+  console.log("[API LIVE] Inicio fetch", new Date().toISOString());
   try {
     const payload = await getLiveMatchesFeed();
+    console.log(
+      "[API LIVE] Fin fetch",
+      new Date().toISOString(),
+      "matches",
+      payload.matches.length,
+      "connected",
+      payload.connected,
+    );
     return NextResponse.json(payload, { headers: NO_STORE });
   } catch (error) {
     const message = error instanceof Error ? error.message : "SportAPI live failed";
-    console.error("[sportapi] /api/matches/live", message);
+    console.error("[API LIVE] Fin fetch (error)", new Date().toISOString(), message);
     return NextResponse.json(
       {
         source: "sportapi",

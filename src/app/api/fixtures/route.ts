@@ -9,21 +9,22 @@ const NO_STORE = {
   "Cache-Control": "no-store, max-age=0",
 };
 
-export async function GET(request: Request) {
+export async function GET() {
+  console.log("[API FIXTURES] Inicio fetch", new Date().toISOString());
   try {
-    const url = new URL(request.url);
-    const rawIds = url.searchParams.get("categoryIds") ?? "";
-    const cachedCategoryIds = rawIds
-      .split(",")
-      .map((value) => Number(value))
-      .filter((value) => Number.isInteger(value) && value > 0);
-    const payload = await getFixturesFeed(
-      cachedCategoryIds.length ? cachedCategoryIds : undefined,
+    const payload = await getFixturesFeed();
+    console.log(
+      "[API FIXTURES] Fin fetch",
+      new Date().toISOString(),
+      "matches",
+      payload.response.length,
+      "connected",
+      payload.connected,
     );
     return NextResponse.json(payload, { headers: NO_STORE });
   } catch (error) {
     const message = error instanceof Error ? error.message : "SportAPI fixtures failed";
-    console.error("[sportapi] /api/fixtures", message);
+    console.error("[API FIXTURES] Fin fetch (error)", new Date().toISOString(), message);
     return NextResponse.json(
       {
         source: "sportapi",

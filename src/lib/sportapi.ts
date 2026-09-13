@@ -111,6 +111,7 @@ export class SportApiTimeoutError extends Error {
 }
 
 const DEFAULT_TIMEOUT_MS = 15_000;
+export const FEED_TIMEOUT_MS = 3_500;
 
 function sportHeaders(): Record<string, string> {
   const env = assertSportApiEnv();
@@ -255,6 +256,28 @@ export async function sportGet<T = unknown>(
 
   if (ttlMs > 0) writeCache(cacheKey, json);
   return json;
+}
+
+/** Single RapidAPI GET for the match feed. One attempt, 3500ms abort, no queue. */
+export async function sportFeedGet<T = unknown>(path: string): Promise<T> {
+  const { status, text } = await sportFetch(path, FEED_TIMEOUT_MS);
+  if (status === 401 || status === 403) {
+    console.error(`[sportapi] ${status} unauthorized ${path}`);
+    throw new SportApiError(status, path, `SportAPI ${status} ${path}`);
+  }
+  if (status < 200 || status >= 300) {
+    console.error(`[sportapi] ${status} ${path}`);
+    throw new SportApiError(
+      status,
+      path,
+      `SportAPI ${status} ${path} ${text.slice(0, 160)}`,
+    );
+  }
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    throw new SportApiError(status, path, `SportAPI JSON inválido ${path}`);
+  }
 }
 
 export function timezoneOffsetSeconds(): number {
@@ -466,13 +489,13 @@ export async function fetchScheduledEvents(
 
 export async function fetchAllScheduledEvents(date: string): Promise<SportEvent[]> {
   const path = `/api/v1/sport/football/scheduled-events/${date}`;
-  const json = await sportGet(path, SHORT_TTL_MS);
+  const json = await sportFeedGet(path);
   return parseEventList(json);
 }
 
 export async function fetchLiveEvents(): Promise<SportEvent[]> {
   const path = `/api/v1/sport/football/events/live`;
-  const json = await sportGet(path, 0, DEFAULT_TIMEOUT_MS, true);
+  const json = await sportFeedGet(path);
   const events = parseEventList(json);
   console.info(`[sportapi] live events ${events.length}`);
   return events;
