@@ -14,6 +14,7 @@ import { TeamCrest } from "@/components/brand/team-crest";
 import { BetBonusCta } from "@/components/signals/bet-bonus-cta";
 import { SignalCopy } from "@/components/signals/signal-copy";
 import { Button } from "@/components/ui/button";
+import { useEventIncidents } from "@/hooks/use-event-incidents";
 import { useEventStatistics } from "@/hooks/use-event-statistics";
 import {
   contextAlert,
@@ -27,8 +28,8 @@ import {
   type StatRow,
 } from "@/lib/match-sheet";
 import { hapticTap, shareToTelegram } from "@/lib/telegram";
-import type { MatchInsight } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import type { MatchIncident, MatchInsight } from "@/lib/types";
+import { cn, isInPlayStatus } from "@/lib/utils";
 
 type MatchSheetProps = {
   match: MatchInsight | null;
@@ -45,6 +46,10 @@ export function MatchSheet({ match, onClose }: MatchSheetProps) {
 
 function SheetFrame({ match, onClose }: { match: MatchInsight; onClose: () => void }) {
   const { metrics } = useEventStatistics(match.id);
+  const { incidents, loading: incidentsLoading } = useEventIncidents(
+    match.id,
+    isInPlayStatus(match.status),
+  );
   const view: MatchInsight = metrics ? { ...match, metrics: { ...match.metrics, ...metrics } } : match;
   const dragControls = useDragControls();
 
@@ -90,6 +95,8 @@ function SheetFrame({ match, onClose }: { match: MatchInsight; onClose: () => vo
       >
         <SheetBody
           match={view}
+          incidents={incidents}
+          incidentsLoading={incidentsLoading}
           onClose={onClose}
           handle
           onHandlePointerDown={(event) => dragControls.start(event)}
@@ -103,7 +110,12 @@ function SheetFrame({ match, onClose }: { match: MatchInsight; onClose: () => vo
         exit={{ x: "100%" }}
         transition={{ type: "spring", damping: 28, stiffness: 320 }}
       >
-        <SheetBody match={view} onClose={onClose} />
+        <SheetBody
+          match={view}
+          incidents={incidents}
+          incidentsLoading={incidentsLoading}
+          onClose={onClose}
+        />
       </motion.aside>
     </div>
   );
@@ -111,17 +123,21 @@ function SheetFrame({ match, onClose }: { match: MatchInsight; onClose: () => vo
 
 function SheetBody({
   match,
+  incidents,
+  incidentsLoading,
   onClose,
   handle = false,
   onHandlePointerDown,
 }: {
   match: MatchInsight;
+  incidents: MatchIncident[];
+  incidentsLoading: boolean;
   onClose: () => void;
   handle?: boolean;
   onHandlePointerDown?: (event: PointerEvent) => void;
 }) {
   const clock = headerClock(match);
-  const [open, setOpen] = useState({ markets: true, stats: true, context: true });
+  const [open, setOpen] = useState({ markets: true, stats: true, incidents: true, context: true });
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [overflow, setOverflow] = useState({ up: false, down: false });
 
@@ -265,8 +281,21 @@ function SheetBody({
             </div>
           </Accordion>
 
+          {isInPlayStatus(match.status) ? (
+            <Accordion
+              title="3. Incidentes en directo"
+              open={open.incidents}
+              onToggle={() => {
+                hapticTap();
+                setOpen((state) => ({ ...state, incidents: !state.incidents }));
+              }}
+            >
+              <IncidentsList incidents={incidents} loading={incidentsLoading} />
+            </Accordion>
+          ) : null}
+
           <Accordion
-            title="3. Cara a cara y contexto"
+            title={isInPlayStatus(match.status) ? "4. Cara a cara y contexto" : "3. Cara a cara y contexto"}
             open={open.context}
             onToggle={() => {
               hapticTap();
@@ -329,6 +358,56 @@ function SheetBody({
         ) : null}
       </footer>
     </div>
+  );
+}
+
+function IncidentsList({
+  incidents,
+  loading,
+}: {
+  incidents: MatchIncident[];
+  loading: boolean;
+}) {
+  if (loading && incidents.length === 0) {
+    return <p className="text-[12px] font-semibold text-zinc-400">Sincronizando goles y tarjetas…</p>;
+  }
+  if (incidents.length === 0) {
+    return (
+      <p className="text-[12px] font-semibold text-zinc-400">
+        Aún no hay goles, tarjetas ni córners registrados en este partido.
+      </p>
+    );
+  }
+
+  const visible = incidents.filter((row) =>
+    ["goal", "card", "corner"].includes(row.type),
+  );
+  const rows = visible.length ? visible : incidents.slice(-12);
+
+  return (
+    <ol className="space-y-2">
+      {rows.map((row) => (
+        <li
+          key={row.id}
+          className="flex items-start gap-2 rounded-xl border border-white/10 bg-black/30 px-3 py-2"
+        >
+          <span
+            className={
+              row.type === "goal"
+                ? "mt-0.5 text-[11px] font-black uppercase tracking-[0.12em] text-neon"
+                : row.type === "card"
+                  ? "mt-0.5 text-[11px] font-black uppercase tracking-[0.12em] text-amber-300"
+                  : "mt-0.5 text-[11px] font-black uppercase tracking-[0.12em] text-cyan-300"
+            }
+          >
+            {row.type === "goal" ? "Gol" : row.type === "card" ? "Tarjeta" : row.type === "corner" ? "Córner" : "Juego"}
+          </span>
+          <p className="min-w-0 flex-1 text-[13px] font-semibold leading-snug text-white">
+            {row.label}
+          </p>
+        </li>
+      ))}
+    </ol>
   );
 }
 

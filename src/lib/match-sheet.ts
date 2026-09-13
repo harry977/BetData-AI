@@ -139,8 +139,8 @@ export function contextAlert(match: MatchInsight) {
       match.score.home != null && match.score.away != null
         ? `${match.score.home}–${match.score.away}`
         : "sin marcador";
-    const clock = match.elapsed != null ? `${match.elapsed}'` : statusLabel(match);
-    return `En juego (${clock}, ${score}). Presión ofensiva ${match.metrics.offensivePressure}%.`;
+    const clock = statusLabel(match);
+    return `${clock} (${score}). Presión ofensiva ${match.metrics.offensivePressure}%.`;
   }
   const kickoff = `${formatCalendarDay(match.kickoffIso)} · ${formatKickoffLocal(match.kickoffIso)}`;
   return `${match.league.name} (${countryLabel(match.league.country)}) · ${kickoff}.`;
@@ -175,11 +175,7 @@ export function headerClock(match: MatchInsight) {
   if (match.score.home != null && match.score.away != null) {
     return {
       score: `${match.score.home}–${match.score.away}`,
-      meta: isInPlayStatus(match.status)
-        ? match.elapsed != null
-          ? `${match.elapsed}'`
-          : statusLabel(match)
-        : statusLabel(match),
+      meta: statusLabel(match),
     };
   }
   return {

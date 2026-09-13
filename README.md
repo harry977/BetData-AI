@@ -8,7 +8,7 @@ Telegram Mini App de **inteligencia de fútbol en vivo**. La IA escanea el día,
 - Tailwind CSS + shadcn/ui
 - Framer Motion + Recharts
 - `@telegram-apps/sdk` + script oficial `telegram-web-app.js`
-- Feed SportAPI (SofaScore vía RapidAPI). Si no hay clave, cuota o jornada completa, la app muestra una **simulación** con partidos de demostración para que radar, alerta de gol, resultados del día y combinadas se puedan ver.
+- Feed SportAPI (SofaScore vía RapidAPI). Si no hay `RAPIDAPI_KEY`, la app muestra una **simulación** con partidos de demostración.
 
 ## Cómo arrancar
 
@@ -40,16 +40,24 @@ Para volver a la landing usa *Cerrar sesión*.
 3. En Telegram, *Entra con Telegram* usa el usuario de `initData` (un toque).
 4. En el navegador, el mismo botón te deja entrar. Si configuras `NEXT_PUBLIC_TELEGRAM_BOT_ID` y `/setdomain`, abre el login oficial de Telegram. Opcional: `TELEGRAM_BOT_TOKEN` para validar la firma.
 
-## RapidAPI (SportAPI / SofaScore)
+## RapidAPI (SportAPI)
 
-`/api/fixtures` pide los partidos del día (`YYYY-MM-DD` UTC) a RapidAPI, con `timezone=Europe/Madrid` en API-Football. Sin clave, sin cuota o si el feed no cubre directo + cerrados + combinada, la app usa una jornada simulada (chip **Simulación**).
+La app habla con [SportAPI](https://rapidapi.com) (`sportapi7.p.rapidapi.com`) desde el servidor. El cliente está en `src/lib/sportapi.ts` y las rutas internas son:
+
+- `GET /api/matches/live` — fixtures en directo (marcador, minuto, estado EN DIRECTO)
+- `GET /api/matches/categories?date=YYYY-MM-DD&timezoneOffset=0` — categorías/ligas de fútbol
+- `GET /api/event/{id}/incidents` — goles, tarjetas y córners
+- `GET /api/event/{id}/statistics` — xG, tiros, posesión
+- `GET /api/fixtures` — jornada (hoy / mañana / ayer) + directo
 
 ```bash
 # .env.local
-RAPIDAPI_KEY=tu_clave
-RAPIDAPI_SPORT_HOST=sportapi7.p.rapidapi.com
+RAPIDAPI_KEY="TU_API_KEY_AQUI"
+RAPIDAPI_HOST="sportapi7.p.rapidapi.com"
 NEXT_PUBLIC_OFFICIAL_SERVER_URL=https://tu-servidor-deportivo-oficial
 ```
+
+Sin clave, o si SportAPI no responde, la app usa una jornada simulada (chip **Simulación**). Con clave válida el directo sale de `/api/v1/sport/football/events/live`.
 
 No subas la clave al repositorio: `.env.local` está en `.gitignore`.
 

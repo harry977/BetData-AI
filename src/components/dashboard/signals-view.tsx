@@ -108,10 +108,10 @@ export function SignalsView({
           >
             <span>
               <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-rose-300">
-                En juego ahora · {liveNow.length}
-              </span>
+            {liveNow.length} EN DIRECTO
+          </span>
               <span className="mt-1 block text-sm font-black uppercase text-white">
-                {liveNow[0].home.code} — {liveNow[0].away.code}
+                {liveNow[0].home.name} {liveNow[0].score.home ?? "–"}–{liveNow[0].score.away ?? "–"} {liveNow[0].away.name}
               </span>
             </span>
             <span className="text-[11px] font-black uppercase tracking-[0.14em] text-rose-300">

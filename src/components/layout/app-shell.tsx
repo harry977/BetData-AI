@@ -12,8 +12,9 @@ import { DailyHitsBadge } from "@/components/signals/daily-hits-badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFixtures } from "@/hooks/use-fixtures";
+import { useLiveMatches, withLiveScores } from "@/hooks/use-live-matches";
 import { recordViewedSignal, readUnlockState } from "@/lib/storage";
-import { cn, liveMatches } from "@/lib/utils";
+import { cn, isInPlayStatus, liveMatches } from "@/lib/utils";
 
 type AppShellProps = {
   onLock: () => void;
@@ -21,6 +22,7 @@ type AppShellProps = {
 
 export function AppShell({ onLock }: AppShellProps) {
   const { data, error, loading, reload } = useFixtures();
+  const { data: liveData } = useLiveMatches(true);
   const [tab, setTab] = useState<AppTab>("hoy");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [accountId, setAccountId] = useState("");
@@ -28,8 +30,19 @@ export function AppShell({ onLock }: AppShellProps) {
     setAccountId(readUnlockState().accountId);
   }, []);
 
-  const matches = useMemo(() => data?.response ?? [], [data]);
+  const matches = useMemo(() => {
+    const base = data?.response ?? [];
+    const liveRows = liveData?.matches ?? [];
+    if (liveData?.source === "sportapi") {
+      const rest = base.filter(
+        (match) => !isInPlayStatus(match.status) || match.id < 910000,
+      );
+      return withLiveScores(rest, liveRows);
+    }
+    return withLiveScores(base, liveRows);
+  }, [data, liveData]);
   const liveCount = useMemo(() => liveMatches(matches).length, [matches]);
+  const simulated = data?.source === "mock" && liveData?.source !== "sportapi";
   const liveMode = tab === "live";
 
   function handleSelect(id: number) {
@@ -73,7 +86,7 @@ export function AppShell({ onLock }: AppShellProps) {
         </div>
         <div className="mx-auto max-w-md space-y-2 px-3 pb-2 lg:max-w-lg lg:px-4">
           <DailyHitsBadge matches={matches} />
-          {data?.source === "mock" ? (
+          {simulated ? (
             <p className="rounded-xl border border-neon/25 bg-neon/10 px-3 py-1.5 text-center text-[10px] font-black uppercase tracking-[0.14em] text-neon">
               Simulación · jornada de demostración
             </p>
@@ -88,9 +101,9 @@ export function AppShell({ onLock }: AppShellProps) {
             : "mx-auto max-w-md px-3 pb-nav pt-4 lg:max-w-lg lg:px-4 lg:pb-10 lg:pt-6"
         }
       >
-        {loading ? <DashboardSkeleton /> : null}
+        {loading && matches.length === 0 ? <DashboardSkeleton /> : null}
 
-        {error ? (
+        {error && matches.length === 0 ? (
           <div className="rounded-xl border border-red-500/30 bg-red-950/40 p-4 text-sm text-red-200">
             <div className="flex items-start gap-2">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
@@ -105,7 +118,7 @@ export function AppShell({ onLock }: AppShellProps) {
           </div>
         ) : null}
 
-        {!loading && !error ? (
+        {matches.length > 0 || (!loading && !error) ? (
           <>
             {tab === "hoy" ? (
               <SignalsView

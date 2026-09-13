@@ -2,6 +2,7 @@ import { buildLiveMetrics } from "@/lib/metrics";
 import type {
   DayBucket,
   FixtureStatus,
+  LiveMatchCard,
   LiveMetrics,
   Markets,
   MatchInsight,
@@ -12,7 +13,7 @@ import type {
   EventOdds,
   EventStatSnapshot,
   SportEvent,
-} from "@/services/sportApi";
+} from "@/lib/sportapi";
 
 const TEAM_COLORS: [string, string][] = [
   ["#B8FF00", "#3d4d00"],
@@ -264,4 +265,65 @@ export function mergeLiveEvent(current: SportEvent, live: SportEvent): SportEven
     statusDescription: live.statusDescription || current.statusDescription,
     elapsed: live.elapsed ?? current.elapsed,
   };
+}
+
+export function liveClockLabel(status: FixtureStatus, elapsed: number | null) {
+  if (status === "HT") return "Descanso";
+  if (status === "LIVE") {
+    return elapsed != null ? `EN DIRECTO ${elapsed}'` : "EN DIRECTO";
+  }
+  return null;
+}
+
+export function toLiveMatchCard(match: MatchInsight): LiveMatchCard {
+  return {
+    id: match.id,
+    home: {
+      id: match.home.id,
+      name: match.home.name,
+      code: match.home.code,
+      logo: match.home.logo,
+    },
+    away: {
+      id: match.away.id,
+      name: match.away.name,
+      code: match.away.code,
+      logo: match.away.logo,
+    },
+    score: match.score,
+    minute: match.elapsed,
+    status: match.status,
+    statusLabel: liveClockLabel(match.status, match.elapsed) ?? match.status,
+    league: {
+      id: match.league.id,
+      name: match.league.name,
+      country: match.league.country,
+    },
+    kickoffIso: match.kickoffIso,
+  };
+}
+
+export function mergeLiveInsights(
+  base: MatchInsight[],
+  live: MatchInsight[],
+): MatchInsight[] {
+  if (!live.length) return base;
+  const map = new Map(base.map((match) => [match.id, match]));
+  for (const row of live) {
+    const current = map.get(row.id);
+    if (!current) {
+      map.set(row.id, row);
+      continue;
+    }
+    map.set(row.id, {
+      ...current,
+      status: row.status,
+      elapsed: row.elapsed,
+      score: row.score,
+      kickoffIso: row.kickoffIso || current.kickoffIso,
+      home: { ...current.home, name: row.home.name || current.home.name },
+      away: { ...current.away, name: row.away.name || current.away.name },
+    });
+  }
+  return Array.from(map.values());
 }

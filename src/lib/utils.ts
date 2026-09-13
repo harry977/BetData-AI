@@ -36,8 +36,9 @@ export function statusLabel(match: MatchInsight) {
   if (match.day === "yesterday" && match.result) {
     return `Final ${match.result.finalScore.home}-${match.result.finalScore.away}`;
   }
-  if (match.status === "LIVE" && match.elapsed) return `${match.elapsed}'`;
-  if (match.status === "LIVE") return "En juego";
+  if (match.status === "LIVE") {
+    return match.elapsed != null ? `EN DIRECTO ${match.elapsed}'` : "EN DIRECTO";
+  }
   if (match.status === "HT") return "Descanso";
   if (match.status === "FT" && match.score.home !== null && match.score.away !== null) {
     return `Final ${match.score.home}-${match.score.away}`;

@@ -90,10 +90,66 @@ export type SportCategory = {
   eventsCount?: number;
 };
 
+export type FeedSource = "mock" | "rapidapi" | "sportapi";
+
 export type FixturesPayload = {
-  source: "mock" | "rapidapi" | "sportapi";
+  source: FeedSource;
   generatedAt: string;
   stats: PlatformStats;
   response: MatchInsight[];
   categories?: SportCategory[];
+};
+
+export type MatchIncidentType =
+  | "goal"
+  | "card"
+  | "corner"
+  | "substitution"
+  | "var"
+  | "period"
+  | "other";
+
+export type MatchIncident = {
+  id: number;
+  minute: number;
+  addedTime: number | null;
+  type: MatchIncidentType;
+  subtype: string | null;
+  isHome: boolean;
+  player: string | null;
+  assist: string | null;
+  homeScore: number | null;
+  awayScore: number | null;
+  label: string;
+};
+
+export type LiveMatchCard = {
+  id: number;
+  home: { id: number; name: string; code: string; logo: string };
+  away: { id: number; name: string; code: string; logo: string };
+  score: { home: number | null; away: number | null };
+  minute: number | null;
+  status: FixtureStatus;
+  statusLabel: string;
+  league: { id: number; name: string; country: string };
+  kickoffIso: string;
+};
+
+export type LiveMatchesPayload = {
+  source: FeedSource;
+  generatedAt: string;
+  matches: MatchInsight[];
+  cards: LiveMatchCard[];
+};
+
+export type CategoriesPayload = {
+  source: FeedSource;
+  date: string;
+  timezoneOffset: number;
+  categories: SportCategory[];
+};
+
+export type IncidentsPayload = {
+  eventId: number;
+  incidents: MatchIncident[];
 };

@@ -28,14 +28,14 @@ export function MatchCard({ match, day, active = false, onSelect }: MatchCardPro
       )}
     >
       <div className="w-12 shrink-0">
-        <Badge variant={match.status === "LIVE" ? "live" : "muted"} className="px-1.5">
+        <Badge variant={match.status === "LIVE" || match.status === "HT" ? "live" : "muted"} className="px-1.5">
           {statusLabel(match)}
         </Badge>
       </div>
 
       <div className="min-w-0 flex-1 space-y-1">
-        <TeamLine team={match.home} />
-        <TeamLine team={match.away} />
+        <TeamLine team={match.home} score={match.score.home} live={match.status === "LIVE" || match.status === "HT"} />
+        <TeamLine team={match.away} score={match.score.away} live={match.status === "LIVE" || match.status === "HT"} />
         <SignalCopy match={match} size="sm" />
       </div>
 
@@ -67,11 +67,26 @@ export function MatchCard({ match, day, active = false, onSelect }: MatchCardPro
   );
 }
 
-function TeamLine({ team }: { team: MatchInsight["home"] }) {
+function TeamLine({
+  team,
+  score,
+  live = false,
+}: {
+  team: MatchInsight["home"];
+  score?: number | null;
+  live?: boolean;
+}) {
   return (
     <div className="flex items-center gap-1.5">
       <TeamCrest team={team} size={18} />
-      <span className="truncate text-[13px] font-semibold text-zinc-50">{team.name}</span>
+      <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-zinc-50">
+        {team.name}
+      </span>
+      {live ? (
+        <span className="font-mono text-[13px] font-black tabular-nums text-white">
+          {score ?? "–"}
+        </span>
+      ) : null}
     </div>
   );
 }

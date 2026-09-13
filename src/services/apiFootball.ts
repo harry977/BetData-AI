@@ -1,7 +1,7 @@
 import { RAPIDAPI_FOOTBALL } from "@/lib/constants";
 import { asArray, asInt, asNumber, asString, isRecord } from "@/lib/json";
 import https from "node:https";
-import { hasSportApiKey, type SportEvent } from "@/services/sportApi";
+import { hasSportApiKey, type SportEvent } from "@/lib/sportapi";
 
 function footballGet(pathAndQuery: string): Promise<{ status: number; text: string }> {
   const key = process.env["RAPIDAPI_KEY"];

@@ -47,8 +47,13 @@ export const RAPIDAPI_FOOTBALL = {
 } as const;
 
 export const RAPIDAPI_SPORT = {
-  host: "sportapi7.p.rapidapi.com",
-  base: "https://sportapi7.p.rapidapi.com",
+  host:
+    process.env.RAPIDAPI_HOST ??
+    process.env.RAPIDAPI_SPORT_HOST ??
+    "sportapi7.p.rapidapi.com",
+  base:
+    process.env.RAPIDAPI_SPORT_BASE ??
+    "https://sportapi7.p.rapidapi.com",
 } as const;
 
 export const TELEGRAM_BOT_USERNAME =

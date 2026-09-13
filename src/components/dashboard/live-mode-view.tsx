@@ -136,6 +136,9 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
         >
           {statusLabel(selected)}
         </p>
+        <p className="mt-1 text-center text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">
+          {selected.league.country} · {selected.league.name}
+        </p>
         <GoalAlert
           match={selected}
           className={cn("mt-4", alert.show && "animate-bounce")}
@@ -208,7 +211,10 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
                     className="w-full text-left"
                   >
                     <p className="truncate text-[13px] font-black uppercase text-white">
-                      {match.home.name} — {match.away.name}
+                      {match.home.name} {match.score.home ?? "–"}–{match.score.away ?? "–"} {match.away.name}
+                    </p>
+                    <p className="mt-1 text-[11px] font-black uppercase tracking-[0.12em] text-rose-300">
+                      {statusLabel(match)}
                     </p>
                     <div className="mt-2">
                       <SignalCopy match={match} size="sm" />

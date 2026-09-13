@@ -1,20 +1,28 @@
 import { PLATFORM_STATS } from "@/lib/constants";
 import { shiftYmd } from "@/lib/dates";
-import { buildDemoFixtures, demoFeedCoversProduct } from "@/lib/mocks/demo-fixtures";
+import { buildDemoFixtures } from "@/lib/mocks/demo-fixtures";
 import {
   dayBucketFor,
   isLowQualityLive,
   isPriorityLive,
   mergeLiveEvent,
+  toLiveMatchCard,
   toMatchInsight,
 } from "@/lib/sport-mapper";
-import type { FixturesPayload, MatchInsight, SportCategory } from "@/lib/types";
+import type {
+  CategoriesPayload,
+  FixturesPayload,
+  LiveMatchesPayload,
+  MatchInsight,
+  SportCategory,
+} from "@/lib/types";
 import { isInPlayStatus } from "@/lib/utils";
 import {
   fetchFootballFixturesByDate,
   fetchFootballLiveFixtures,
 } from "@/services/apiFootball";
 import {
+  fetchAllScheduledEvents,
   fetchBulkOdds,
   fetchCategories,
   fetchLiveEvents,
@@ -24,7 +32,7 @@ import {
   timezoneOffsetSeconds,
   type EventOdds,
   type SportEvent,
-} from "@/services/sportApi";
+} from "@/lib/sportapi";
 
 const FEED_TTL_MS = 15_000;
 const FEED_FAIL_TTL_MS = 60_000;
@@ -157,17 +165,60 @@ function capMatches(matches: MatchInsight[]) {
   return [...take(byDay.today, 48), ...take(byDay.tomorrow, 32), ...take(byDay.yesterday, 16)];
 }
 
+async function scheduledForDate(date: string, categories: SportCategory[]) {
+  try {
+    const all = await fetchAllScheduledEvents(date);
+    if (all.length) return all;
+  } catch {
+    /* fall through to per-category */
+  }
+  return eventsForDate(date, categories);
+}
+
+function mergeScheduledAndLive(scheduled: SportEvent[], liveEvents: SportEvent[]) {
+  const liveById = new Map(liveEvents.map((event) => [event.id, event]));
+  const merged = scheduled.map((event) => {
+    const live = liveById.get(event.id);
+    return live ? mergeLiveEvent(event, live) : event;
+  });
+  for (const live of Array.from(liveById.values())) {
+    if (merged.some((event) => event.id === live.id)) continue;
+    if (isLowQualityLive(live) && !isPriorityLive(live) && !live.leagueLogo) continue;
+    merged.push(live);
+  }
+  return merged;
+}
+
+async function mapEvents(events: SportEvent[], today: string) {
+  const tomorrow = shiftYmd(today, 1);
+  const empty = new Map<number, EventOdds>();
+  const odds = await Promise.race([
+    Promise.all([oddsMapFor(today), oddsMapFor(tomorrow).catch(() => empty)]),
+    new Promise<[Map<number, EventOdds>, Map<number, EventOdds>]>((resolve) =>
+      setTimeout(() => resolve([empty, empty]), 2500),
+    ),
+  ]);
+  const [oddsToday, oddsTomorrow] = odds;
+  return events.map((event) => {
+    const day = dayBucketFor(event.startTimestamp, today);
+    const eventOdds =
+      (day === "tomorrow" ? oddsTomorrow : oddsToday).get(event.id) ?? defaultOdds();
+    return toMatchInsight(event, eventOdds, today);
+  });
+}
+
 export async function getFixturesFeed(cachedCategoryIds?: number[]): Promise<FixturesPayload> {
   const today = todayIsoDate();
   const tomorrow = shiftYmd(today, 1);
   const yesterday = shiftYmd(today, -1);
   const cacheKey = `${today}:${(cachedCategoryIds ?? []).join(",")}`;
   if (feedCache && feedCache.key === cacheKey && Date.now() - feedCache.savedAt < feedCache.ttl) {
-    if (feedCache.payload.source === "mock") return feedCache.payload;
-    const cachedLive = feedCache.payload.response.some((match) =>
-      isInPlayStatus(match.status),
-    );
-    if (!cachedLive) return feedCache.payload;
+    if (feedCache.payload.source !== "mock") {
+      const cachedLive = feedCache.payload.response.some((match) =>
+        isInPlayStatus(match.status),
+      );
+      if (!cachedLive) return feedCache.payload;
+    }
   }
 
   const demo = payload("mock", buildDemoFixtures());
@@ -177,82 +228,122 @@ export async function getFixturesFeed(cachedCategoryIds?: number[]): Promise<Fix
     return demo;
   }
 
-  const liveFeed = (async (): Promise<FixturesPayload | null> => {
+  try {
     const categories = await categoriesForDate(today, cachedCategoryIds);
-    const [
-      footballToday,
-      footballTomorrow,
-      footballYesterday,
-      footballLive,
-      todayEvents,
-      tomorrowEvents,
-      yesterdayEvents,
-      liveEvents,
-    ] = await Promise.all([
-      fetchFootballFixturesByDate(today),
-      fetchFootballFixturesByDate(tomorrow).catch(() => [] as SportEvent[]),
-      fetchFootballFixturesByDate(yesterday).catch(() => [] as SportEvent[]),
-      fetchFootballLiveFixtures().catch(() => [] as SportEvent[]),
-      eventsForDate(today, categories).catch(() => [] as SportEvent[]),
-      eventsForDate(tomorrow, categories).catch(() => [] as SportEvent[]),
-      eventsForDate(yesterday, categories).catch(() => [] as SportEvent[]),
+    const [todayEvents, tomorrowEvents, yesterdayEvents, liveEvents] = await Promise.all([
+      scheduledForDate(today, categories).catch(() => [] as SportEvent[]),
+      scheduledForDate(tomorrow, categories).catch(() => [] as SportEvent[]),
+      scheduledForDate(yesterday, categories).catch(() => [] as SportEvent[]),
       fetchLiveEvents().catch(() => [] as SportEvent[]),
     ]);
 
-    const scheduled = uniqueEvents([
-      ...footballToday,
-      ...footballTomorrow,
-      ...footballYesterday,
-      ...todayEvents,
-      ...tomorrowEvents,
-      ...yesterdayEvents,
-    ]);
-    const liveById = new Map(
-      [...footballLive, ...liveEvents].map((event) => [event.id, event]),
+    let merged = mergeScheduledAndLive(
+      uniqueEvents([...todayEvents, ...tomorrowEvents, ...yesterdayEvents]),
+      liveEvents,
     );
-    const merged = scheduled.map((event) => {
-      const live = liveById.get(event.id);
-      return live ? mergeLiveEvent(event, live) : event;
-    });
-    for (const live of Array.from(liveById.values())) {
-      if (merged.some((event) => event.id === live.id)) continue;
-      if (isLowQualityLive(live) && !isPriorityLive(live) && !live.leagueLogo) continue;
-      merged.push(live);
-    }
 
-    if (merged.length === 0) return { ...demo, categories };
-
-    const [oddsToday, oddsTomorrow] = await Promise.all([
-      oddsMapFor(today),
-      oddsMapFor(tomorrow).catch(() => new Map<number, EventOdds>()),
-    ]);
-
-    const mapped = merged.map((event) => {
-      const day = dayBucketFor(event.startTimestamp, today);
-      const odds =
-        (day === "tomorrow" ? oddsTomorrow : oddsToday).get(event.id) ?? defaultOdds();
-      return toMatchInsight(event, odds, today);
-    });
-    const source = footballToday.length || footballLive.length ? "rapidapi" : "sportapi";
-    return payload(source, capMatches(mapped), categories);
-  })();
-
-  try {
-    const result = await Promise.race([
-      liveFeed,
-      new Promise<null>((resolve) => setTimeout(() => resolve(null), 4500)),
-    ]);
-    if (result && result.source !== "mock" && demoFeedCoversProduct(result.response)) {
-      const hasLive = result.response.some((match) => isInPlayStatus(match.status));
-      feedCache = hasLive
-        ? null
-        : { key: cacheKey, savedAt: Date.now(), ttl: FEED_TTL_MS, payload: result };
+    if (merged.length === 0) {
+      const [footballToday, footballTomorrow, footballYesterday, footballLive] =
+        await Promise.all([
+          fetchFootballFixturesByDate(today).catch(() => [] as SportEvent[]),
+          fetchFootballFixturesByDate(tomorrow).catch(() => [] as SportEvent[]),
+          fetchFootballFixturesByDate(yesterday).catch(() => [] as SportEvent[]),
+          fetchFootballLiveFixtures().catch(() => [] as SportEvent[]),
+        ]);
+      merged = mergeScheduledAndLive(
+        uniqueEvents([...footballToday, ...footballTomorrow, ...footballYesterday]),
+        footballLive,
+      );
+      if (merged.length === 0) {
+        feedCache = { key: cacheKey, savedAt: Date.now(), ttl: FEED_FAIL_TTL_MS, payload: demo };
+        return { ...demo, categories };
+      }
+      const mappedFootball = await mapEvents(merged, today);
+      const result = payload("rapidapi", capMatches(mappedFootball), categories);
+      feedCache = {
+        key: cacheKey,
+        savedAt: Date.now(),
+        ttl: result.response.some((match) => isInPlayStatus(match.status)) ? 0 : FEED_TTL_MS,
+        payload: result,
+      };
       return result;
     }
+
+    const mapped = await mapEvents(merged, today);
+    const result = payload("sportapi", capMatches(mapped), categories);
+    const hasLive = result.response.some((match) => isInPlayStatus(match.status));
+    feedCache = hasLive
+      ? null
+      : { key: cacheKey, savedAt: Date.now(), ttl: FEED_TTL_MS, payload: result };
+    return result;
   } catch {
-    /* demo fallback */
+    feedCache = { key: cacheKey, savedAt: Date.now(), ttl: FEED_FAIL_TTL_MS, payload: demo };
+    return demo;
+  }
+}
+
+export async function getLiveMatchesFeed(): Promise<LiveMatchesPayload> {
+  const today = todayIsoDate();
+  const demoMatches = buildDemoFixtures().filter((match) => isInPlayStatus(match.status));
+
+  if (!hasSportApiKey()) {
+    return {
+      source: "mock",
+      generatedAt: new Date().toISOString(),
+      matches: demoMatches,
+      cards: demoMatches.map(toLiveMatchCard),
+    };
   }
 
-  feedCache = { key: cacheKey, savedAt: Date.now(), ttl: FEED_FAIL_TTL_MS, payload: demo };
-  return demo;
+  try {
+    const liveEvents = await fetchLiveEvents();
+    const matches = (await mapEvents(liveEvents, today)).filter((match) =>
+      isInPlayStatus(match.status),
+    );
+    if (matches.length === 0) {
+      return {
+        source: "sportapi",
+        generatedAt: new Date().toISOString(),
+        matches: [],
+        cards: [],
+      };
+    }
+    return {
+      source: "sportapi",
+      generatedAt: new Date().toISOString(),
+      matches,
+      cards: matches.map(toLiveMatchCard),
+    };
+  } catch {
+    return {
+      source: "mock",
+      generatedAt: new Date().toISOString(),
+      matches: demoMatches,
+      cards: demoMatches.map(toLiveMatchCard),
+    };
+  }
+}
+
+export async function getFootballCategoriesFeed(
+  date?: string,
+  timezoneOffset?: number,
+): Promise<CategoriesPayload> {
+  const resolvedDate = date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : todayIsoDate();
+  const offset = timezoneOffset ?? timezoneOffsetSeconds();
+
+  if (!hasSportApiKey()) {
+    return { source: "mock", date: resolvedDate, timezoneOffset: offset, categories: [] };
+  }
+
+  try {
+    const categories = await fetchCategories(resolvedDate, offset);
+    return {
+      source: "sportapi",
+      date: resolvedDate,
+      timezoneOffset: offset,
+      categories,
+    };
+  } catch {
+    return { source: "mock", date: resolvedDate, timezoneOffset: offset, categories: [] };
+  }
 }

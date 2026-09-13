@@ -1,5 +1,5 @@
 import { snapshotToMetrics } from "@/lib/sport-mapper";
-import { fetchEventStatistics } from "@/services/sportApi";
+import { fetchEventStatistics } from "@/lib/sportapi";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";

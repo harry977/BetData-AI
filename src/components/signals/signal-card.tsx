@@ -25,7 +25,11 @@ export function SignalCard({
 }) {
   const live = match.status === "LIVE" || match.status === "HT";
   const rarity = signalRarity(match.confidence);
-  const clock = live && match.elapsed != null ? `${match.elapsed}'` : null;
+  const clock = live ? statusLabel(match) : null;
+  const score =
+    live && match.score.home != null && match.score.away != null
+      ? `${match.score.home}–${match.score.away}`
+      : null;
 
   if (compact) {
     return (
@@ -41,6 +45,7 @@ export function SignalCard({
         <div className="min-w-0 flex-1">
           <p className="truncate text-[12px] font-black uppercase tracking-wide text-slate-400 lg:text-base lg:text-gray-300">
             {match.home.code} · {match.away.code}
+            {score ? ` · ${score}` : ""}
             {clock ? ` · ${clock}` : ""}
           </p>
           <div className="mt-0.5 lg:mt-1">
