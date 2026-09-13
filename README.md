@@ -48,6 +48,8 @@ La app habla con [SportAPI](https://rapidapi.com) (`sportapi7.p.rapidapi.com`) d
 - `GET /api/matches/categories?date=YYYY-MM-DD&timezoneOffset=0` — categorías/ligas de fútbol
 - `GET /api/event/{id}/incidents` — goles, tarjetas y córners
 - `GET /api/event/{id}/statistics` — xG, tiros, posesión
+- `GET /api/crest/team/{id}` — escudo Premium (`/api/v1/team/{id}/image`)
+- `GET /api/crest/league/{id}` — logo de competición
 - `GET /api/fixtures` — jornada (hoy / mañana / ayer) + directo
 
 ```bash
@@ -57,7 +59,7 @@ RAPIDAPI_HOST="sportapi7.p.rapidapi.com"
 NEXT_PUBLIC_OFFICIAL_SERVER_URL=https://tu-servidor-deportivo-oficial
 ```
 
-Sin clave, o si SportAPI no responde, la app usa una jornada simulada (chip **Simulación**). Con clave válida el directo sale de `/api/v1/sport/football/events/live`.
+Con clave válida el directo sale de `/api/v1/sport/football/events/live` y los escudos de `/api/v1/team/{id}/image`. No se mezcla la jornada de demostración con datos reales.
 
 No subas la clave al repositorio: `.env.local` está en `.gitignore`.
 

@@ -330,6 +330,18 @@ export async function getFixturesFeed(cachedCategoryIds?: number[]): Promise<Fix
       : { key: cacheKey, savedAt: Date.now(), ttl: FEED_TTL_MS, payload: result };
     return result;
   } catch {
+    try {
+      const liveEvents = await fetchLiveEvents();
+      if (liveEvents.length) {
+        const mapped = liveEvents.map((event) => toMatchInsight(event, defaultOdds(), today));
+        return payload("sportapi", capMatches(mapped));
+      }
+    } catch {
+      /* keep going */
+    }
+    if (hasSportApiKey()) {
+      return payload("sportapi", []);
+    }
     feedCache = { key: cacheKey, savedAt: Date.now(), ttl: FEED_FAIL_TTL_MS, payload: demo };
     return demo;
   }
@@ -371,10 +383,10 @@ export async function getLiveMatchesFeed(): Promise<LiveMatchesPayload> {
     };
   } catch {
     return {
-      source: "mock",
+      source: "sportapi",
       generatedAt: new Date().toISOString(),
-      matches: demoMatches,
-      cards: demoMatches.map(toLiveMatchCard),
+      matches: [],
+      cards: [],
     };
   }
 }

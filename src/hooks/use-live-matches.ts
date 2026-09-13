@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { mergeLiveInsights } from "@/lib/sport-mapper";
 import type { LiveMatchesPayload, MatchInsight } from "@/lib/types";
 
-const LIVE_POLL_MS = 12_000;
+const LIVE_POLL_MS = 8_000;
 
 export function useLiveMatches(enabled = true) {
   const [data, setData] = useState<LiveMatchesPayload | null>(null);

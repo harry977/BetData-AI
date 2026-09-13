@@ -6,7 +6,7 @@ import { utcDateOffset } from "@/lib/dates";
 import type { FixturesPayload } from "@/lib/types";
 import { isInPlayStatus } from "@/lib/utils";
 
-const LIVE_POLL_MS = 15_000;
+const LIVE_POLL_MS = 20_000;
 
 export function useFixtures() {
   const [data, setData] = useState<FixturesPayload | null>(null);

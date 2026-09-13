@@ -9,9 +9,11 @@ import { TelegramLogin } from "@/components/gatekeeper/telegram-login";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFixtures } from "@/hooks/use-fixtures";
+import { useLiveMatches } from "@/hooks/use-live-matches";
 import { ACTIVATION_STATUS, ACTIVATION_STEP_MS, BRAND } from "@/lib/constants";
 import { calendarDayFromYmd, formatCalendarDay, utcDateOffset } from "@/lib/dates";
 import { uniqueLeagues } from "@/lib/leagues";
+import { composeMatchFeed } from "@/lib/sport-mapper";
 import {
   hapticSuccess,
   hapticTap,
@@ -26,6 +28,7 @@ type GatekeeperViewProps = {
 
 export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
   const { data, loading } = useFixtures();
+  const { data: liveData } = useLiveMatches(true);
   const [activating, setActivating] = useState(false);
   const [statusIndex, setStatusIndex] = useState(0);
   const [telegramUser, setTelegramUser] = useState<TelegramIdentity | null>(null);
@@ -41,7 +44,7 @@ export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
     };
   }, []);
 
-  const matches = useMemo(() => data?.response ?? [], [data]);
+  const matches = useMemo(() => composeMatchFeed(data, liveData).matches, [data, liveData]);
   const today = useMemo(() => {
     return matchesForDay(matches, "today")
       .slice()
@@ -135,7 +138,7 @@ export function GatekeeperView({ onUnlock }: GatekeeperViewProps) {
       </section>
 
       <div id="pronosticos-gratis" className="space-y-8 pb-8">
-        {loading ? (
+        {loading && matches.length === 0 ? (
           <div className="space-y-2 px-4">
             <Skeleton className="h-8 w-48" />
             <Skeleton className="h-40 w-full rounded-2xl" />

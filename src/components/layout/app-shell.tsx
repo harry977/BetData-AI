@@ -12,9 +12,10 @@ import { DailyHitsBadge } from "@/components/signals/daily-hits-badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFixtures } from "@/hooks/use-fixtures";
-import { useLiveMatches, withLiveScores } from "@/hooks/use-live-matches";
+import { useLiveMatches } from "@/hooks/use-live-matches";
+import { composeMatchFeed } from "@/lib/sport-mapper";
 import { recordViewedSignal, readUnlockState } from "@/lib/storage";
-import { cn, isInPlayStatus, liveMatches } from "@/lib/utils";
+import { cn, liveMatches } from "@/lib/utils";
 
 type AppShellProps = {
   onLock: () => void;
@@ -30,17 +31,11 @@ export function AppShell({ onLock }: AppShellProps) {
     setAccountId(readUnlockState().accountId);
   }, []);
 
-  const matches = useMemo(() => {
-    const base = data?.response ?? [];
-    const liveRows = liveData?.matches ?? [];
-    if (liveData?.source === "sportapi") {
-      const rest = base.filter((match) => !isInPlayStatus(match.status));
-      return withLiveScores(rest, liveRows);
-    }
-    return withLiveScores(base, liveRows);
-  }, [data, liveData]);
+  const { matches, simulated } = useMemo(
+    () => composeMatchFeed(data, liveData),
+    [data, liveData],
+  );
   const liveCount = useMemo(() => liveMatches(matches).length, [matches]);
-  const simulated = data?.source === "mock" && liveData?.source !== "sportapi";
   const liveMode = tab === "live";
 
   function handleSelect(id: number) {

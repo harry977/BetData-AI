@@ -1,14 +1,18 @@
+import { isDemoEventId } from "@/lib/ids";
 import { buildLiveMetrics } from "@/lib/metrics";
 import type {
   DayBucket,
+  FeedSource,
   FixtureStatus,
+  FixturesPayload,
   LiveMatchCard,
+  LiveMatchesPayload,
   LiveMetrics,
   Markets,
   MatchInsight,
   OneXTwoPick,
 } from "@/lib/types";
-import { isBanker } from "@/lib/utils";
+import { isBanker, isInPlayStatus } from "@/lib/utils";
 import type {
   EventOdds,
   EventStatSnapshot,
@@ -62,11 +66,11 @@ function teamCode(eventTeam: SportEvent["home"]) {
 }
 
 function teamLogo(teamId: number) {
-  return `https://img.sofascore.com/api/v1/team/${teamId}/image`;
+  return `/api/crest/team/${teamId}`;
 }
 
 function leagueLogo(leagueId: number) {
-  return `https://img.sofascore.com/api/v1/unique-tournament/${leagueId}/image`;
+  return `/api/crest/league/${leagueId}`;
 }
 
 function colorsFor(id: number): [string, string] {
@@ -209,14 +213,14 @@ export function toMatchInsight(
       name: event.home.name,
       code: teamCode(event.home),
       logo: event.home.logo || teamLogo(event.home.id),
-      colors: colorsFor(event.home.id),
+      colors: event.home.colors ?? colorsFor(event.home.id),
     },
     away: {
       id: event.away.id,
       name: event.away.name,
       code: teamCode(event.away),
       logo: event.away.logo || teamLogo(event.away.id),
-      colors: colorsFor(event.away.id),
+      colors: event.away.colors ?? colorsFor(event.away.id),
     },
     kickoffIso: new Date(event.startTimestamp * 1000).toISOString(),
     status,
@@ -264,6 +268,7 @@ export function mergeLiveEvent(current: SportEvent, live: SportEvent): SportEven
     statusType: live.statusType || current.statusType,
     statusDescription: live.statusDescription || current.statusDescription,
     elapsed: live.elapsed ?? current.elapsed,
+    lastPeriod: live.lastPeriod || current.lastPeriod,
   };
 }
 
@@ -321,9 +326,45 @@ export function mergeLiveInsights(
       elapsed: row.elapsed,
       score: row.score,
       kickoffIso: row.kickoffIso || current.kickoffIso,
-      home: { ...current.home, name: row.home.name || current.home.name },
-      away: { ...current.away, name: row.away.name || current.away.name },
+      home: {
+        ...current.home,
+        name: row.home.name || current.home.name,
+        logo: row.home.logo || current.home.logo,
+        colors: row.home.colors ?? current.home.colors,
+      },
+      away: {
+        ...current.away,
+        name: row.away.name || current.away.name,
+        logo: row.away.logo || current.away.logo,
+        colors: row.away.colors ?? current.away.colors,
+      },
     });
   }
   return Array.from(map.values());
+}
+
+export function composeMatchFeed(
+  fixtures: FixturesPayload | null,
+  live: LiveMatchesPayload | null,
+): { matches: MatchInsight[]; simulated: boolean; source: FeedSource } {
+  const liveOk = live?.source === "sportapi" || live?.source === "rapidapi";
+  const fixturesOk = fixtures?.source === "sportapi" || fixtures?.source === "rapidapi";
+  const liveRows = (live?.matches ?? []).filter((match) => !isDemoEventId(match.id));
+
+  if (liveOk || fixturesOk) {
+    const rest = (fixturesOk ? fixtures?.response ?? [] : []).filter(
+      (match) => !isDemoEventId(match.id) && !isInPlayStatus(match.status),
+    );
+    return {
+      matches: mergeLiveInsights(rest, liveRows),
+      simulated: false,
+      source: liveOk ? (live?.source ?? "sportapi") : (fixtures?.source ?? "sportapi"),
+    };
+  }
+
+  return {
+    matches: fixtures?.response ?? liveRows,
+    simulated: true,
+    source: "mock",
+  };
 }

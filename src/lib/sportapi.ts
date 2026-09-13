@@ -43,6 +43,7 @@ export type SportTeam = {
   shortName: string;
   nameCode: string;
   logo?: string;
+  colors?: [string, string];
 };
 
 export type SportEvent = {
@@ -55,6 +56,7 @@ export type SportEvent = {
   statusType: string;
   statusDescription: string;
   elapsed: number | null;
+  lastPeriod?: string;
   leagueId: number;
   leagueName: string;
   country: string;
@@ -169,6 +171,37 @@ function enqueue<T>(task: () => Promise<T>): Promise<T> {
   });
 }
 
+export async function sportGetBinary(
+  path: string,
+  timeoutMs = 10_000,
+): Promise<{ contentType: string; body: Uint8Array }> {
+  const env = assertSportApiEnv();
+  const url = `${env.base}${path.startsWith("/") ? path : `/${path}`}`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: sportHeaders(),
+      signal: controller.signal,
+      cache: "no-store",
+    });
+    const body = new Uint8Array(await res.arrayBuffer());
+    const contentType = res.headers.get("content-type") ?? "application/octet-stream";
+    if (res.status < 200 || res.status >= 300 || contentType.includes("json")) {
+      throw new SportApiError(res.status, path, `SportAPI image ${res.status} ${path}`);
+    }
+    return { contentType, body };
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new SportApiTimeoutError(path, timeoutMs);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export async function sportGet<T = unknown>(
   path: string,
   ttlMs = 0,
@@ -213,14 +246,32 @@ export function timezoneOffsetSeconds(): number {
   return getSportApiEnv().timezoneOffset;
 }
 
+function teamColorsFromUnknown(value: unknown): [string, string] | undefined {
+  if (!isRecord(value)) return undefined;
+  const primary = asString(value.primary);
+  const secondary = asString(value.secondary) || asString(value.text);
+  if (!primary.startsWith("#")) return undefined;
+  return [primary, secondary.startsWith("#") ? secondary : "#111111"];
+}
+
 function teamFromUnknown(value: unknown): SportTeam {
   const row = isRecord(value) ? value : {};
   const id = asInt(row.id) ?? 0;
   const name = asString(row.name, "Equipo");
   const shortName = asString(row.shortName, name);
   const nameCode = asString(row.nameCode, shortName.slice(0, 3).toUpperCase());
-  const logo = asString(row.logo) || asString(row.image) || undefined;
-  return { id, name, shortName, nameCode, logo };
+  const logo =
+    asString(row.logo) ||
+    asString(row.image) ||
+    (id > 0 ? `/api/crest/team/${id}` : undefined);
+  return {
+    id,
+    name,
+    shortName,
+    nameCode,
+    logo,
+    colors: teamColorsFromUnknown(row.teamColors),
+  };
 }
 
 function scoreFromUnknown(value: unknown): number | null {
@@ -235,16 +286,41 @@ function scoreFromUnknown(value: unknown): number | null {
 
 function elapsedFromEvent(row: Record<string, unknown>, statusType: string): number | null {
   const time = isRecord(row.time) ? row.time : {};
+  const statusTime = isRecord(row.statusTime) ? row.statusTime : {};
+  const lastPeriod = asString(row.lastPeriod).toLowerCase();
+  const description = asString(
+    isRecord(row.status) ? row.status.description : row.statusDescription,
+  ).toLowerCase();
   const played = asInt(time.played) ?? asInt(row.elapsed);
-  if (played !== null) return played;
-  if (statusType === "halftime") return 45;
-  if (statusType === "finished") return 90;
-  const periodStart = asInt(time.currentPeriodStartTimestamp);
-  if (periodStart) {
-    const minutes = Math.max(1, Math.round((Date.now() / 1000 - periodStart) / 60));
-    return Math.min(130, minutes);
+  if (played !== null && played > 0 && played <= 130) return played;
+  if (statusType === "halftime" || description.includes("halftime") || description === "ht") {
+    return 45;
   }
-  return statusType === "inprogress" ? 1 : null;
+  if (statusType === "finished") return 90;
+  if (statusType !== "inprogress" && statusType !== "live") return null;
+
+  const secondHalf =
+    lastPeriod.includes("period2") ||
+    lastPeriod.includes("2nd") ||
+    description.includes("2nd") ||
+    description.includes("second");
+  const extraTime = lastPeriod.includes("extra") || description.includes("extra");
+  const base = extraTime ? 90 : secondHalf ? 45 : 0;
+  const periodStart =
+    asInt(time.currentPeriodStartTimestamp) ?? asInt(statusTime.timestamp);
+  const initial = asInt(time.initial) ?? asInt(statusTime.initial) ?? 0;
+  if (periodStart) {
+    const elapsedSec = Date.now() / 1000 - periodStart + initial;
+    if (elapsedSec >= 0) {
+      const intoPeriod = Math.max(1, Math.round(elapsedSec / 60));
+      if (extraTime) return Math.min(125, 90 + intoPeriod);
+      if (secondHalf) {
+        return Math.min(98, intoPeriod > 45 ? intoPeriod : 45 + intoPeriod);
+      }
+      return Math.min(53, intoPeriod);
+    }
+  }
+  return Math.max(1, base || 1);
 }
 
 export function parseSportEvent(value: unknown): SportEvent | null {
@@ -281,6 +357,7 @@ export function parseSportEvent(value: unknown): SportEvent | null {
     statusType,
     statusDescription: asString(status.description, asString(status.code)),
     elapsed: elapsedFromEvent(value, statusType),
+    lastPeriod: asString(value.lastPeriod) || undefined,
     leagueId: asInt(unique.id) ?? asInt(tournament.id) ?? asInt(category.id) ?? 0,
     leagueName:
       asString(unique.name) || asString(tournament.name) || asString(category.name) || "Fútbol",
@@ -291,6 +368,9 @@ export function parseSportEvent(value: unknown): SportEvent | null {
       "International",
     countryFlag: asString(category.flag) || asString(countryObj.alpha2),
     uniqueTournamentId: asInt(unique.id) ?? undefined,
+    leagueLogo: asInt(unique.id)
+      ? `/api/crest/league/${asInt(unique.id)}`
+      : undefined,
   };
 }
 

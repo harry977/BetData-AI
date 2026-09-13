@@ -17,7 +17,7 @@ function league(id: number, name: string, country: string): League {
     id,
     name,
     country,
-    logo: `https://img.sofascore.com/api/v1/unique-tournament/${id}/image`,
+    logo: `/api/crest/league/${id}`,
   };
 }
 
@@ -41,7 +41,7 @@ function team(
     id,
     name,
     code,
-    logo: `https://img.sofascore.com/api/v1/team/${id}/image`,
+    logo: `/api/crest/team/${id}`,
     colors,
   };
 }
