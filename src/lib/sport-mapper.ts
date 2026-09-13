@@ -12,7 +12,7 @@ import type {
   MatchInsight,
   OneXTwoPick,
 } from "@/lib/types";
-import { isBanker, isInPlayStatus } from "@/lib/utils";
+import { isBanker } from "@/lib/utils";
 import type {
   EventOdds,
   EventStatSnapshot,
@@ -343,29 +343,22 @@ export function mergeLiveInsights(
   return Array.from(map.values());
 }
 
-function feedIsConnected(
-  payload: { connected?: boolean; source?: FeedSource } | null,
-) {
-  if (!payload) return false;
-  if (typeof payload.connected === "boolean") return payload.connected;
-  return payload.source === "sportapi" || payload.source === "rapidapi";
+function realRows(rows: MatchInsight[] | undefined) {
+  return (rows ?? []).filter((match) => !isDemoEventId(match.id));
 }
 
 export function composeMatchFeed(
   fixtures: FixturesPayload | null,
   live: LiveMatchesPayload | null,
 ): { matches: MatchInsight[]; connected: boolean; source: FeedSource } {
-  const liveOk = feedIsConnected(live);
-  const fixturesOk = feedIsConnected(fixtures);
-  const liveRows = (liveOk ? live?.matches ?? [] : []).filter(
-    (match) => !isDemoEventId(match.id),
-  );
-  const rest = (fixturesOk ? fixtures?.response ?? [] : []).filter(
-    (match) => !isDemoEventId(match.id) && !isInPlayStatus(match.status),
-  );
+  const fixtureRows = realRows(fixtures?.response);
+  const liveRows = realRows(live?.matches);
+  const matches = mergeLiveInsights(fixtureRows, liveRows);
+  const liveOk = Boolean(live?.connected) || liveRows.length > 0;
+  const fixturesOk = Boolean(fixtures?.connected) || fixtureRows.length > 0;
 
   return {
-    matches: mergeLiveInsights(rest, liveRows),
+    matches,
     connected: liveOk || fixturesOk,
     source: liveOk
       ? (live?.source ?? "sportapi")

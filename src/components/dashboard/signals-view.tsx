@@ -135,15 +135,9 @@ export function SignalsView({
             />
           ))}
         </section>
-      ) : (
-        <ScanningLiveState compact />
-      )}
-
-      {featured ? (
-        <SignalCard match={featured} onWhy={() => openWhy(featured)} />
-      ) : todayRest.length === 0 && tomorrow.length === 0 && liveNow.length === 0 ? (
-        <ScanningLiveState compact />
       ) : null}
+
+      {featured ? <SignalCard match={featured} onWhy={() => openWhy(featured)} /> : null}
 
       {todayRest.length > 0 ? (
         <section className="space-y-2">

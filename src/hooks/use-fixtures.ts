@@ -26,7 +26,10 @@ export function useFixtures() {
       const cached = readCategoriesCache(today);
       const query =
         cached && cached.length
-          ? `?categoryIds=${cached.map((category) => category.id).join(",")}`
+          ? `?categoryIds=${cached
+              .slice(0, 24)
+              .map((category) => category.id)
+              .join(",")}`
           : "";
       const res = await fetch(`/api/fixtures${query}`, {
         cache: "no-store",
@@ -36,10 +39,15 @@ export function useFixtures() {
         throw new Error("No se pudieron cargar los pronósticos.");
       }
       const json = (await res.json()) as FixturesPayload;
+      const response = Array.isArray(json.response) ? json.response.slice() : [];
       if (json.categories?.length) {
         saveCategoriesCache(today, json.categories);
       }
-      setData(json);
+      setData({
+        ...json,
+        response,
+        connected: json.connected === true || response.length > 0,
+      });
       setError(null);
     } catch (err) {
       if (!silent) {

@@ -28,7 +28,12 @@ export function useLiveMatches(enabled = true) {
         throw new Error("No se pudieron cargar los partidos en directo.");
       }
       const json = (await res.json()) as LiveMatchesPayload;
-      setData(json);
+      const matches = Array.isArray(json.matches) ? json.matches.slice() : [];
+      setData({
+        ...json,
+        matches,
+        connected: json.connected === true || matches.length > 0,
+      });
       setError(null);
     } catch (err) {
       if (!silent) {

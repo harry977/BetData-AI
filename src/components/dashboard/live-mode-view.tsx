@@ -28,7 +28,14 @@ type LiveModeViewProps = {
 const BEATS = ["EN DIRECTO", "DATOS EN VIVO", "NUEVA LECTURA", "SEÑAL ACTIVA"] as const;
 
 export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProps) {
-  const playlist = useMemo(() => livePlaylist(matches), [matches]);
+  const playlist = useMemo(() => {
+    const live = livePlaylist(matches);
+    if (live.length) return live;
+    return matches
+      .filter((match) => match.day === "today" || match.status === "NS")
+      .slice()
+      .sort((a, b) => a.kickoffIso.localeCompare(b.kickoffIso));
+  }, [matches]);
   const selected =
     playlist.find((match) => match.id === selectedId) ?? playlist[0] ?? null;
   const selectedIndex = selected
@@ -73,7 +80,7 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
   }, [paused, playlist, selectedId]);
 
   if (!selected) {
-    return <ScanningLiveState />;
+    return matches.length === 0 ? <ScanningLiveState /> : null;
   }
 
   const live = selected.status === "LIVE" || selected.status === "HT";
