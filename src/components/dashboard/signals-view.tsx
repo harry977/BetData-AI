@@ -145,11 +145,10 @@ export function SignalsView({
         </section>
       )}
 
+      <DailyHitsBadge matches={matches} className="hidden sm:flex" />
+
       {featured ? (
-        <section className="space-y-2">
-          <DailyHitsBadge matches={matches} className="hidden sm:flex" />
-          <SignalCard match={featured} onWhy={() => openWhy(featured)} />
-        </section>
+        <SignalCard match={featured} onWhy={() => openWhy(featured)} />
       ) : todayRest.length === 0 && tomorrow.length === 0 ? (
         <p className="rounded-2xl border border-white/8 bg-[#121726] p-6 text-center text-sm text-gray-300">
           Sin partidos en directo en este momento. Los próximos de la jornada de hoy aparecerán aquí.
