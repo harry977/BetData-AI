@@ -9,11 +9,10 @@ import { LiveModeView } from "@/components/dashboard/live-mode-view";
 import { SignalsView } from "@/components/dashboard/signals-view";
 import { BottomNav, HeaderNav, type AppTab } from "@/components/layout/bottom-nav";
 import { DailyHitsBadge } from "@/components/signals/daily-hits-badge";
-import { ScanningLiveState } from "@/components/signals/scanning-live-state";
 import { Button } from "@/components/ui/button";
 import { useFixtures } from "@/hooks/use-fixtures";
 import { useLiveMatches } from "@/hooks/use-live-matches";
-import { composeMatchFeed } from "@/lib/sport-mapper";
+import { mergeMatchRows } from "@/lib/sport-mapper";
 import { recordViewedSignal, readUnlockState } from "@/lib/storage";
 import { cn, liveMatches } from "@/lib/utils";
 
@@ -22,8 +21,9 @@ type AppShellProps = {
 };
 
 export function AppShell({ onLock }: AppShellProps) {
-  const { data, error, loading, reload } = useFixtures();
-  const { data: liveData, error: liveError, loading: liveLoading } = useLiveMatches(true);
+  const { matches: fixtureMatches, error, loading, reload } = useFixtures();
+  const { matches: liveHookMatches, error: liveError, loading: liveLoading } =
+    useLiveMatches(true);
   const [tab, setTab] = useState<AppTab>("hoy");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [accountId, setAccountId] = useState("");
@@ -32,21 +32,15 @@ export function AppShell({ onLock }: AppShellProps) {
     setAccountId(readUnlockState().accountId);
   }, []);
 
-  const composed = useMemo(
-    () => composeMatchFeed(data, liveData),
-    [data, liveData],
+  const matches = useMemo(
+    () => mergeMatchRows(fixtureMatches, liveHookMatches),
+    [fixtureMatches, liveHookMatches],
   );
-  const visibleMatches = composed.matches;
-  const feedConnected = composed.connected || visibleMatches.length > 0;
-  const liveCount = useMemo(() => liveMatches(visibleMatches).length, [visibleMatches]);
+  const feedConnected = matches.length > 0;
+  const liveCount = useMemo(() => liveMatches(matches).length, [matches]);
   const liveMode = tab === "live";
-  const waiting =
-    visibleMatches.length === 0 &&
-    !data &&
-    !liveData &&
-    (loading || liveLoading);
-  const feedError =
-    visibleMatches.length === 0 ? error || liveError || data?.error || liveData?.error : null;
+  const loadingFeed = (loading || liveLoading) && matches.length === 0;
+  const feedError = matches.length === 0 ? error || liveError : null;
 
   function handleSelect(id: number) {
     recordViewedSignal(id);
@@ -85,14 +79,16 @@ export function AppShell({ onLock }: AppShellProps) {
               ? liveCount > 0
                 ? `EN VIVO · CONECTADO A SPORTAPI · ${liveCount}`
                 : "EN VIVO · CONECTADO A SPORTAPI"
-              : "Escaneando SportAPI"}
+              : loadingFeed
+                ? "Cargando…"
+                : "SportAPI"}
           </span>
         </div>
         <div className="mx-auto hidden max-w-lg justify-center px-4 pb-1 lg:flex">
           <HeaderNav value={tab} onChange={setTab} />
         </div>
         <div className="mx-auto max-w-md space-y-2 px-3 pb-2 lg:max-w-lg lg:px-4">
-          <DailyHitsBadge matches={visibleMatches} />
+          <DailyHitsBadge matches={matches} />
         </div>
       </header>
 
@@ -104,7 +100,7 @@ export function AppShell({ onLock }: AppShellProps) {
         }
       >
         {feedError ? (
-          <div className="rounded-xl border border-red-500/30 bg-red-950/40 p-4 text-sm text-red-200">
+          <div className="mb-4 rounded-xl border border-red-500/30 bg-red-950/40 p-4 text-sm text-red-200">
             <div className="flex items-start gap-2">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
               <div className="space-y-3">
@@ -118,36 +114,31 @@ export function AppShell({ onLock }: AppShellProps) {
           </div>
         ) : null}
 
-        {waiting ? <ScanningLiveState /> : null}
-
-        {visibleMatches.length > 0 || (!waiting && !feedError) ? (
-          <>
-            {tab === "hoy" ? (
-              <SignalsView
-                matches={visibleMatches}
-                selectedId={selectedId}
-                onSelect={handleSelect}
-                onOpenLive={openLive}
-              />
-            ) : null}
-            {tab === "live" ? (
-              <LiveModeView
-                matches={visibleMatches}
-                selectedId={selectedId}
-                onSelect={handleSelect}
-              />
-            ) : null}
-            {tab === "combo" ? <CombinadasView matches={visibleMatches} /> : null}
-            {tab === "account" ? (
-              <AccountView
-                accountId={accountId}
-                matches={visibleMatches}
-                onLock={onLock}
-                onOpenSignal={openFromAccount}
-                onOpenCombo={() => setTab("combo")}
-              />
-            ) : null}
-          </>
+        {tab === "hoy" ? (
+          <SignalsView
+            matches={matches}
+            loading={loadingFeed}
+            selectedId={selectedId}
+            onSelect={handleSelect}
+            onOpenLive={openLive}
+          />
+        ) : null}
+        {tab === "live" ? (
+          <LiveModeView
+            matches={matches}
+            selectedId={selectedId}
+            onSelect={handleSelect}
+          />
+        ) : null}
+        {tab === "combo" ? <CombinadasView matches={matches} /> : null}
+        {tab === "account" ? (
+          <AccountView
+            accountId={accountId}
+            matches={matches}
+            onLock={onLock}
+            onOpenSignal={openFromAccount}
+            onOpenCombo={() => setTab("combo")}
+          />
         ) : null}
       </main>
 

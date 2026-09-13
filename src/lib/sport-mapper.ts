@@ -1,4 +1,3 @@
-import { isDemoEventId } from "@/lib/ids";
 import { buildLiveMetrics } from "@/lib/metrics";
 import type {
   DayBucket,
@@ -344,26 +343,43 @@ export function mergeLiveInsights(
 }
 
 function realRows(rows: MatchInsight[] | undefined) {
-  return (rows ?? []).filter((match) => !isDemoEventId(match.id));
+  return (rows ?? []).filter((match) => match && typeof match.id === "number");
+}
+
+export function extractMatchRows(payload: unknown): MatchInsight[] {
+  if (!payload || typeof payload !== "object") return [];
+  const record = payload as Record<string, unknown>;
+  for (const key of ["matches", "response", "data", "events", "fixtures"] as const) {
+    const value = record[key];
+    if (!Array.isArray(value) || value.length === 0) continue;
+    const first = value[0];
+    if (first && typeof first === "object" && ("home" in first || "id" in first)) {
+      return value as MatchInsight[];
+    }
+  }
+  return [];
+}
+
+export function mergeMatchRows(...lists: MatchInsight[][]) {
+  const map = new Map<number, MatchInsight>();
+  for (const list of lists) {
+    for (const row of list) {
+      if (row && typeof row.id === "number") map.set(row.id, row);
+    }
+  }
+  return Array.from(map.values());
 }
 
 export function composeMatchFeed(
   fixtures: FixturesPayload | null,
   live: LiveMatchesPayload | null,
 ): { matches: MatchInsight[]; connected: boolean; source: FeedSource } {
-  const fixtureRows = realRows(fixtures?.response);
-  const liveRows = realRows(live?.matches);
-  const matches = mergeLiveInsights(fixtureRows, liveRows);
-  const liveOk = Boolean(live?.connected) || liveRows.length > 0;
-  const fixturesOk = Boolean(fixtures?.connected) || fixtureRows.length > 0;
-
+  const fixtureRows = extractMatchRows(fixtures) || realRows(fixtures?.response);
+  const liveRows = extractMatchRows(live) || realRows(live?.matches);
+  const matches = mergeMatchRows(fixtureRows, liveRows);
   return {
     matches,
-    connected: liveOk || fixturesOk,
-    source: liveOk
-      ? (live?.source ?? "sportapi")
-      : fixturesOk
-        ? (fixtures?.source ?? "sportapi")
-        : "sportapi",
+    connected: matches.length > 0 || Boolean(live?.connected || fixtures?.connected),
+    source: liveRows.length ? (live?.source ?? "sportapi") : fixtures?.source ?? "sportapi",
   };
 }

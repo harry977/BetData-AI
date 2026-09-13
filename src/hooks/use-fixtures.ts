@@ -3,13 +3,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { readCategoriesCache, saveCategoriesCache } from "@/lib/category-cache";
 import { utcDateOffset } from "@/lib/dates";
-import type { FixturesPayload } from "@/lib/types";
+import { extractMatchRows } from "@/lib/sport-mapper";
+import type { FixturesPayload, MatchInsight } from "@/lib/types";
 import { isInPlayStatus } from "@/lib/utils";
 
 const LIVE_POLL_MS = 20_000;
 const FETCH_TIMEOUT_MS = 12_000;
 
 export function useFixtures() {
+  const [matches, setMatches] = useState<MatchInsight[]>([]);
   const [data, setData] = useState<FixturesPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -47,28 +49,25 @@ export function useFixtures() {
         throw new Error("No se pudieron cargar los pronósticos.");
       }
       const json = (await res.json()) as FixturesPayload;
-      const response = Array.isArray(json.response) ? json.response.slice() : [];
+      const rows = extractMatchRows(json);
       if (json.categories?.length) {
         saveCategoriesCache(today, json.categories);
       }
       const next: FixturesPayload = {
         ...json,
-        response,
-        connected: json.connected === true || response.length > 0,
+        response: rows,
+        connected: json.connected === true || rows.length > 0,
       };
+      setMatches(rows);
       setData(next);
-      if (response.length === 0 && json.error) {
-        setError(json.error);
-      } else {
-        setError(null);
-      }
+      setError(rows.length === 0 && json.error ? json.error : null);
     } catch (err) {
       if (!silent) {
         setError(
-          err instanceof Error && err.name !== "AbortError"
-            ? err.message
-            : err instanceof Error && err.name === "AbortError"
-              ? "SportAPI tardó demasiado. Reintenta."
+          err instanceof Error && err.name === "AbortError"
+            ? "SportAPI tardó demasiado. Reintenta."
+            : err instanceof Error
+              ? err.message
               : "No se pudieron cargar los pronósticos.",
         );
       }
@@ -82,7 +81,7 @@ export function useFixtures() {
     void reload();
   }, [reload]);
 
-  const hasLive = (data?.response ?? []).some((match) => isInPlayStatus(match.status));
+  const hasLive = matches.some((match) => isInPlayStatus(match.status));
 
   useEffect(() => {
     if (!hasLive) return;
@@ -90,5 +89,5 @@ export function useFixtures() {
     return () => window.clearInterval(id);
   }, [hasLive, reload]);
 
-  return { data, error, loading, reload, hasLive };
+  return { data, error, loading, reload, hasLive, matches };
 }

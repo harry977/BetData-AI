@@ -8,7 +8,7 @@ Telegram Mini App de **inteligencia de fútbol en vivo**. La IA escanea el día,
 - Tailwind CSS + shadcn/ui
 - Framer Motion + Recharts
 - `@telegram-apps/sdk` + script oficial `telegram-web-app.js`
-- Feed SportAPI (SofaScore vía RapidAPI). Sin `RAPIDAPI_KEY` o sin partidos, la app muestra un estado vacío (*Escaneando partidos en directo...*), nunca una jornada simulada.
+- Feed SportAPI (SofaScore vía RapidAPI). Hoy y Directo pintan el array de partidos en cuanto llega el fetch. Sin partidos, un loader ligero; nunca una jornada simulada.
 
 ## Cómo arrancar
 

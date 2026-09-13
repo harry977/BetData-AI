@@ -1,13 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { mergeLiveInsights } from "@/lib/sport-mapper";
+import { extractMatchRows, mergeLiveInsights } from "@/lib/sport-mapper";
 import type { LiveMatchesPayload, MatchInsight } from "@/lib/types";
 
 const LIVE_POLL_MS = 8_000;
 const FETCH_TIMEOUT_MS = 10_000;
 
 export function useLiveMatches(enabled = true) {
+  const [matches, setMatches] = useState<MatchInsight[]>([]);
   const [data, setData] = useState<LiveMatchesPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(enabled);
@@ -32,13 +33,14 @@ export function useLiveMatches(enabled = true) {
         throw new Error("No se pudieron cargar los partidos en directo.");
       }
       const json = (await res.json()) as LiveMatchesPayload;
-      const matches = Array.isArray(json.matches) ? json.matches.slice() : [];
+      const rows = extractMatchRows(json);
+      setMatches(rows);
       setData({
         ...json,
-        matches,
-        connected: json.connected === true || matches.length > 0,
+        matches: rows,
+        connected: json.connected === true || rows.length > 0,
       });
-      setError(matches.length === 0 && json.error ? json.error : null);
+      setError(rows.length === 0 && json.error ? json.error : null);
     } catch (err) {
       if (!silent) {
         setError(
@@ -62,7 +64,7 @@ export function useLiveMatches(enabled = true) {
     return () => window.clearInterval(id);
   }, [enabled, reload]);
 
-  return { data, error, loading, reload, matches: data?.matches ?? [] };
+  return { data, error, loading, reload, matches };
 }
 
 export function withLiveScores(base: MatchInsight[], live: MatchInsight[]) {

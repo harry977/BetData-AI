@@ -12,8 +12,6 @@ import { SignalCopy } from "@/components/signals/signal-copy";
 import { LivePulse } from "@/components/signals/live-pulse";
 import { goalAlert } from "@/lib/stream-widgets";
 import { MatchSheet } from "@/components/signals/match-sheet";
-import { ScanningLiveState } from "@/components/signals/scanning-live-state";
-import { livePlaylist } from "@/lib/signals";
 import { recordViewedSignal } from "@/lib/storage";
 import { hapticTap } from "@/lib/telegram";
 import type { MatchInsight } from "@/lib/types";
@@ -28,14 +26,7 @@ type LiveModeViewProps = {
 const BEATS = ["EN DIRECTO", "DATOS EN VIVO", "NUEVA LECTURA", "SEÑAL ACTIVA"] as const;
 
 export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProps) {
-  const playlist = useMemo(() => {
-    const live = livePlaylist(matches);
-    if (live.length) return live;
-    return matches
-      .filter((match) => match.day === "today" || match.status === "NS")
-      .slice()
-      .sort((a, b) => a.kickoffIso.localeCompare(b.kickoffIso));
-  }, [matches]);
+  const playlist = useMemo(() => (matches.length ? matches : []), [matches]);
   const selected =
     playlist.find((match) => match.id === selectedId) ?? playlist[0] ?? null;
   const selectedIndex = selected
@@ -80,7 +71,13 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
   }, [paused, playlist, selectedId]);
 
   if (!selected) {
-    return matches.length === 0 ? <ScanningLiveState /> : null;
+    return (
+      <div className="flex flex-1 items-center justify-center px-6 py-16 text-center">
+        <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">
+          {matches.length === 0 ? "Cargando partidos…" : "Elige un partido"}
+        </p>
+      </div>
+    );
   }
 
   const live = selected.status === "LIVE" || selected.status === "HT";
