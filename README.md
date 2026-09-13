@@ -26,7 +26,8 @@ La app queda en [http://127.0.0.1:43141](http://127.0.0.1:43141).
 2. **Registro** — Telegram (Mini App o Login Widget) y también desde el navegador. Sin correo ni contraseña.
 3. **Hoy** — partidos en curso y próxima jornada (API en tiempo real), señal más fuerte y CTA para comprobar cuotas. En cabecera: **Resultados hoy** (solo partidos cerrados de hoy). **Ver ficha** abre el desglose del partido (bottom sheet en móvil, panel derecho en escritorio): mercados, barras de stats y contexto.
 4. **En directo** — solo partidos en juego, 9:16. Cada partido muestra la señal de la IA, radar de presión (últimos 5 min) y, si la presión supera 80% o la probabilidad de gol 85%, una alerta de gol inminente. Si no hay live, estado vacío.
-5. **Mi cuenta** — progreso, boleto, bono de hasta 500€ (después de entrar) y ajustes.
+5. **Combinadas IA** — cuota objetivo, número de partidos, mercados y confianza mínima. Genera un boleto con picks y cuotas reales del día.
+6. **Mi cuenta** — progreso, bono de hasta 500€ (después de entrar) y ajustes.
 
 El bono **no** aparece en la landing. Dentro de la app no se habla de tipsters.
 

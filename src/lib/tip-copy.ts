@@ -82,5 +82,15 @@ export function explainTip(tip: string, home: string, away: string): TipCopy {
     return { plain: `Que gane ${away}`, market: `Victoria ${away}` };
   }
 
+  if (/^1x$/i.test(compact)) {
+    return { plain: `Que gane ${home} o empate`, market: `Doble oportunidad ${home} o X` };
+  }
+  if (/^x2$/i.test(compact)) {
+    return { plain: `Que gane ${away} o empate`, market: `Doble oportunidad X o ${away}` };
+  }
+  if (/^12$/i.test(compact)) {
+    return { plain: "Que no empate", market: "Doble oportunidad 12" };
+  }
+
   return { plain: compact, market: compact };
 }

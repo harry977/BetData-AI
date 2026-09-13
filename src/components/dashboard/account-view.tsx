@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Gift, LogOut } from "lucide-react";
-import { BetBuilderView } from "@/components/dashboard/bet-builder-view";
+import { Gift, Layers, LogOut } from "lucide-react";
 import { StreakBoard } from "@/components/signals/streak-board";
 import { MissionCard } from "@/components/signals/mission-card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +18,7 @@ type AccountViewProps = {
   matches: MatchInsight[];
   onLock: () => void;
   onOpenSignal: (id: number) => void;
+  onOpenCombo: () => void;
 };
 
 export function AccountView({
@@ -26,6 +26,7 @@ export function AccountView({
   matches,
   onLock,
   onOpenSignal,
+  onOpenCombo,
 }: AccountViewProps) {
   const history = useMemo(() => resolvedSignals(matches).slice(0, 6), [matches]);
   const [viewed, setViewed] = useState<MatchInsight[]>([]);
@@ -90,11 +91,23 @@ export function AccountView({
         </Button>
       </section>
 
-      <section>
-        <h2 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
-          Boleto combinado
-        </h2>
-        <BetBuilderView matches={matches} />
+      <section className="rounded-[24px] border border-white/8 bg-[#121726] p-4">
+        <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-[#00E676]">
+          <Layers className="h-3.5 w-3.5" />
+          Combinadas IA
+        </p>
+        <p className="mt-2 text-sm leading-relaxed text-slate-300">
+          La IA arma el boleto del día según cuota objetivo, mercados y confianza.
+        </p>
+        <Button
+          className="mt-4 w-full"
+          onClick={() => {
+            hapticTap();
+            onOpenCombo();
+          }}
+        >
+          Abrir combinadas
+        </Button>
       </section>
 
       <HistoryList

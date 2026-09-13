@@ -4,6 +4,7 @@ import { AlertTriangle, RefreshCcw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { BetDataLogo } from "@/components/brand/betdata-logo";
 import { AccountView } from "@/components/dashboard/account-view";
+import { CombinadasView } from "@/components/dashboard/combinadas-view";
 import { LiveModeView } from "@/components/dashboard/live-mode-view";
 import { SignalsView } from "@/components/dashboard/signals-view";
 import { BottomNav, HeaderNav, type AppTab } from "@/components/layout/bottom-nav";
@@ -114,12 +115,14 @@ export function AppShell({ onLock }: AppShellProps) {
                 onSelect={handleSelect}
               />
             ) : null}
+            {tab === "combo" ? <CombinadasView matches={matches} /> : null}
             {tab === "account" ? (
               <AccountView
                 accountId={accountId}
                 matches={matches}
                 onLock={onLock}
                 onOpenSignal={openFromAccount}
+                onOpenCombo={() => setTab("combo")}
               />
             ) : null}
           </>
