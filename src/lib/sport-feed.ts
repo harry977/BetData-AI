@@ -89,7 +89,7 @@ function mapEventsNow(events: SportEvent[], today: string) {
  * One round-trip to SportAPI (live + today's schedule in parallel).
  * No odds, crests or per-category loops before we respond.
  */
-export async function getFixturesFeed(_cachedCategoryIds?: number[]): Promise<FixturesPayload> {
+export async function getFixturesFeed(): Promise<FixturesPayload> {
   const today = todayIsoDate();
   if (feedCache && Date.now() - feedCache.savedAt < FEED_TTL_MS && feedCache.payload.response.length) {
     return feedCache.payload;
