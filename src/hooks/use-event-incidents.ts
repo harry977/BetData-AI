@@ -1,21 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { isDemoEventId } from "@/lib/ids";
 import type { MatchIncident } from "@/lib/types";
 
 const memory = new Map<number, MatchIncident[]>();
-const DEMO_EVENT_FROM = 910000;
 
 export function useEventIncidents(eventId: number, live: boolean) {
   const [incidents, setIncidents] = useState<MatchIncident[]>(
     () => memory.get(eventId) ?? [],
   );
   const [loading, setLoading] = useState(
-    () => live && eventId < DEMO_EVENT_FROM && !memory.has(eventId),
+    () => live && !isDemoEventId(eventId) && !memory.has(eventId),
   );
 
   useEffect(() => {
-    if (!live || eventId >= DEMO_EVENT_FROM) {
+    if (!live || isDemoEventId(eventId)) {
       setIncidents(memory.get(eventId) ?? []);
       setLoading(false);
       return;

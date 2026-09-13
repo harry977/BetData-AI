@@ -150,17 +150,23 @@ async function sportFetch(
   }
 }
 
-let requestChain = Promise.resolve();
+const MAX_IN_FLIGHT = 3;
+let inFlight = 0;
+const waiting: Array<() => void> = [];
 
 function enqueue<T>(task: () => Promise<T>): Promise<T> {
-  const run = requestChain
-    .then(() => new Promise((resolve) => setTimeout(resolve, 120)))
-    .then(task);
-  requestChain = run.then(
-    () => undefined,
-    () => undefined,
-  );
-  return run;
+  return new Promise((resolve, reject) => {
+    const start = () => {
+      inFlight += 1;
+      task().then(resolve, reject).finally(() => {
+        inFlight -= 1;
+        const next = waiting.shift();
+        if (next) next();
+      });
+    };
+    if (inFlight < MAX_IN_FLIGHT) start();
+    else waiting.push(start);
+  });
 }
 
 export async function sportGet<T = unknown>(
@@ -463,7 +469,7 @@ export function parseEventIncidents(payload: unknown): MatchIncident[] {
     const klass = asString(row.incidentClass ?? row.class).toLowerCase() || null;
     const player = playerName(row.player ?? row.playerName);
     const assist = playerName(row.assist1 ?? row.assist ?? row.playerIn ?? row.playerOut);
-    const isHome = Boolean(row.isHome ?? row.home);
+    const isHome = row.isHome === true || row.isHome === 1 || row.isHome === "1";
     const parsed: Omit<MatchIncident, "label"> = {
       id,
       minute,
@@ -484,7 +490,7 @@ export function parseEventIncidents(payload: unknown): MatchIncident[] {
 
 export async function fetchEventIncidents(eventId: number): Promise<MatchIncident[]> {
   const path = `/api/v1/event/${eventId}/incidents`;
-  const json = await sportGet(path, 20_000);
+  const json = await sportGet(path, 0);
   return parseEventIncidents(json);
 }
 

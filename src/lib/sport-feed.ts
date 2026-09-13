@@ -134,17 +134,33 @@ function defaultOdds(): EventOdds {
 }
 
 function leagueBoost(match: MatchInsight) {
-  const name = `${match.league.country} ${match.league.name}`.toLowerCase();
-  if (/u1[6-9]|u21|u23|youth|reserva|reserve|premier league 2/.test(name)) return -50;
+  const country = match.league.country.toLowerCase();
+  const name = match.league.name.toLowerCase();
+  const hay = `${country} ${name}`;
+  if (/eccellenza|amateur|amistoso|friendly|tercera|regional/.test(hay)) return -30;
+  if (/uefa champions/.test(hay)) return 90;
+  if (country === "england" && name === "premier league") return 88;
+  if ((country === "spain" || country === "españa") && /laliga|la liga/.test(name)) return 86;
+  if (country === "italy" && name.includes("serie a")) return 84;
+  if (country === "germany" && /^bundesliga$/.test(name)) return 84;
+  if (country === "france" && name.includes("ligue 1")) return 82;
+  if (/europa league|copa del rey|fa cup/.test(hay)) return 70;
   if (
-    /uefa champions|premier league|la liga|serie a|bundesliga|ligue 1|europa league|copa del rey|fa cup/.test(
-      name,
-    )
+    [
+      "england",
+      "spain",
+      "españa",
+      "germany",
+      "italy",
+      "france",
+      "netherlands",
+      "portugal",
+      "brazil",
+      "argentina",
+      "mexico",
+    ].includes(country)
   ) {
-    return 55;
-  }
-  if (/england|spain|germany|italy|france|netherlands|portugal|brazil|argentina|mexico/.test(name)) {
-    return 12;
+    return 16;
   }
   return 0;
 }
@@ -165,6 +181,39 @@ function capMatches(matches: MatchInsight[]) {
   return [...take(byDay.today, 48), ...take(byDay.tomorrow, 32), ...take(byDay.yesterday, 16)];
 }
 
+function capLiveMatches(matches: MatchInsight[], limit = 48) {
+  return matches
+    .slice()
+    .sort((a, b) => {
+      const score = (match: MatchInsight) =>
+        leagueBoost(match) + (isInPlayStatus(match.status) ? 12 : 0) + (match.elapsed ?? 0) / 10;
+      return score(b) - score(a);
+    })
+    .slice(0, limit);
+}
+
+function preselectEvents(events: SportEvent[], today: string) {
+  const buckets: Record<"today" | "tomorrow" | "yesterday", SportEvent[]> = {
+    today: [],
+    tomorrow: [],
+    yesterday: [],
+  };
+  for (const event of events) {
+    buckets[dayBucketFor(event.startTimestamp, today)].push(event);
+  }
+  const rank = (event: SportEvent) => {
+    const live = /progress|live|inplay|halftime/.test(event.statusType) ? 25 : 0;
+    return (isPriorityLive(event) ? 55 : 0) + live - (isLowQualityLive(event) ? 40 : 0);
+  };
+  const take = (rows: SportEvent[], limit: number) =>
+    rows.slice().sort((a, b) => rank(b) - rank(a)).slice(0, limit);
+  return uniqueEvents([
+    ...take(buckets.today, 64),
+    ...take(buckets.tomorrow, 36),
+    ...take(buckets.yesterday, 20),
+  ]);
+}
+
 async function scheduledForDate(date: string, categories: SportCategory[]) {
   try {
     const all = await fetchAllScheduledEvents(date);
@@ -172,7 +221,7 @@ async function scheduledForDate(date: string, categories: SportCategory[]) {
   } catch {
     /* fall through to per-category */
   }
-  return eventsForDate(date, categories);
+  return eventsForDate(date, selectPriorityCategories(categories, 4));
 }
 
 function mergeScheduledAndLive(scheduled: SportEvent[], liveEvents: SportEvent[]) {
@@ -241,6 +290,7 @@ export async function getFixturesFeed(cachedCategoryIds?: number[]): Promise<Fix
       uniqueEvents([...todayEvents, ...tomorrowEvents, ...yesterdayEvents]),
       liveEvents,
     );
+    merged = preselectEvents(merged, today);
 
     if (merged.length === 0) {
       const [footballToday, footballTomorrow, footballYesterday, footballLive] =
@@ -250,9 +300,12 @@ export async function getFixturesFeed(cachedCategoryIds?: number[]): Promise<Fix
           fetchFootballFixturesByDate(yesterday).catch(() => [] as SportEvent[]),
           fetchFootballLiveFixtures().catch(() => [] as SportEvent[]),
         ]);
-      merged = mergeScheduledAndLive(
-        uniqueEvents([...footballToday, ...footballTomorrow, ...footballYesterday]),
-        footballLive,
+      merged = preselectEvents(
+        mergeScheduledAndLive(
+          uniqueEvents([...footballToday, ...footballTomorrow, ...footballYesterday]),
+          footballLive,
+        ),
+        today,
       );
       if (merged.length === 0) {
         feedCache = { key: cacheKey, savedAt: Date.now(), ttl: FEED_FAIL_TTL_MS, payload: demo };
@@ -297,8 +350,10 @@ export async function getLiveMatchesFeed(): Promise<LiveMatchesPayload> {
 
   try {
     const liveEvents = await fetchLiveEvents();
-    const matches = (await mapEvents(liveEvents, today)).filter((match) =>
-      isInPlayStatus(match.status),
+    const matches = capLiveMatches(
+      liveEvents
+        .map((event) => toMatchInsight(event, defaultOdds(), today))
+        .filter((match) => isInPlayStatus(match.status)),
     );
     if (matches.length === 0) {
       return {

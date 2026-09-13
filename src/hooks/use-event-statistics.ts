@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { isDemoEventId } from "@/lib/ids";
 import type { LiveMetrics } from "@/lib/types";
 
 const memory = new Map<number, LiveMetrics>();
@@ -10,7 +11,7 @@ export function useEventStatistics(eventId: number) {
     () => memory.get(eventId) ?? null,
   );
   const [loading, setLoading] = useState(
-    () => eventId < 910000 && !memory.has(eventId),
+    () => !isDemoEventId(eventId) && !memory.has(eventId),
   );
 
   useEffect(() => {
@@ -21,8 +22,7 @@ export function useEventStatistics(eventId: number) {
       return;
     }
 
-    const DEMO_EVENT_FROM = 910000;
-    if (eventId >= DEMO_EVENT_FROM) {
+    if (isDemoEventId(eventId)) {
       setLoading(false);
       return;
     }

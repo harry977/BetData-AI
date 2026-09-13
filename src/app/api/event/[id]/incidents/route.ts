@@ -1,4 +1,5 @@
-import { fetchEventIncidents, hasSportApiKey } from "@/lib/sportapi";
+import { isDemoEventId } from "@/lib/ids";
+import { hasSportApiKey, parseEventIncidents, sportGet } from "@/lib/sportapi";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -21,14 +22,19 @@ export async function GET(
     );
   }
 
-  if (!hasSportApiKey() || eventId >= 910000) {
+  if (!hasSportApiKey() || isDemoEventId(eventId)) {
     return NextResponse.json({ eventId, incidents: [] }, { headers: NO_STORE });
   }
 
   try {
-    const incidents = await fetchEventIncidents(eventId);
-    return NextResponse.json({ eventId, incidents }, { headers: NO_STORE });
-  } catch {
+    const json = await sportGet(`/api/v1/event/${eventId}/incidents`);
+    return NextResponse.json(
+      { eventId, incidents: parseEventIncidents(json) },
+      { headers: NO_STORE },
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "SportAPI incidents failed";
+    console.error("[sportapi] incidents", eventId, message);
     return NextResponse.json({ eventId, incidents: [] }, { headers: NO_STORE });
   }
 }

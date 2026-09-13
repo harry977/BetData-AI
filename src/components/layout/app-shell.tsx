@@ -34,9 +34,7 @@ export function AppShell({ onLock }: AppShellProps) {
     const base = data?.response ?? [];
     const liveRows = liveData?.matches ?? [];
     if (liveData?.source === "sportapi") {
-      const rest = base.filter(
-        (match) => !isInPlayStatus(match.status) || match.id < 910000,
-      );
+      const rest = base.filter((match) => !isInPlayStatus(match.status));
       return withLiveScores(rest, liveRows);
     }
     return withLiveScores(base, liveRows);
