@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
+import { FEED_NO_STORE_HEADERS } from "@/lib/no-store";
 import { getFixturesFeed } from "@/lib/sport-feed";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export const fetchCache = "force-no-store";
 
-const NO_STORE = {
-  "Cache-Control": "no-store, max-age=0",
-};
+const NO_STORE = FEED_NO_STORE_HEADERS;
 
 export async function GET() {
   console.log("[API FIXTURES] Inicio fetch", new Date().toISOString());

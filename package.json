@@ -6,6 +6,7 @@
     "dev": "next dev -p 43141 -H 0.0.0.0",
     "build": "next build",
     "build:cf": "opennextjs-cloudflare build --skipWranglerConfigCheck",
+    "deploy:cf": "npm run build:cf && wrangler deploy",
     "start": "next start -p 43141 -H 0.0.0.0",
     "lint": "next lint"
   },

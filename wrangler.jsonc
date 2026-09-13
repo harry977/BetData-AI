@@ -6,5 +6,8 @@
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
+  },
+  "vars": {
+    "RAPIDAPI_HOST": "sportapi7.p.rapidapi.com"
   }
 }
