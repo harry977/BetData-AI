@@ -12,6 +12,7 @@ import { SignalCopy } from "@/components/signals/signal-copy";
 import { LivePulse } from "@/components/signals/live-pulse";
 import { goalAlert } from "@/lib/stream-widgets";
 import { MatchSheet } from "@/components/signals/match-sheet";
+import { ScanningLiveState } from "@/components/signals/scanning-live-state";
 import { livePlaylist } from "@/lib/signals";
 import { recordViewedSignal } from "@/lib/storage";
 import { hapticTap } from "@/lib/telegram";
@@ -72,19 +73,7 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
   }, [paused, playlist, selectedId]);
 
   if (!selected) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center px-8 text-center">
-        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-rose-400">
-          En directo
-        </p>
-        <h2 className="mt-3 text-2xl font-black uppercase leading-tight text-white">
-          Sin partidos en directo en este momento
-        </h2>
-        <p className="mt-3 text-sm leading-relaxed text-slate-400">
-          Cuando arranque uno, aquí verás marcador, minuto y la señal. Mientras, en Hoy están los próximos de la jornada.
-        </p>
-      </div>
-    );
+    return <ScanningLiveState />;
   }
 
   const live = selected.status === "LIVE" || selected.status === "HT";

@@ -9,8 +9,8 @@ import { LiveModeView } from "@/components/dashboard/live-mode-view";
 import { SignalsView } from "@/components/dashboard/signals-view";
 import { BottomNav, HeaderNav, type AppTab } from "@/components/layout/bottom-nav";
 import { DailyHitsBadge } from "@/components/signals/daily-hits-badge";
+import { ScanningLiveState } from "@/components/signals/scanning-live-state";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useFixtures } from "@/hooks/use-fixtures";
 import { useLiveMatches } from "@/hooks/use-live-matches";
 import { composeMatchFeed } from "@/lib/sport-mapper";
@@ -31,7 +31,7 @@ export function AppShell({ onLock }: AppShellProps) {
     setAccountId(readUnlockState().accountId);
   }, []);
 
-  const { matches, simulated } = useMemo(
+  const { matches, connected } = useMemo(
     () => composeMatchFeed(data, liveData),
     [data, liveData],
   );
@@ -70,8 +70,12 @@ export function AppShell({ onLock }: AppShellProps) {
       >
         <div className="mx-auto flex max-w-md items-center justify-between gap-3 px-3 py-3 lg:max-w-lg lg:px-4 lg:py-3.5">
           <BetDataLogo className="min-w-0" />
-          <span className="shrink-0 rounded-full border border-neon/30 bg-neon/10 px-2 py-1 text-[9px] font-semibold uppercase tracking-wide text-neon sm:text-[10px] lg:text-[11px]">
-            {liveCount > 0 ? `${liveCount} en juego` : "IA activa"}
+          <span className="max-w-[11rem] shrink-0 rounded-full border border-neon/30 bg-neon/10 px-2 py-1 text-center text-[8px] font-semibold uppercase leading-tight tracking-wide text-neon sm:max-w-none sm:text-[10px] lg:text-[11px]">
+            {connected
+              ? liveCount > 0
+                ? `EN VIVO · CONECTADO A SPORTAPI · ${liveCount}`
+                : "EN VIVO · CONECTADO A SPORTAPI"
+              : "Escaneando SportAPI"}
           </span>
         </div>
         <div className="mx-auto hidden max-w-lg justify-center px-4 pb-1 lg:flex">
@@ -79,11 +83,6 @@ export function AppShell({ onLock }: AppShellProps) {
         </div>
         <div className="mx-auto max-w-md space-y-2 px-3 pb-2 lg:max-w-lg lg:px-4">
           <DailyHitsBadge matches={matches} />
-          {simulated ? (
-            <p className="rounded-xl border border-neon/25 bg-neon/10 px-3 py-1.5 text-center text-[10px] font-black uppercase tracking-[0.14em] text-neon">
-              Simulación · jornada de demostración
-            </p>
-          ) : null}
         </div>
       </header>
 
@@ -94,8 +93,6 @@ export function AppShell({ onLock }: AppShellProps) {
             : "mx-auto max-w-md px-3 pb-nav pt-4 lg:max-w-lg lg:px-4 lg:pb-10 lg:pt-6"
         }
       >
-        {loading && matches.length === 0 ? <DashboardSkeleton /> : null}
-
         {error && matches.length === 0 ? (
           <div className="rounded-xl border border-red-500/30 bg-red-950/40 p-4 text-sm text-red-200">
             <div className="flex items-start gap-2">
@@ -110,6 +107,8 @@ export function AppShell({ onLock }: AppShellProps) {
             </div>
           </div>
         ) : null}
+
+        {!error && loading && matches.length === 0 ? <ScanningLiveState /> : null}
 
         {matches.length > 0 || (!loading && !error) ? (
           <>
@@ -143,16 +142,6 @@ export function AppShell({ onLock }: AppShellProps) {
       </main>
 
       <BottomNav value={tab} onChange={setTab} />
-    </div>
-  );
-}
-
-function DashboardSkeleton() {
-  return (
-    <div className="space-y-3 px-3 pt-4">
-      <Skeleton className="h-14 w-full rounded-2xl" />
-      <Skeleton className="h-24 w-full rounded-2xl" />
-      <Skeleton className="h-36 w-full rounded-2xl" />
     </div>
   );
 }

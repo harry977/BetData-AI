@@ -90,10 +90,11 @@ export type SportCategory = {
   eventsCount?: number;
 };
 
-export type FeedSource = "mock" | "rapidapi" | "sportapi";
+export type FeedSource = "rapidapi" | "sportapi";
 
 export type FixturesPayload = {
   source: FeedSource;
+  connected: boolean;
   generatedAt: string;
   stats: PlatformStats;
   response: MatchInsight[];
@@ -137,6 +138,7 @@ export type LiveMatchCard = {
 
 export type LiveMatchesPayload = {
   source: FeedSource;
+  connected: boolean;
   generatedAt: string;
   matches: MatchInsight[];
   cards: LiveMatchCard[];
@@ -144,6 +146,7 @@ export type LiveMatchesPayload = {
 
 export type CategoriesPayload = {
   source: FeedSource;
+  connected: boolean;
   date: string;
   timezoneOffset: number;
   categories: SportCategory[];

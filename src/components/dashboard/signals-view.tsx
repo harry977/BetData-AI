@@ -9,6 +9,7 @@ import { SignalCopy } from "@/components/signals/signal-copy";
 import { StreakBoard } from "@/components/signals/streak-board";
 import { LivePulse } from "@/components/signals/live-pulse";
 import { MatchSheet } from "@/components/signals/match-sheet";
+import { ScanningLiveState } from "@/components/signals/scanning-live-state";
 import { madridYmd } from "@/lib/dates";
 import { recordMissionSignal, recordViewedSignal } from "@/lib/storage";
 import { activeSignals, featuredSignal, scanCounts } from "@/lib/signals";
@@ -77,6 +78,10 @@ export function SignalsView({
     setWhyMatch(match);
   }
 
+  if (matches.length === 0) {
+    return <ScanningLiveState />;
+  }
+
   return (
     <div className="space-y-5">
       {scanning ? (
@@ -131,25 +136,13 @@ export function SignalsView({
           ))}
         </section>
       ) : (
-        <section className="rounded-2xl border border-white/8 bg-[#121726] px-5 py-6 text-center">
-          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-neon">
-            En directo
-          </p>
-          <h2 className="mt-2 text-xl font-black uppercase leading-tight text-white">
-            Sin partidos en directo en este momento
-          </h2>
-          <p className="mt-2 text-sm leading-relaxed text-gray-300">
-            Cargamos los próximos partidos de la jornada de hoy.
-          </p>
-        </section>
+        <ScanningLiveState compact />
       )}
 
       {featured ? (
         <SignalCard match={featured} onWhy={() => openWhy(featured)} />
-      ) : todayRest.length === 0 && tomorrow.length === 0 ? (
-        <p className="rounded-2xl border border-white/8 bg-[#121726] p-6 text-center text-sm text-gray-300">
-          Sin partidos en directo en este momento. Los próximos de la jornada de hoy aparecerán aquí.
-        </p>
+      ) : todayRest.length === 0 && tomorrow.length === 0 && liveNow.length === 0 ? (
+        <ScanningLiveState compact />
       ) : null}
 
       {todayRest.length > 0 ? (

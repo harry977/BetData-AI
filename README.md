@@ -8,7 +8,7 @@ Telegram Mini App de **inteligencia de fútbol en vivo**. La IA escanea el día,
 - Tailwind CSS + shadcn/ui
 - Framer Motion + Recharts
 - `@telegram-apps/sdk` + script oficial `telegram-web-app.js`
-- Feed SportAPI (SofaScore vía RapidAPI). Si no hay `RAPIDAPI_KEY`, la app muestra una **simulación** con partidos de demostración.
+- Feed SportAPI (SofaScore vía RapidAPI). Sin `RAPIDAPI_KEY` o sin partidos, la app muestra un estado vacío (*Escaneando partidos en directo...*), nunca una jornada simulada.
 
 ## Cómo arrancar
 
@@ -59,7 +59,7 @@ RAPIDAPI_HOST="sportapi7.p.rapidapi.com"
 NEXT_PUBLIC_OFFICIAL_SERVER_URL=https://tu-servidor-deportivo-oficial
 ```
 
-Con clave válida el directo sale de `/api/v1/sport/football/events/live` y los escudos de `/api/v1/team/{id}/image`. No se mezcla la jornada de demostración con datos reales.
+Con clave válida el directo sale de `/api/v1/sport/football/events/live` y los escudos de `/api/v1/team/{id}/image`. La cabecera muestra **EN VIVO · CONECTADO A SPORTAPI** cuando el fetch responde. Si SportAPI no trae partidos, se muestra el estado vacío; no hay jornada de demostración ni flags `IS_DEMO`.
 
 No subas la clave al repositorio: `.env.local` está en `.gitignore`.
 

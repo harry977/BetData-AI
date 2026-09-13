@@ -343,28 +343,34 @@ export function mergeLiveInsights(
   return Array.from(map.values());
 }
 
+function feedIsConnected(
+  payload: { connected?: boolean; source?: FeedSource } | null,
+) {
+  if (!payload) return false;
+  if (typeof payload.connected === "boolean") return payload.connected;
+  return payload.source === "sportapi" || payload.source === "rapidapi";
+}
+
 export function composeMatchFeed(
   fixtures: FixturesPayload | null,
   live: LiveMatchesPayload | null,
-): { matches: MatchInsight[]; simulated: boolean; source: FeedSource } {
-  const liveOk = live?.source === "sportapi" || live?.source === "rapidapi";
-  const fixturesOk = fixtures?.source === "sportapi" || fixtures?.source === "rapidapi";
-  const liveRows = (live?.matches ?? []).filter((match) => !isDemoEventId(match.id));
-
-  if (liveOk || fixturesOk) {
-    const rest = (fixturesOk ? fixtures?.response ?? [] : []).filter(
-      (match) => !isDemoEventId(match.id) && !isInPlayStatus(match.status),
-    );
-    return {
-      matches: mergeLiveInsights(rest, liveRows),
-      simulated: false,
-      source: liveOk ? (live?.source ?? "sportapi") : (fixtures?.source ?? "sportapi"),
-    };
-  }
+): { matches: MatchInsight[]; connected: boolean; source: FeedSource } {
+  const liveOk = feedIsConnected(live);
+  const fixturesOk = feedIsConnected(fixtures);
+  const liveRows = (liveOk ? live?.matches ?? [] : []).filter(
+    (match) => !isDemoEventId(match.id),
+  );
+  const rest = (fixturesOk ? fixtures?.response ?? [] : []).filter(
+    (match) => !isDemoEventId(match.id) && !isInPlayStatus(match.status),
+  );
 
   return {
-    matches: fixtures?.response ?? liveRows,
-    simulated: true,
-    source: "mock",
+    matches: mergeLiveInsights(rest, liveRows),
+    connected: liveOk || fixturesOk,
+    source: liveOk
+      ? (live?.source ?? "sportapi")
+      : fixturesOk
+        ? (fixtures?.source ?? "sportapi")
+        : "sportapi",
   };
 }

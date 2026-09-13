@@ -1,6 +1,5 @@
 import { PLATFORM_STATS } from "@/lib/constants";
 import { shiftYmd } from "@/lib/dates";
-import { buildDemoFixtures } from "@/lib/mocks/demo-fixtures";
 import {
   dayBucketFor,
   isLowQualityLive,
@@ -18,10 +17,6 @@ import type {
 } from "@/lib/types";
 import { isInPlayStatus } from "@/lib/utils";
 import {
-  fetchFootballFixturesByDate,
-  fetchFootballLiveFixtures,
-} from "@/services/apiFootball";
-import {
   fetchAllScheduledEvents,
   fetchBulkOdds,
   fetchCategories,
@@ -35,7 +30,6 @@ import {
 } from "@/lib/sportapi";
 
 const FEED_TTL_MS = 15_000;
-const FEED_FAIL_TTL_MS = 60_000;
 let feedCache: {
   key: string;
   savedAt: number;
@@ -53,10 +47,11 @@ function todayIsoDate() {
 function payload(
   source: FixturesPayload["source"],
   response: MatchInsight[],
-  categories: SportCategory[] = [],
+  options?: { categories?: SportCategory[]; connected?: boolean },
 ): FixturesPayload {
   return {
     source,
+    connected: options?.connected ?? true,
     generatedAt: new Date().toISOString(),
     stats: {
       matchesAnalyzedToday: PLATFORM_STATS.matchesAnalyzedToday,
@@ -64,7 +59,7 @@ function payload(
       leaguesMonitored: PLATFORM_STATS.leaguesMonitored,
     },
     response,
-    categories,
+    categories: options?.categories ?? [],
   };
 }
 
@@ -262,7 +257,7 @@ export async function getFixturesFeed(cachedCategoryIds?: number[]): Promise<Fix
   const yesterday = shiftYmd(today, -1);
   const cacheKey = `${today}:${(cachedCategoryIds ?? []).join(",")}`;
   if (feedCache && feedCache.key === cacheKey && Date.now() - feedCache.savedAt < feedCache.ttl) {
-    if (feedCache.payload.source !== "mock") {
+    if (feedCache.payload.connected) {
       const cachedLive = feedCache.payload.response.some((match) =>
         isInPlayStatus(match.status),
       );
@@ -270,11 +265,10 @@ export async function getFixturesFeed(cachedCategoryIds?: number[]): Promise<Fix
     }
   }
 
-  const demo = payload("mock", buildDemoFixtures());
+  const disconnected = payload("sportapi", [], { connected: false });
 
   if (!hasSportApiKey()) {
-    feedCache = { key: cacheKey, savedAt: Date.now(), ttl: FEED_FAIL_TTL_MS, payload: demo };
-    return demo;
+    return disconnected;
   }
 
   try {
@@ -286,44 +280,23 @@ export async function getFixturesFeed(cachedCategoryIds?: number[]): Promise<Fix
       fetchLiveEvents().catch(() => [] as SportEvent[]),
     ]);
 
-    let merged = mergeScheduledAndLive(
-      uniqueEvents([...todayEvents, ...tomorrowEvents, ...yesterdayEvents]),
-      liveEvents,
+    const merged = preselectEvents(
+      mergeScheduledAndLive(
+        uniqueEvents([...todayEvents, ...tomorrowEvents, ...yesterdayEvents]),
+        liveEvents,
+      ),
+      today,
     );
-    merged = preselectEvents(merged, today);
 
     if (merged.length === 0) {
-      const [footballToday, footballTomorrow, footballYesterday, footballLive] =
-        await Promise.all([
-          fetchFootballFixturesByDate(today).catch(() => [] as SportEvent[]),
-          fetchFootballFixturesByDate(tomorrow).catch(() => [] as SportEvent[]),
-          fetchFootballFixturesByDate(yesterday).catch(() => [] as SportEvent[]),
-          fetchFootballLiveFixtures().catch(() => [] as SportEvent[]),
-        ]);
-      merged = preselectEvents(
-        mergeScheduledAndLive(
-          uniqueEvents([...footballToday, ...footballTomorrow, ...footballYesterday]),
-          footballLive,
-        ),
-        today,
-      );
-      if (merged.length === 0) {
-        feedCache = { key: cacheKey, savedAt: Date.now(), ttl: FEED_FAIL_TTL_MS, payload: demo };
-        return { ...demo, categories };
-      }
-      const mappedFootball = await mapEvents(merged, today);
-      const result = payload("rapidapi", capMatches(mappedFootball), categories);
-      feedCache = {
-        key: cacheKey,
-        savedAt: Date.now(),
-        ttl: result.response.some((match) => isInPlayStatus(match.status)) ? 0 : FEED_TTL_MS,
-        payload: result,
-      };
-      return result;
+      return payload("sportapi", [], { categories, connected: true });
     }
 
     const mapped = await mapEvents(merged, today);
-    const result = payload("sportapi", capMatches(mapped), categories);
+    const result = payload("sportapi", capMatches(mapped), {
+      categories,
+      connected: true,
+    });
     const hasLive = result.response.some((match) => isInPlayStatus(match.status));
     feedCache = hasLive
       ? null
@@ -334,30 +307,27 @@ export async function getFixturesFeed(cachedCategoryIds?: number[]): Promise<Fix
       const liveEvents = await fetchLiveEvents();
       if (liveEvents.length) {
         const mapped = liveEvents.map((event) => toMatchInsight(event, defaultOdds(), today));
-        return payload("sportapi", capMatches(mapped));
+        return payload("sportapi", capMatches(mapped), { connected: true });
       }
     } catch {
       /* keep going */
     }
-    if (hasSportApiKey()) {
-      return payload("sportapi", []);
-    }
-    feedCache = { key: cacheKey, savedAt: Date.now(), ttl: FEED_FAIL_TTL_MS, payload: demo };
-    return demo;
+    return disconnected;
   }
 }
 
 export async function getLiveMatchesFeed(): Promise<LiveMatchesPayload> {
   const today = todayIsoDate();
-  const demoMatches = buildDemoFixtures().filter((match) => isInPlayStatus(match.status));
+  const empty: LiveMatchesPayload = {
+    source: "sportapi",
+    connected: false,
+    generatedAt: new Date().toISOString(),
+    matches: [],
+    cards: [],
+  };
 
   if (!hasSportApiKey()) {
-    return {
-      source: "mock",
-      generatedAt: new Date().toISOString(),
-      matches: demoMatches,
-      cards: demoMatches.map(toLiveMatchCard),
-    };
+    return empty;
   }
 
   try {
@@ -367,27 +337,15 @@ export async function getLiveMatchesFeed(): Promise<LiveMatchesPayload> {
         .map((event) => toMatchInsight(event, defaultOdds(), today))
         .filter((match) => isInPlayStatus(match.status)),
     );
-    if (matches.length === 0) {
-      return {
-        source: "sportapi",
-        generatedAt: new Date().toISOString(),
-        matches: [],
-        cards: [],
-      };
-    }
     return {
       source: "sportapi",
+      connected: true,
       generatedAt: new Date().toISOString(),
       matches,
       cards: matches.map(toLiveMatchCard),
     };
   } catch {
-    return {
-      source: "sportapi",
-      generatedAt: new Date().toISOString(),
-      matches: [],
-      cards: [],
-    };
+    return empty;
   }
 }
 
@@ -397,20 +355,28 @@ export async function getFootballCategoriesFeed(
 ): Promise<CategoriesPayload> {
   const resolvedDate = date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : todayIsoDate();
   const offset = timezoneOffset ?? timezoneOffsetSeconds();
+  const empty: CategoriesPayload = {
+    source: "sportapi",
+    connected: false,
+    date: resolvedDate,
+    timezoneOffset: offset,
+    categories: [],
+  };
 
   if (!hasSportApiKey()) {
-    return { source: "mock", date: resolvedDate, timezoneOffset: offset, categories: [] };
+    return empty;
   }
 
   try {
     const categories = await fetchCategories(resolvedDate, offset);
     return {
       source: "sportapi",
+      connected: true,
       date: resolvedDate,
       timezoneOffset: offset,
       categories,
     };
   } catch {
-    return { source: "mock", date: resolvedDate, timezoneOffset: offset, categories: [] };
+    return empty;
   }
 }
