@@ -8,7 +8,7 @@ export type AppTab = "hoy" | "live" | "combo" | "account";
 export const NAV_ITEMS: { id: AppTab; label: string; icon: typeof Brain }[] = [
   { id: "hoy", label: "Hoy", icon: Brain },
   { id: "live", label: "Directo", icon: Radio },
-  { id: "combo", label: "Combo", icon: Layers },
+  { id: "combo", label: "Combinada", icon: Layers },
   { id: "account", label: "Cuenta", icon: User },
 ];
 

@@ -29,7 +29,7 @@ export function DailyHitsBadge({
         )}
         title={
           stats.settled
-            ? `Resultados hoy: ${stats.hits}/${stats.total} aciertos (${stats.pct}% Win Rate)`
+          ? `Resultados hoy: ${stats.hits}/${stats.total} aciertos (${stats.pct}% de acierto)`
             : "Resultados hoy: sin partidos cerrados"
         }
       >
@@ -61,7 +61,7 @@ export function DailyHitsBadge({
       </span>
       <p className="min-w-0 text-[11px] font-black uppercase leading-snug tracking-[0.08em] text-neon lg:text-[13px]">
         {stats.settled
-          ? `Resultados hoy: ${stats.hits}/${stats.total} aciertos (${stats.pct}% Win Rate)`
+          ? `Resultados hoy: ${stats.hits}/${stats.total} aciertos (${stats.pct}% de acierto)`
           : "Resultados hoy: 0/0 aciertos · Sin cerrar aún"}
       </p>
     </div>

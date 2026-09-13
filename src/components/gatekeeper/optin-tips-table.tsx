@@ -33,7 +33,7 @@ export function OptinTipsTable({
         <div className="grid grid-cols-[3rem_1fr_minmax(7.5rem,38%)] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
           <span>Hora</span>
           <span>Partidos</span>
-          <span className="text-right">Mejor tip</span>
+          <span>Mejor consejo</span>
         </div>
         <ul>
           {matches.map((match) => (
@@ -60,10 +60,10 @@ function TimeCell({ match }: { match: MatchInsight }) {
   const finished = match.status === "FT" || Boolean(match.result);
   const label = live
     ? match.status === "HT"
-      ? "HT"
+      ? "Descanso"
       : `${match.elapsed ?? ""}'`
     : finished
-      ? "FT"
+      ? "Final"
       : formatKickoffLocal(match.kickoffIso);
 
   return (

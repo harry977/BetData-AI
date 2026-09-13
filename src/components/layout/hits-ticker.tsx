@@ -11,7 +11,7 @@ type HitsTickerProps = {
 function tickerBadge(match: MatchInsight) {
   if (match.status === "LIVE" || match.status === "HT") {
     const score = `${match.score.home ?? 0}-${match.score.away ?? 0}`;
-    if (match.status === "HT") return `${score} HT`;
+    if (match.status === "HT") return `${score} descanso`;
     return match.elapsed ? `${score} ${match.elapsed}'` : score;
   }
   if (match.result?.won) return "Acertado";
@@ -35,7 +35,7 @@ export function HitsTicker({ hits }: HitsTickerProps) {
             >
               <Badge variant={live ? "live" : "won"}>{tickerBadge(match)}</Badge>
               <span className="whitespace-nowrap text-[11px] text-zinc-300">
-                {match.home.code} vs {match.away.code}
+                {match.home.code} – {match.away.code}
               </span>
               <span className="whitespace-nowrap text-[11px] font-semibold text-neon">
                 {explainTip(match.bestTip, match.home.name, match.away.name).plain}

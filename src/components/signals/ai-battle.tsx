@@ -50,12 +50,12 @@ export function AiBattle({
                     {match.confidence.toFixed(1)}
                   </p>
                 </button>
-                {i === 0 ? <p className="text-[10px] font-black text-slate-500">VS</p> : null}
+                {i === 0 ? <p className="text-[10px] font-black text-slate-500">frente a</p> : null}
               </div>
             ))}
           </div>
           <p className="mt-3 text-[11px] font-black uppercase tracking-[0.16em] text-neon">
-            Winner · {pair.winner.home.code} — {pair.winner.away.code}
+            Ganador · {pair.winner.home.code} — {pair.winner.away.code}
           </p>
         </article>
       ) : null}

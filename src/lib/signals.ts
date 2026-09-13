@@ -194,27 +194,27 @@ export function whyItems(match: MatchInsight): WhyItem[] {
   return [
     {
       key: "form",
-      title: "Recent form",
+      title: "Forma reciente",
       body: match.formNote,
     },
     {
       key: "stats",
-      title: "Match statistics",
+      title: "Estadísticas del partido",
       body: `${xg} · ${shots} · ${pressure}`,
     },
     {
       key: "momentum",
-      title: "Current momentum",
+      title: "Ritmo actual",
       body: live,
     },
     {
       key: "confidence",
-      title: "AI confidence",
+      title: "Confianza de la IA",
       body: `${match.confidence.toFixed(1)}/10 · acierto del modelo ${match.hitRate.toFixed(1)}%`,
     },
     {
       key: "lineups",
-      title: "Lineups",
+      title: "Alineaciones",
       body: "Pendiente de sincronizar",
       pending: true,
     },
@@ -224,7 +224,7 @@ export function whyItems(match: MatchInsight): WhyItem[] {
 export function supportStats(match: MatchInsight) {
   return [
     {
-      label: "xG",
+      label: "Goles esperados",
       value: `${match.metrics.xG.home.toFixed(2)}/${match.metrics.xG.away.toFixed(2)}`,
     },
     { label: "Presión", value: `${match.metrics.offensivePressure}%` },

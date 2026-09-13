@@ -9,7 +9,7 @@ import { SignalCopy } from "@/components/signals/signal-copy";
 import { signalRarity } from "@/lib/signals";
 import { goalAlert } from "@/lib/stream-widgets";
 import type { MatchInsight } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { cn, statusLabel } from "@/lib/utils";
 import { Zap } from "lucide-react";
 
 export function SignalCard({
@@ -81,7 +81,7 @@ export function SignalCard({
           </span>
         ) : (
           <span className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 lg:text-sm lg:text-gray-300">
-            {match.status === "NS" ? "Antes del partido" : match.status}
+            {match.status === "NS" ? "Antes del partido" : statusLabel(match)}
           </span>
         )}
       </div>
@@ -108,7 +108,7 @@ export function SignalCard({
             {match.home.name}
           </p>
         </div>
-        <p className="shrink-0 text-xl font-black text-gray-300">VS</p>
+        <p className="shrink-0 text-xl font-black text-gray-300">frente a</p>
         <div className="flex min-w-0 flex-1 flex-col items-center gap-3 text-center">
           <TeamCrest team={match.away} size={84} className="h-[84px] w-[84px]" />
           <p className="text-2xl font-black uppercase leading-tight tracking-tight text-white">

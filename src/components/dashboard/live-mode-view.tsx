@@ -167,7 +167,7 @@ export function LiveModeView({ matches, selectedId, onSelect }: LiveModeViewProp
           </p>
           <p className="mt-3 text-2xl font-black tabular-nums text-white">{shots} tiros</p>
           <p className="mt-1 text-2xl font-black tabular-nums text-white">
-            {xg.toFixed(2)} xG
+            {xg.toFixed(2)} goles esperados
           </p>
           <p className="mt-1 text-2xl font-black tabular-nums text-neon">
             {selected.metrics.offensivePressure}% ritmo

@@ -1,4 +1,5 @@
 import { formatCalendarDay, formatKickoffLocal } from "@/lib/dates";
+import { countryLabel, formatBttsPick, formatOverUnderPick } from "@/lib/locale";
 import { explainTip } from "@/lib/tip-copy";
 import type { MatchInsight } from "@/lib/types";
 import { formatOdds, isInPlayStatus, statusLabel } from "@/lib/utils";
@@ -22,27 +23,27 @@ export function marketCells(match: MatchInsight): MarketCell[] {
       : one.pick === "2"
         ? `Victoria ${match.away.code}`
         : "Empate";
-  const bttsLabel = btts.pick === "GG" ? "BTTS Sí" : "BTTS No";
+  const bttsLabel = formatBttsPick(btts.pick);
   const exact = expectedExactScore(match);
 
   return [
     {
       key: "1x2",
-      label: "1X2",
+      label: "Resultado 1X2",
       pick: oneLabel,
       odds: formatOdds(one.odds),
       highlight: /^(1|2|x)$/i.test(match.bestTip.trim()),
     },
     {
       key: "ou",
-      label: "Over/Under",
-      pick: ou.pick,
+      label: "Más / menos goles",
+      pick: formatOverUnderPick(ou.pick),
       odds: formatOdds(ou.odds),
       highlight: /over|under|^o\d|^u\d/i.test(best),
     },
     {
       key: "btts",
-      label: "BTTS",
+      label: "Ambos anotan",
       pick: bttsLabel,
       odds: formatOdds(btts.odds),
       highlight: /btts|gg|ng|ambos/i.test(best),
@@ -67,7 +68,7 @@ export function expectedExactScore(match: MatchInsight): {
   }
   const home = Math.round(match.metrics.xG.home);
   const away = Math.round(match.metrics.xG.away);
-  return { line: `${home}–${away} · por xG`, source: "xg" };
+  return { line: `${home}–${away} · según goles esperados`, source: "xg" };
 }
 
 export type StatRow = {
@@ -83,7 +84,7 @@ export function predictedStatRows(match: MatchInsight): StatRow[] {
   return [
     {
       key: "xg",
-      label: "xG",
+      label: "Goles esperados",
       home: metrics.xG.home,
       away: metrics.xG.away,
       format: "xg",
@@ -142,13 +143,13 @@ export function contextAlert(match: MatchInsight) {
     return `En juego (${clock}, ${score}). Presión ofensiva ${match.metrics.offensivePressure}%.`;
   }
   const kickoff = `${formatCalendarDay(match.kickoffIso)} · ${formatKickoffLocal(match.kickoffIso)}`;
-  return `${match.league.name} (${match.league.country}) · ${kickoff}.`;
+  return `${match.league.name} (${countryLabel(match.league.country)}) · ${kickoff}.`;
 }
 
 export function contextBody(match: MatchInsight) {
   const note = match.formNote.trim();
   if (note) return note;
-  return "Sin historial cara a cara en el feed. Cuando SportAPI envíe H2H, aparecerá aquí.";
+  return "Sin historial cara a cara en el feed. Cuando lleguen esos datos, aparecerán aquí.";
 }
 
 export function matchShareText(match: MatchInsight) {
@@ -160,13 +161,13 @@ export function matchShareText(match: MatchInsight) {
   const one = match.markets.oneXTwo;
   const ou = match.markets.overUnder;
   const btts = match.markets.btts;
-  const bttsLabel = btts.pick === "GG" ? "BTTS Sí" : "BTTS No";
+  const bttsLabel = `Ambos anotan ${formatBttsPick(btts.pick)}`;
   return [
-    `RadarBet IA · ${match.home.name} vs ${match.away.name}`,
+    `RadarBet IA · ${match.home.name} – ${match.away.name}`,
     `${match.league.name} · ${clock}`,
     `Mejor consejo: ${copy.plain}`,
     `${copy.market} · confianza ${match.confidence.toFixed(1)}/10`,
-    `1X2 ${one.pick} ${formatOdds(one.odds)} · ${ou.pick} ${formatOdds(ou.odds)} · ${bttsLabel} ${formatOdds(btts.odds)}`,
+    `1X2 ${one.pick} ${formatOdds(one.odds)} · ${formatOverUnderPick(ou.pick)} ${formatOdds(ou.odds)} · ${bttsLabel} ${formatOdds(btts.odds)}`,
   ].join("\n");
 }
 

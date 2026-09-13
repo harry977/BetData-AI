@@ -1,3 +1,5 @@
+import { formatGoalLine } from "@/lib/locale";
+
 export type TipCopy = {
   plain: string;
   market: string;
@@ -16,10 +18,10 @@ export function explainTip(tip: string, home: string, away: string): TipCopy {
   const half = /1h|ht|1ª|primera parte|1a parte/i.test(compact);
 
   if (/btts\s*no|\bng\b/i.test(compact)) {
-    return { plain: "Que no marquen los dos equipos", market: "BTTS No" };
+    return { plain: "Que no marquen los dos equipos", market: "Ambos anotan · No" };
   }
   if (/btts|ambos|\bgg\b/i.test(compact)) {
-    return { plain: "Que marquen los dos equipos", market: "BTTS Sí" };
+    return { plain: "Que marquen los dos equipos", market: "Ambos anotan · Sí" };
   }
 
   const over =
@@ -28,7 +30,7 @@ export function explainTip(tip: string, home: string, away: string): TipCopy {
   if (over) {
     const line = Number(over[1]);
     const goals = lineGoals(line);
-    const market = half ? `Over ${line} Primera Parte` : `Over ${line}`;
+    const market = half ? `Más de ${formatGoalLine(line)} · primera parte` : `Más de ${formatGoalLine(line)} goles`;
     if (half) {
       return {
         plain:
@@ -53,7 +55,7 @@ export function explainTip(tip: string, home: string, away: string): TipCopy {
   if (under) {
     const line = Number(under[1]);
     const goals = maxGoals(line);
-    const market = half ? `Under ${line} Primera Parte` : `Under ${line}`;
+    const market = half ? `Menos de ${formatGoalLine(line)} · primera parte` : `Menos de ${formatGoalLine(line)} goles`;
     if (half) {
       return {
         plain:

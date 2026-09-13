@@ -232,7 +232,7 @@ export function toMatchInsight(
     isBanker: isBanker(confidence),
     bestTip,
     markets,
-    formNote: `BD APEX AI analiza ${event.home.name} vs ${event.away.name}. El Mejor Pronóstico es ${bestTip} con un índice de confianza ${confidence.toFixed(1)}/10, construido a partir de las cuotas implícitas, la forma de los equipos y el contexto del encuentro.`,
+    formNote: `RadarBet IA analiza ${event.home.name} frente a ${event.away.name}. El mejor consejo es ${bestTip} con un índice de confianza ${confidence.toFixed(1)}/10, construido a partir de las cuotas implícitas, la forma de los equipos y el contexto del encuentro.`,
     metrics: stats
       ? snapshotToMetrics(stats, elapsed ?? 90)
       : buildLiveMetrics(pressure, xgHome, xgAway, elapsed ?? 20),

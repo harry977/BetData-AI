@@ -252,7 +252,7 @@ export function comboShareText(ticket: ComboTicket) {
     `Objetivo ${formatOdds(ticket.targetOdds)} · confianza media ${ticket.avgConfidence}/10`,
     ...ticket.legs.map(
       (leg) =>
-        `${leg.homeCode} vs ${leg.awayCode} · ${leg.plain} ${formatOdds(leg.odds)} · ${leg.confidence.toFixed(1)}/10`,
+        `${leg.homeCode} – ${leg.awayCode} · ${leg.plain} ${formatOdds(leg.odds)} · ${leg.confidence.toFixed(1)}/10`,
     ),
   ];
   return lines.join("\n");

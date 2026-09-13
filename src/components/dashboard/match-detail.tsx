@@ -20,7 +20,7 @@ export function MatchDetail({ match }: MatchDetailProps) {
   const view: MatchInsight = metrics ? { ...match, metrics } : match;
   const xgNote =
     metrics && (metrics.xG.home > 0 || metrics.xG.away > 0)
-      ? ` xG en vivo: ${metrics.xG.home.toFixed(2)} vs ${metrics.xG.away.toFixed(2)}. Tiros a puerta ${metrics.shotsOnTarget.home}-${metrics.shotsOnTarget.away}.`
+      ? ` Goles esperados en vivo: ${metrics.xG.home.toFixed(2)} frente a ${metrics.xG.away.toFixed(2)}. Tiros a puerta ${metrics.shotsOnTarget.home}-${metrics.shotsOnTarget.away}.`
       : "";
 
   return (
@@ -48,7 +48,7 @@ export function MatchDetail({ match }: MatchDetailProps) {
           </p>
           <div className="grid grid-cols-3 gap-2">
             <Stat
-              label="xG"
+              label="Goles esp."
               value={`${view.metrics.xG.home.toFixed(2)}/${view.metrics.xG.away.toFixed(2)}`}
             />
             <Stat label="Presión" value={`${view.metrics.offensivePressure}%`} />

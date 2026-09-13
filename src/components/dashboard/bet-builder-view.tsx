@@ -58,7 +58,7 @@ export function BetBuilderView({ matches }: BetBuilderViewProps) {
         <div className="mt-2 space-y-1">
           {selected.map((match) => (
             <p key={match.id} className="text-[12px] text-zinc-200">
-              {match.home.code} vs {match.away.code} ·{" "}
+              {match.home.code} – {match.away.code} ·{" "}
               {explainTip(match.bestTip, match.home.name, match.away.name).plain}
             </p>
           ))}

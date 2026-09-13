@@ -77,7 +77,7 @@ export function AccountView({
           Desbloqueado
         </p>
         <p className="mt-2 text-lg font-black text-white">{WELCOME_BONUS.headline}</p>
-        <p className="mt-1 text-[13px] leading-snug text-neon/70/80">
+        <p className="mt-1 text-[13px] leading-snug text-neon/80">
           {WELCOME_BONUS.detail}
         </p>
         <Button

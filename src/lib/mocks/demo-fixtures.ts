@@ -22,13 +22,13 @@ function league(id: number, name: string, country: string): League {
 }
 
 const L = {
-  laliga: league(8, "LaLiga", "Spain"),
-  pl: league(17, "Premier League", "England"),
-  sa: league(23, "Serie A", "Italy"),
-  bl: league(35, "Bundesliga", "Germany"),
-  l1: league(34, "Ligue 1", "France"),
-  ucl: league(7, "UEFA Champions League", "Europe"),
-  cdr: league(329, "Copa del Rey", "Spain"),
+  laliga: league(8, "LaLiga", "España"),
+  pl: league(17, "Premier League", "Inglaterra"),
+  sa: league(23, "Serie A", "Italia"),
+  bl: league(35, "Bundesliga", "Alemania"),
+  l1: league(34, "Ligue 1", "Francia"),
+  ucl: league(7, "UEFA Champions League", "Europa"),
+  cdr: league(329, "Copa del Rey", "España"),
 };
 
 function team(
@@ -238,7 +238,7 @@ export function buildDemoFixtures(): MatchInsight[] {
     bestTip: "O2.5",
     markets: markets("1", 1.72, 3.9, 4.6, "O2.5", 1.7, "GG", 1.55),
     formNote:
-      "Ida y vuelta en Anfield. 1.41 xG combinado al descanso y ambos porteros ya han tenido trabajo. El over 2.5 sigue vivo.",
+      "Ida y vuelta en Anfield. 1,41 goles esperados combinados al descanso y ambos porteros ya han tenido trabajo. El más de 2,5 sigue vivo.",
     metrics: fullMetrics(58, 0.92, 0.49, 45, {
       shots: { home: 4, away: 3 },
       possession: { home: 61, away: 39 },
@@ -264,7 +264,7 @@ export function buildDemoFixtures(): MatchInsight[] {
     bestTip: "U2.5",
     markets: markets("1", 1.85, 3.4, 4.4, "U2.5", 1.74, "NG", 1.66),
     formNote:
-      "Partido trabado en San Siro. Pocas llegadas claras y un under 2.5 que se sostiene con 0.71 xG total.",
+      "Partido trabado en San Siro. Pocas llegadas claras y un menos de 2,5 que se sostiene con 0,71 goles esperados en total.",
     metrics: fullMetrics(54, 0.44, 0.27, 62, {
       shots: { home: 3, away: 2 },
       possession: { home: 57, away: 43 },
@@ -311,7 +311,7 @@ export function buildDemoFixtures(): MatchInsight[] {
       bestTip: "1",
       markets: markets("1", 1.48, 4.5, 6.4, "O2.5", 1.82, "NG", 1.95),
       formNote:
-        "Emirates a tope y Newcastle con tres bajas atrás. Arsenal sostiene el 1 con xG esperado 1.8–0.6.",
+        "Emirates a tope y Newcastle con tres bajas atrás. Arsenal sostiene el 1 con goles esperados 1,8–0,6.",
       metrics: fullMetrics(66, 1.82, 0.58, 90),
       result: null,
     },
@@ -512,7 +512,7 @@ export function buildDemoFixtures(): MatchInsight[] {
       confidence: 7.6,
       bestTip: "O2.5",
       markets: markets("1", 2.45, 3.5, 2.75, "O2.5", 1.62, "GG", 1.5),
-      formNote: "Choque de altos xG. Los dos atacan de primeras y el over 2.5 es el mercado más estable.",
+      formNote: "Choque de altos goles esperados. Los dos atacan de primeras y el más de 2,5 es el mercado más estable.",
       metrics: fullMetrics(56, 1.7, 1.55, 90),
       result: null,
     },
@@ -531,7 +531,7 @@ export function buildDemoFixtures(): MatchInsight[] {
       confidence: 7.9,
       bestTip: "BTTS Sí",
       markets: markets("1", 2.05, 3.6, 3.4, "O2.5", 1.55, "GG", 1.48),
-      formNote: "Eliminatoria abierta. Ambos llegan goleando en Europa: BTTS es el pick más sólido.",
+      formNote: "Eliminatoria abierta. Ambos llegan goleando en Europa: ambos anotan es el pick más sólido.",
       metrics: fullMetrics(53, 1.8, 1.66, 90),
       result: null,
     },
@@ -550,7 +550,7 @@ export function buildDemoFixtures(): MatchInsight[] {
       confidence: 7.5,
       bestTip: "U2.5",
       markets: markets("X", 2.6, 3.2, 2.7, "U2.5", 1.7, "NG", 1.84),
-      formNote: "Partido de ajedrez. Inter cierra y Nápoles no fuerza: under 2.5.",
+      formNote: "Partido de ajedrez. Inter cierra y Nápoles no fuerza: menos de 2,5.",
       metrics: fullMetrics(48, 1.05, 1.1, 90),
       result: null,
     },

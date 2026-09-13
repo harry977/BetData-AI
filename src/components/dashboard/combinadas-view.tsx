@@ -20,7 +20,7 @@ import { cn, formatOdds } from "@/lib/utils";
 
 const MARKET_OPTIONS: MarketKey[] = ["1x2", "ou", "btts", "dc"];
 const LEG_OPTIONS: { id: LegMode; label: string }[] = [
-  { id: "auto", label: "Auto" },
+  { id: "auto", label: "Automático" },
   { id: "2-3", label: "2 a 3" },
   { id: "4-5", label: "4 a 5" },
   { id: "6+", label: "6+" },

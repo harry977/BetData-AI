@@ -16,7 +16,7 @@ export function HeroLiveStrip({ match, className }: HeroLiveStripProps) {
     <div className={cn("space-y-3", className)}>
       <div className="grid grid-cols-2 gap-2">
         <MiniStat
-          label="xG"
+          label="Goles esperados"
           value={`${xG.home.toFixed(2)} – ${xG.away.toFixed(2)}`}
         />
         <MiniStat
@@ -32,7 +32,7 @@ export function HeroLiveStrip({ match, className }: HeroLiveStripProps) {
 function MiniStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-white/8 bg-black/25 px-3 py-2">
-      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 lg:text-xs lg:text-gray-300">
+      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-300 lg:text-xs">
         {label}
       </p>
       <p className="mt-1 text-sm font-black tabular-nums text-white lg:text-lg">

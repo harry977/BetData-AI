@@ -2,7 +2,14 @@
 
 import { AnimatePresence, motion, useDragControls } from "framer-motion";
 import { ChevronDown, Send, X } from "lucide-react";
-import { useEffect, useState, type PointerEvent, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent,
+  type ReactNode,
+} from "react";
 import { TeamCrest } from "@/components/brand/team-crest";
 import { BetBonusCta } from "@/components/signals/bet-bonus-cta";
 import { SignalCopy } from "@/components/signals/signal-copy";
@@ -67,7 +74,7 @@ function SheetFrame({ match, onClose }: { match: MatchInsight; onClose: () => vo
       />
 
       <motion.div
-        className="absolute inset-x-0 bottom-0 flex max-h-[92dvh] flex-col rounded-t-[28px] border-t border-white/10 bg-[#121726] lg:hidden"
+        className="absolute inset-x-0 bottom-0 flex max-h-[92dvh] flex-col overflow-hidden rounded-t-[28px] border-t border-white/10 bg-[#121726] lg:hidden"
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
@@ -90,7 +97,7 @@ function SheetFrame({ match, onClose }: { match: MatchInsight; onClose: () => vo
       </motion.div>
 
       <motion.aside
-        className="absolute inset-y-0 right-0 hidden w-full max-w-md flex-col border-l border-white/10 bg-[#121726] shadow-[-24px_0_60px_rgba(0,0,0,0.45)] lg:flex"
+        className="absolute inset-y-0 right-0 hidden w-full max-w-md flex-col overflow-hidden border-l border-white/10 bg-[#121726] shadow-[-24px_0_60px_rgba(0,0,0,0.45)] lg:flex"
         initial={{ x: "100%" }}
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
@@ -114,24 +121,47 @@ function SheetBody({
   onHandlePointerDown?: (event: PointerEvent) => void;
 }) {
   const clock = headerClock(match);
-  const [open, setOpen] = useState({ markets: true, stats: true, context: false });
+  const [open, setOpen] = useState({ markets: true, stats: true, context: true });
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [overflow, setOverflow] = useState({ up: false, down: false });
+
+  const updateOverflow = useCallback(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const up = el.scrollTop > 12;
+    const down = el.scrollTop + el.clientHeight < el.scrollHeight - 12;
+    setOverflow({ up, down });
+  }, []);
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    updateOverflow();
+    el.addEventListener("scroll", updateOverflow, { passive: true });
+    const observer = new ResizeObserver(updateOverflow);
+    observer.observe(el);
+    return () => {
+      el.removeEventListener("scroll", updateOverflow);
+      observer.disconnect();
+    };
+  }, [match.id, open, updateOverflow]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <header className="sticky top-0 z-10 shrink-0 border-b border-white/8 bg-[#121726]/95 px-4 pb-4 pt-2 backdrop-blur-xl">
+      <header className="shrink-0 overflow-hidden border-b border-white/10 bg-[#161b2c] px-4 pb-3 pt-2">
         {handle ? (
           <div
             className="mb-3 flex cursor-grab justify-center touch-none active:cursor-grabbing"
             onPointerDown={onHandlePointerDown}
           >
-            <span className="h-1.5 w-12 rounded-full bg-white/25" />
+            <span className="h-1.5 w-12 rounded-full bg-white/45" />
           </div>
         ) : (
           <div className="mb-3 flex justify-end">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-full p-2 text-slate-400 hover:bg-white/5 hover:text-white"
+              className="rounded-full p-2 text-zinc-300 hover:bg-white/5 hover:text-white"
               aria-label="Cerrar"
             >
               <X className="h-5 w-5" />
@@ -139,7 +169,7 @@ function SheetBody({
           </div>
         )}
 
-        <p className="text-center text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+        <p className="text-center text-[10px] font-black uppercase tracking-[0.18em] text-zinc-300">
           {match.league.name}
         </p>
         <div className="mt-3 flex items-center justify-between gap-3">
@@ -162,97 +192,119 @@ function SheetBody({
             </p>
           </div>
         </div>
-
-        <div className="mt-4 rounded-[22px] border border-neon/40 bg-black/40 p-4 shadow-[0_0_24px_rgba(184,255,0,0.18)]">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neon">
-            Mejor consejo IA
-          </p>
-          <div className="mt-2">
-            <SignalCopy match={match} size="md" />
-          </div>
-          <p className="mt-3 font-black leading-none tabular-nums text-neon">
-            <span className="text-5xl">{match.confidence.toFixed(1)}</span>
-            <span className="ml-1 text-lg text-gray-300">/10</span>
-          </p>
-        </div>
       </header>
 
-      <div className="min-h-0 flex-1 space-y-2 overflow-y-auto px-4 py-3">
-        <Accordion
-          title="1. Pronósticos por mercado"
-          open={open.markets}
-          onToggle={() => {
-            hapticTap();
-            setOpen((state) => ({ ...state, markets: !state.markets }));
-          }}
+      <div className="relative min-h-0 flex-1">
+        <div
+          ref={scrollerRef}
+          className="sheet-scroll h-full space-y-3 overflow-y-auto overscroll-contain px-4 py-3"
         >
-          <div className="grid grid-cols-2 gap-2">
-            {marketCells(match).map((cell) => (
-              <div
-                key={cell.key}
-                className={cn(
-                  "rounded-2xl border bg-black/30 px-3 py-3",
-                  cell.highlight ? "border-neon/50" : "border-white/8",
-                )}
-              >
-                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">
-                  {cell.label}
-                </p>
-                <p className="mt-1 text-sm font-black uppercase leading-tight text-white">
-                  {cell.pick}
-                </p>
-                {cell.odds ? (
-                  <p className="mt-1 font-mono text-xs text-neon">{cell.odds}</p>
-                ) : null}
-              </div>
-            ))}
-          </div>
-        </Accordion>
-
-        <Accordion
-          title="2. Predicción de estadísticas"
-          open={open.stats}
-          onToggle={() => {
-            hapticTap();
-            setOpen((state) => ({ ...state, stats: !state.stats }));
-          }}
-        >
-          <div className="space-y-3">
-            {predictedStatRows(match).map((row) => (
-              <CompareBar
-                key={row.key}
-                row={row}
-                homeCode={match.home.code}
-                awayCode={match.away.code}
-              />
-            ))}
-          </div>
-        </Accordion>
-
-        <Accordion
-          title="3. H2H y contexto"
-          open={open.context}
-          onToggle={() => {
-            hapticTap();
-            setOpen((state) => ({ ...state, context: !state.context }));
-          }}
-        >
-          <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 px-3 py-3">
-            <p className="text-[11px] font-black uppercase tracking-[0.14em] text-amber-300">
-              Alerta de contexto
+          <div className="rounded-[22px] border border-neon/40 bg-black/50 p-4 shadow-[0_0_24px_rgba(184,255,0,0.18)]">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neon">
+              Mejor consejo IA
             </p>
-            <p className="mt-1 text-sm font-semibold leading-snug text-white">
-              {contextAlert(match)}
+            <div className="mt-2">
+              <SignalCopy match={match} size="md" />
+            </div>
+            <p className="mt-3 font-black leading-none tabular-nums text-neon">
+              <span className="text-5xl">{match.confidence.toFixed(1)}</span>
+              <span className="ml-1 text-lg text-zinc-300">/10</span>
             </p>
           </div>
-          <p className="mt-3 text-sm leading-relaxed text-slate-300">{contextBody(match)}</p>
-          <p className="mt-2 text-[11px] font-semibold text-slate-500">
-            Sin historial cara a cara en el feed. No inventamos H2H.
-          </p>
-        </Accordion>
+
+          <Accordion
+            title="1. Pronósticos por mercado"
+            open={open.markets}
+            onToggle={() => {
+              hapticTap();
+              setOpen((state) => ({ ...state, markets: !state.markets }));
+            }}
+          >
+            <div className="grid grid-cols-2 gap-2">
+              {marketCells(match).map((cell) => (
+                <div
+                  key={cell.key}
+                  className={cn(
+                    "min-h-[6.5rem] rounded-2xl border bg-[#0d111c] px-3 py-3",
+                    cell.highlight ? "border-neon/60" : "border-white/15",
+                  )}
+                >
+                  <p className="text-[10px] font-black uppercase tracking-[0.12em] text-zinc-300">
+                    {cell.label}
+                  </p>
+                  <p className="mt-1.5 text-sm font-black uppercase leading-snug text-white">
+                    {cell.pick}
+                  </p>
+                  {cell.odds ? (
+                    <p className="mt-2 font-mono text-sm font-semibold text-neon">{cell.odds}</p>
+                  ) : (
+                    <p className="mt-2 text-[11px] font-semibold text-zinc-400">Sin cuota</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </Accordion>
+
+          <Accordion
+            title="2. Predicción de estadísticas"
+            open={open.stats}
+            onToggle={() => {
+              hapticTap();
+              setOpen((state) => ({ ...state, stats: !state.stats }));
+            }}
+          >
+            <div className="space-y-3">
+              {predictedStatRows(match).map((row) => (
+                <CompareBar
+                  key={row.key}
+                  row={row}
+                  homeCode={match.home.code}
+                  awayCode={match.away.code}
+                />
+              ))}
+            </div>
+          </Accordion>
+
+          <Accordion
+            title="3. Cara a cara y contexto"
+            open={open.context}
+            onToggle={() => {
+              hapticTap();
+              setOpen((state) => ({ ...state, context: !state.context }));
+            }}
+          >
+            <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 px-3 py-3">
+              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-amber-200">
+                Alerta de contexto
+              </p>
+              <p className="mt-1 text-sm font-semibold leading-snug text-white">
+                {contextAlert(match)}
+              </p>
+            </div>
+            <p className="mt-3 text-sm leading-relaxed text-zinc-200">{contextBody(match)}</p>
+            <p className="mt-2 text-[11px] font-semibold text-zinc-400">
+              Sin historial cara a cara en el feed. No inventamos enfrentamientos.
+            </p>
+          </Accordion>
+        </div>
+
+        {overflow.up ? (
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-[#121726] to-transparent"
+            aria-hidden
+          />
+        ) : null}
+        {overflow.down ? (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-14 items-end justify-center bg-gradient-to-t from-[#121726] via-[#121726]/90 to-transparent pb-1">
+            <p className="inline-flex items-center gap-1 rounded-full border border-neon/40 bg-black/70 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-neon">
+              Desliza para ver más
+              <ChevronDown className="h-3.5 w-3.5 animate-bounce" />
+            </p>
+          </div>
+        ) : null}
       </div>
 
-      <footer className="shrink-0 space-y-2 border-t border-white/8 bg-[#121726] px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+      <footer className="shrink-0 space-y-2 border-t border-white/10 bg-[#161b2c] px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
         <Button
           type="button"
           variant="telegram"
@@ -270,7 +322,7 @@ function SheetBody({
           <button
             type="button"
             onClick={onClose}
-            className="h-11 w-full rounded-2xl text-sm font-black uppercase tracking-[0.16em] text-slate-400"
+            className="h-11 w-full rounded-2xl text-sm font-black uppercase tracking-[0.16em] text-zinc-300"
           >
             Cerrar
           </button>
@@ -292,19 +344,19 @@ function Accordion({
   children: ReactNode;
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-white/8 bg-black/20">
+    <section className="overflow-hidden rounded-2xl border border-white/15 bg-[#0d111c]">
       <button
         type="button"
         onClick={onToggle}
         className="flex w-full items-center justify-between gap-3 px-3 py-3 text-left"
         aria-expanded={open}
       >
-        <span className="text-[11px] font-black uppercase tracking-[0.14em] text-cyan-300">
+        <span className="text-[11px] font-black uppercase tracking-[0.14em] text-cyan-200">
           {title}
         </span>
         <ChevronDown
           className={cn(
-            "h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200",
+            "h-4 w-4 shrink-0 text-zinc-300 transition-transform duration-200",
             open && "rotate-180",
           )}
         />
@@ -338,10 +390,10 @@ function CompareBar({
   if (row.home == null || row.away == null) {
     return (
       <div>
-        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">
+        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-zinc-300">
           {row.label}
         </p>
-        <p className="mt-1 text-[12px] font-semibold text-slate-500">Pendiente de sincronizar</p>
+        <p className="mt-1 text-[12px] font-semibold text-zinc-400">Pendiente de sincronizar</p>
       </div>
     );
   }
@@ -350,15 +402,15 @@ function CompareBar({
   return (
     <div>
       <div className="mb-1 flex items-center justify-between gap-2">
-        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">
+        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-zinc-200">
           {row.label}
         </p>
-        <p className="text-[10px] font-black uppercase tracking-[0.08em] text-slate-500">
+        <p className="text-[10px] font-black uppercase tracking-[0.08em] text-zinc-300">
           {homeCode} {formatStatValue(row.home, row.format)} · {awayCode}{" "}
           {formatStatValue(row.away, row.format)}
         </p>
       </div>
-      <div className="flex h-2.5 overflow-hidden rounded-full bg-black/70 ring-1 ring-white/10">
+      <div className="flex h-2.5 overflow-hidden rounded-full bg-black/70 ring-1 ring-white/15">
         <div
           className="h-full bg-neon transition-[width] duration-700"
           style={{ width: `${share.homePct}%` }}
